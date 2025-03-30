@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -36,12 +35,9 @@ import { Application, Job } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 
-// Mock function to fetch application details
 const fetchApplicationDetails = async (id: string): Promise<Application> => {
-  // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
-  // Return mock data
   return {
     id,
     userId: 'user-123',
@@ -65,6 +61,7 @@ const fetchApplicationDetails = async (id: string): Promise<Application> => {
       endDate: '2023-12-31',
       createdAt: '2023-09-01',
       updatedAt: '2023-09-01',
+      requirements: ['5+ years of React experience', 'TypeScript proficiency', 'Experience with modern frontend tools'],
       company: {
         id: 'company-123',
         name: 'Tech Solutions Inc',
@@ -146,7 +143,6 @@ const ApplicationDetails: React.FC = () => {
       description: "Your application has been withdrawn successfully."
     });
     
-    // In a real app, you would make an API call to update the status
     navigate('/dashboard/job-seeker');
   };
   
@@ -196,7 +192,6 @@ const ApplicationDetails: React.FC = () => {
   
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Back button */}
       <div className="mb-6">
         <Button variant="ghost" onClick={() => navigate(-1)} className="gap-1">
           <ChevronLeft className="h-4 w-4" />
@@ -204,7 +199,6 @@ const ApplicationDetails: React.FC = () => {
         </Button>
       </div>
       
-      {/* Application Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-2">Application for {application.job?.title}</h1>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
@@ -224,9 +218,7 @@ const ApplicationDetails: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Application Status */}
           <Card>
             <CardHeader>
               <CardTitle>Application Status</CardTitle>
@@ -287,7 +279,6 @@ const ApplicationDetails: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Your Responses */}
           <Card>
             <CardHeader>
               <CardTitle>Your Responses</CardTitle>
@@ -320,9 +311,7 @@ const ApplicationDetails: React.FC = () => {
           </Card>
         </div>
         
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Job Info Card */}
           <Card>
             <CardHeader>
               <CardTitle>Job Information</CardTitle>
@@ -351,7 +340,6 @@ const ApplicationDetails: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Actions Card */}
           <Card>
             <CardHeader>
               <CardTitle>Actions</CardTitle>
@@ -374,7 +362,6 @@ const ApplicationDetails: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Timeline */}
           <Card>
             <CardHeader>
               <CardTitle>Timeline</CardTitle>
