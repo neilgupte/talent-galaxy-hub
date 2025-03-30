@@ -21,7 +21,7 @@ import { Separator } from "@/components/ui/separator";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
-  const { isAuthenticated, user } = authState;
+  const { isAuthenticated, user, profile } = authState;
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -70,8 +70,6 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center justify-end space-x-2 sm:space-x-4">
-          {/* Removed Browse Jobs link as requested */}
-          
           {/* User is authenticated */}
           {isAuthenticated ? (
             <>
@@ -83,15 +81,18 @@ const Navbar = () => {
                 onDelete={deleteNotification}
               />
               
-              {/* User Menu */}
+              {/* User Menu - Now using Avatar component */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder.svg" alt={user?.name || 'User'} />
-                      <AvatarFallback>
-                        {user?.name?.charAt(0) || 'U'}
-                      </AvatarFallback>
+                      {profile?.avatarUrl ? (
+                        <AvatarImage src={profile.avatarUrl} alt={user?.name || 'User'} />
+                      ) : (
+                        <AvatarFallback>
+                          {user?.name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
