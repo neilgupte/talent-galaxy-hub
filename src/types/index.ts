@@ -23,6 +23,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  phone?: string; // Added phone as optional property
   createdAt: string;
 }
 
