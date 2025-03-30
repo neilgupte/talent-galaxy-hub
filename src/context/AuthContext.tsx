@@ -75,10 +75,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }
 
+            // Convert from database model to frontend model
+            const user: User = {
+              id: userData.id,
+              name: userData.name,
+              email: userData.email,
+              role: userData.role,
+              createdAt: userData.created_at
+            };
+
+            let profile: Profile | null = null;
+            if (profileData) {
+              profile = {
+                userId: profileData.user_id,
+                headline: profileData.headline || '',
+                bio: profileData.bio || '',
+                location: profileData.location || '',
+                currentTitle: profileData.current_title || '',
+                skills: profileData.skills || [],
+                avatarUrl: profileData.avatar_url
+              };
+            }
+
+            let company: Company | null = null;
+            if (companyData) {
+              company = {
+                id: companyData.id,
+                name: companyData.name,
+                industry: companyData.industry || '',
+                description: companyData.description || '',
+                logoUrl: companyData.logo_url,
+                planType: companyData.plan_type || 'free'
+              };
+            }
+
             setAuthState({
-              user: userData,
-              profile: profileData || null,
-              company: companyData,
+              user,
+              profile,
+              company,
               isAuthenticated: true,
               isLoading: false
             });
@@ -198,9 +232,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateProfile = async (profile: Profile) => {
     try {
+      // Convert from frontend model to database model
+      const dbProfile = {
+        user_id: profile.userId,
+        headline: profile.headline,
+        bio: profile.bio,
+        location: profile.location,
+        current_title: profile.currentTitle,
+        skills: profile.skills,
+        avatar_url: profile.avatarUrl
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .update(profile)
+        .update(dbProfile)
         .eq('user_id', profile.userId);
 
       if (error) throw error;
@@ -226,9 +271,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateCompany = async (company: Company) => {
     try {
+      // Convert from frontend model to database model
+      const dbCompany = {
+        id: company.id,
+        name: company.name,
+        industry: company.industry,
+        description: company.description,
+        logo_url: company.logoUrl,
+        plan_type: company.planType
+      };
+
       const { error } = await supabase
         .from('companies')
-        .update(company)
+        .update(dbCompany)
         .eq('id', company.id);
 
       if (error) throw error;

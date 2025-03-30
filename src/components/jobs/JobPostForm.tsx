@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
@@ -29,7 +28,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JobEmploymentType, JobLevel, JobOnsiteType } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 
-const JobPostForm = () => {
+interface JobPostFormProps {
+  initialValues?: {
+    country?: string;
+    city?: string;
+    currency?: string;
+  };
+}
+
+const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
   const { authState } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -48,6 +55,9 @@ const JobPostForm = () => {
     benefits: '',
     isHighPriority: false,
     isBoosted: false,
+    country: initialValues.country || '',
+    city: initialValues.city || '',
+    currency: initialValues.currency || 'USD',
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -106,11 +116,9 @@ const JobPostForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Here we would typically send the data to a backend API
       console.log('Job Post Data:', formData);
       console.log('Job Questions:', jobQuestions);
       
-      // Simulate a successful API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,7 @@ const MOCK_JOBS: Job[] = [
     onsiteType: 'hybrid',
     jobLevel: 'senior',
     requirements: ['5+ years of React experience', 'TypeScript proficiency', 'UI/UX knowledge'],
-    status: 'published',
+    status: 'active',
     isHighPriority: true,
     isBoosted: false,
     endDate: '2023-10-30',
@@ -66,7 +65,7 @@ const MOCK_JOBS: Job[] = [
     onsiteType: 'remote',
     jobLevel: 'mid',
     requirements: ['3+ years of UX design experience', 'Figma proficiency', 'User research skills'],
-    status: 'published',
+    status: 'active',
     isHighPriority: false,
     isBoosted: true,
     endDate: '2023-10-25',
@@ -94,7 +93,7 @@ const MOCK_JOBS: Job[] = [
     onsiteType: 'onsite',
     jobLevel: 'senior',
     requirements: ['Experience with Node.js', 'React knowledge', 'Database design'],
-    status: 'published',
+    status: 'active',
     isHighPriority: false,
     isBoosted: false,
     endDate: '2023-10-20',
@@ -122,7 +121,7 @@ const MOCK_JOBS: Job[] = [
     onsiteType: 'remote',
     jobLevel: 'mid',
     requirements: ['3+ years in product management', 'Agile methodology', 'User-centric mindset'],
-    status: 'published',
+    status: 'active',
     isHighPriority: true,
     isBoosted: false,
     endDate: '2023-11-05',
@@ -138,7 +137,7 @@ const MOCK_JOBS: Job[] = [
     },
     matchPercentage: 65,
     hasApplied: true,
-    applicationStatus: 'under_review'
+    applicationStatus: 'reviewing'
   }
 ];
 

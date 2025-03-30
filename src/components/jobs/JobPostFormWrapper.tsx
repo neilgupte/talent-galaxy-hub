@@ -5,9 +5,15 @@ import JobPostForm from './JobPostForm';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoaderCircle } from 'lucide-react';
 
+interface JobPostInitialValues {
+  country?: string;
+  city?: string;
+  currency?: string;
+}
+
 const JobPostFormWrapper = () => {
   const { location, loading, error } = useGeolocation();
-  const [initialValues, setInitialValues] = useState({});
+  const [initialValues, setInitialValues] = useState<JobPostInitialValues>({});
 
   useEffect(() => {
     if (location) {
@@ -31,7 +37,7 @@ const JobPostFormWrapper = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       {error && (
-        <Alert variant="warning" className="mb-6">
+        <Alert variant="destructive" className="mb-6">
           <AlertTitle>Location Detection Failed</AlertTitle>
           <AlertDescription>
             We couldn't detect your location automatically. You can still proceed with the job posting.
