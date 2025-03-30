@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
+import { Google, Linkedin } from 'lucide-react';
 
 const AuthForm = () => {
   const { login, register, continueWithGoogle, continueWithLinkedIn } = useAuth();
@@ -164,6 +165,7 @@ const AuthForm = () => {
                   onClick={handleGoogleLogin} 
                   className="w-full"
                 >
+                  <Google className="mr-2 h-4 w-4" />
                   Google
                 </Button>
                 <Button 
@@ -172,6 +174,7 @@ const AuthForm = () => {
                   onClick={handleLinkedInLogin} 
                   className="w-full"
                 >
+                  <Linkedin className="mr-2 h-4 w-4" />
                   LinkedIn
                 </Button>
               </div>
@@ -277,6 +280,7 @@ const AuthForm = () => {
                   onClick={handleGoogleLogin} 
                   className="w-full"
                 >
+                  <Google className="mr-2 h-4 w-4" />
                   Google
                 </Button>
                 <Button 
@@ -285,6 +289,7 @@ const AuthForm = () => {
                   onClick={handleLinkedInLogin} 
                   className="w-full"
                 >
+                  <Linkedin className="mr-2 h-4 w-4" />
                   LinkedIn
                 </Button>
               </div>
