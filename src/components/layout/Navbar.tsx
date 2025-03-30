@@ -61,12 +61,7 @@ const Navbar = () => {
               <Link to="/jobs" className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md">
                 Find Jobs
               </Link>
-              <Link to="/companies" className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md">
-                Companies
-              </Link>
-              <Link to="/resources" className="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary px-3 py-2 rounded-md">
-                Resources
-              </Link>
+              {/* Removed Companies and Resources links from here */}
             </nav>
           </div>
           
