@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Bell, Menu, Search, User, Briefcase, LogOut } from 'lucide-react';
+import { Bell, Menu, Search, User, Briefcase, LogOut, PlusCircle } from 'lucide-react';
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -20,20 +20,31 @@ const Navbar = () => {
   
   const handleLogout = () => {
     logout();
-    navigate('/');
   };
   
   const getInitials = (name: string) => {
     return name
-      .split(' ')
+      ?.split(' ')
       .map(n => n[0])
       .join('')
-      .toUpperCase();
+      .toUpperCase() || 'U';
   };
   
   const dashboardLink = user?.role === 'job_seeker' 
     ? '/dashboard/job-seeker' 
     : '/dashboard/employer';
+
+  const handlePostJobClick = () => {
+    if (isAuthenticated && user?.role === 'employer') {
+      navigate('/jobs/post');
+    } else if (isAuthenticated && user?.role === 'job_seeker') {
+      // If a job seeker tries to post a job, redirect them to change their account type
+      navigate('/account/upgrade');
+    } else {
+      // If not logged in, redirect to auth page
+      navigate('/auth');
+    }
+  };
 
   return (
     <header className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
@@ -75,6 +86,15 @@ const Navbar = () => {
           
           {/* Auth buttons or user menu */}
           <div className="flex items-center space-x-2">
+            <Button 
+              onClick={handlePostJobClick}
+              className="hidden sm:flex items-center gap-2"
+              variant="outline"
+            >
+              <PlusCircle className="h-4 w-4" />
+              Post Job
+            </Button>
+            
             {isAuthenticated ? (
               <>
                 <Button variant="ghost" size="icon" className="relative">

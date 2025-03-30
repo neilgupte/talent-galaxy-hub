@@ -8,13 +8,13 @@ export type JobOnsiteType = 'onsite' | 'hybrid' | 'remote';
 export type JobLevel = 'entry' | 'junior' | 'mid' | 'senior' | 'executive';
 
 export type ApplicationStatus = 
-  | 'applied' 
-  | 'under_review' 
+  | 'pending'
+  | 'reviewing' 
   | 'interview' 
-  | 'offered' 
+  | 'offer' 
   | 'rejected' 
-  | 'withdrawn'
-  | 'hired';
+  | 'accepted'
+  | 'withdrawn';
 
 export type QuestionType = 'text' | 'mcq' | 'yesno';
 
@@ -79,12 +79,15 @@ export interface Job {
   onsiteType: JobOnsiteType;
   jobLevel: JobLevel;
   requirements: string[];
-  status: 'draft' | 'published' | 'closed' | 'expired';
+  status: 'draft' | 'active' | 'expired' | 'closed';
   isHighPriority: boolean;
   isBoosted: boolean;
   endDate: string;
   createdAt: string;
   updatedAt: string;
+  country?: string;
+  city?: string;
+  currency?: string;
   
   // Joined fields
   company?: Company;
@@ -134,4 +137,14 @@ export interface AuthState {
   company: Company | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+}
+
+export interface GeolocationInfo {
+  country: string;
+  city: string;
+  countryCode: string;
+  currency: {
+    code: string;
+    symbol: string;
+  };
 }

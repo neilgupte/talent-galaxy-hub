@@ -8,10 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
 
 const AuthForm = () => {
-  const { login, register } = useAuth();
+  const { login, register, continueWithGoogle, continueWithLinkedIn } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   
@@ -36,13 +37,7 @@ const AuthForm = () => {
     
     try {
       await login(loginEmail, loginPassword);
-      
-      // Navigate based on user role
-      if (loginEmail === 'john@example.com') { // Job seeker in our mock data
-        navigate('/dashboard/job-seeker');
-      } else {
-        navigate('/dashboard/employer');
-      }
+      // Navigation will be handled by the auth state change in AuthContext
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -69,17 +64,29 @@ const AuthForm = () => {
     
     try {
       await register(registerName, registerEmail, registerPassword, registerRole);
-      
-      // Navigate based on user role
-      if (registerRole === 'job_seeker') {
-        navigate('/onboarding/profile');
-      } else {
-        navigate('/dashboard/employer');
-      }
+      // Navigation will be handled by the register function in AuthContext
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    try {
+      await continueWithGoogle();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Google login failed');
+    }
+  };
+
+  const handleLinkedInLogin = async () => {
+    setError(null);
+    try {
+      await continueWithLinkedIn();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'LinkedIn login failed');
     }
   };
 
@@ -96,7 +103,7 @@ const AuthForm = () => {
             <CardHeader>
               <CardTitle>Login to Your Account</CardTitle>
               <CardDescription>
-                Enter your email and password to access your account
+                Enter your credentials to access your account
               </CardDescription>
             </CardHeader>
             
@@ -134,13 +141,41 @@ const AuthForm = () => {
                   required
                 />
               </div>
-            </CardContent>
-            
-            <CardFooter>
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Logging in...' : 'Login'}
               </Button>
-            </CardFooter>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleGoogleLogin} 
+                  className="w-full"
+                >
+                  Google
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleLinkedInLogin} 
+                  className="w-full"
+                >
+                  LinkedIn
+                </Button>
+              </div>
+            </CardContent>
           </form>
         </TabsContent>
         
@@ -219,13 +254,41 @@ const AuthForm = () => {
                   </div>
                 </RadioGroup>
               </div>
-            </CardContent>
-            
-            <CardFooter>
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>
-            </CardFooter>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col space-y-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleGoogleLogin} 
+                  className="w-full"
+                >
+                  Google
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleLinkedInLogin} 
+                  className="w-full"
+                >
+                  LinkedIn
+                </Button>
+              </div>
+            </CardContent>
           </form>
         </TabsContent>
       </Tabs>

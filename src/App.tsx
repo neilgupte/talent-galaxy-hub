@@ -9,11 +9,13 @@ import Navbar from "@/components/layout/Navbar";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
+import AuthCallback from "./pages/AuthCallback";
+import AccountUpgrade from "./pages/AccountUpgrade";
 import JobSeekerDashboard from "@/components/dashboard/JobSeekerDashboard";
 import EmployerDashboard from "@/components/dashboard/EmployerDashboard";
 import JobSearch from "@/components/jobs/JobSearch";
 import ProfileForm from "@/components/profile/ProfileForm";
-import JobPostForm from "@/components/jobs/JobPostForm";
+import JobPostFormWrapper from "@/components/jobs/JobPostFormWrapper";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +53,9 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/jobs" element={<JobSearch />} />
+                <Route path="/account/upgrade" element={<AccountUpgrade />} />
                 
                 {/* Protected Job Seeker Routes */}
                 <Route 
@@ -92,7 +96,7 @@ const App = () => (
                   path="/jobs/post" 
                   element={
                     <ProtectedRoute requiredRole="employer">
-                      <JobPostForm />
+                      <JobPostFormWrapper />
                     </ProtectedRoute>
                   } 
                 />

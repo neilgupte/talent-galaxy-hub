@@ -1,48 +1,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User, Profile, Company, UserRole, AuthState } from '@/types';
 import { useToast } from "@/components/ui/use-toast";
-
-// Mock data for now - will be replaced with actual API calls
-const MOCK_USERS = [
-  { 
-    id: 'user1', 
-    name: 'John Doe', 
-    email: 'john@example.com', 
-    role: 'job_seeker' as UserRole,
-    createdAt: new Date().toISOString()
-  },
-  { 
-    id: 'user2', 
-    name: 'Jane Smith', 
-    email: 'jane@example.com', 
-    role: 'employer' as UserRole,
-    createdAt: new Date().toISOString()
-  },
-];
-
-const MOCK_PROFILES = [
-  {
-    userId: 'user1',
-    headline: 'Software Developer',
-    bio: 'Passionate developer with 5 years of experience',
-    location: 'New York, NY',
-    currentTitle: 'Senior Developer',
-    skills: ['JavaScript', 'React', 'Node.js', 'TypeScript']
-  }
-];
-
-const MOCK_COMPANIES = [
-  {
-    id: 'company1',
-    name: 'Tech Solutions Inc',
-    industry: 'Information Technology',
-    description: 'Leading provider of innovative tech solutions',
-    logoUrl: '/placeholder.svg',
-    planType: 'premium',
-    jobsPosted: 5
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 type AuthContextType = {
   authState: AuthState;
@@ -51,6 +12,8 @@ type AuthContextType = {
   logout: () => void;
   updateProfile: (profile: Profile) => Promise<void>;
   updateCompany: (company: Company) => Promise<void>;
+  continueWithGoogle: () => Promise<void>;
+  continueWithLinkedIn: () => Promise<void>;
 };
 
 const defaultAuthState: AuthState = {
@@ -66,72 +29,113 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Check for stored auth on mount
   useEffect(() => {
-    const storedAuth = localStorage.getItem('auth');
-    if (storedAuth) {
-      try {
-        const parsed = JSON.parse(storedAuth);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          try {
+            // Get user data from our users table
+            const { data: userData, error: userError } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', session.user.id)
+              .single();
+
+            if (userError) throw userError;
+
+            // Get profile data
+            const { data: profileData, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('user_id', session.user.id)
+              .single();
+
+            if (profileError && profileError.code !== 'PGRST116') throw profileError;
+
+            // Get company data if user is an employer
+            let companyData = null;
+            if (userData.role === 'employer') {
+              const { data: companyUserData, error: companyUserError } = await supabase
+                .from('company_users')
+                .select('company_id')
+                .eq('user_id', session.user.id)
+                .single();
+
+              if (!companyUserError && companyUserData) {
+                const { data: company, error: companyError } = await supabase
+                  .from('companies')
+                  .select('*')
+                  .eq('id', companyUserData.company_id)
+                  .single();
+
+                if (!companyError) companyData = company;
+              }
+            }
+
+            setAuthState({
+              user: userData,
+              profile: profileData || null,
+              company: companyData,
+              isAuthenticated: true,
+              isLoading: false
+            });
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+            setAuthState({
+              user: null,
+              profile: null,
+              company: null,
+              isAuthenticated: false,
+              isLoading: false
+            });
+          }
+        } else {
+          setAuthState({
+            user: null,
+            profile: null,
+            company: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
         setAuthState({
-          ...parsed,
+          ...defaultAuthState,
           isLoading: false
         });
-      } catch (error) {
-        console.error('Failed to parse stored auth:', error);
-        setAuthState({ ...defaultAuthState, isLoading: false });
       }
-    } else {
-      setAuthState({ ...defaultAuthState, isLoading: false });
-    }
-  }, []);
+    });
 
-  // Save auth state to localStorage when it changes
-  useEffect(() => {
-    if (!authState.isLoading) {
-      localStorage.setItem('auth', JSON.stringify({
-        user: authState.user,
-        profile: authState.profile,
-        company: authState.company,
-        isAuthenticated: authState.isAuthenticated
-      }));
-    }
-  }, [authState]);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      // Mock login - would be replaced with actual API call
-      const user = MOCK_USERS.find(u => u.email === email);
-      
-      if (!user) {
-        throw new Error('Invalid credentials');
-      }
-      
-      // Find associated profile or company
-      const profile = user.role === 'job_seeker' 
-        ? MOCK_PROFILES.find(p => p.userId === user.id) || null
-        : null;
-        
-      const company = user.role === 'employer'
-        ? MOCK_COMPANIES[0] // Mock association
-        : null;
-      
-      setAuthState({
-        user,
-        profile,
-        company,
-        isAuthenticated: true,
-        isLoading: false
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
-      
+
+      if (error) throw error;
+
       toast({
         title: "Login successful",
-        description: `Welcome back, ${user.name}!`,
+        description: "Welcome back!",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Login failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error.message || "An error occurred",
         variant: "destructive"
       });
       throw error;
@@ -140,45 +144,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string, role: UserRole) => {
     try {
-      // Mock registration - would be replaced with actual API call
-      if (MOCK_USERS.some(u => u.email === email)) {
-        throw new Error('Email already in use');
-      }
-      
-      const newUser: User = {
-        id: `user${MOCK_USERS.length + 1}`,
-        name,
+      const { error } = await supabase.auth.signUp({
         email,
-        role,
-        createdAt: new Date().toISOString()
-      };
-      
-      // For demo purposes, add to our mock data
-      MOCK_USERS.push(newUser);
-      
-      setAuthState({
-        user: newUser,
-        profile: null,
-        company: null,
-        isAuthenticated: true,
-        isLoading: false
+        password,
+        options: {
+          data: {
+            name,
+            role
+          }
+        }
       });
-      
+
+      if (error) throw error;
+
       toast({
         title: "Registration successful",
         description: `Welcome, ${name}!`,
       });
-    } catch (error) {
+
+      // Redirect to appropriate onboarding page based on role
+      setTimeout(() => {
+        if (role === 'job_seeker') {
+          navigate('/onboarding/profile');
+        } else {
+          navigate('/dashboard/employer');
+        }
+      }, 1000);
+    } catch (error: any) {
       toast({
         title: "Registration failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error.message || "An error occurred",
         variant: "destructive"
       });
       throw error;
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setAuthState({
       user: null,
       profile: null,
@@ -186,29 +189,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: false,
       isLoading: false
     });
-    localStorage.removeItem('auth');
     toast({
       title: "Logged out",
       description: "You have been successfully logged out",
     });
+    navigate('/');
   };
 
   const updateProfile = async (profile: Profile) => {
     try {
-      // Mock profile update - would be replaced with actual API call
+      const { error } = await supabase
+        .from('profiles')
+        .update(profile)
+        .eq('user_id', profile.userId);
+
+      if (error) throw error;
+
       setAuthState(prev => ({
         ...prev,
         profile
       }));
-      
+
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Failed to update profile",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error.message || "An error occurred",
         variant: "destructive"
       });
       throw error;
@@ -217,20 +226,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateCompany = async (company: Company) => {
     try {
-      // Mock company update - would be replaced with actual API call
+      const { error } = await supabase
+        .from('companies')
+        .update(company)
+        .eq('id', company.id);
+
+      if (error) throw error;
+
       setAuthState(prev => ({
         ...prev,
         company
       }));
-      
+
       toast({
         title: "Company updated",
         description: "Company details have been successfully updated",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Failed to update company",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error.message || "An error occurred",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const continueWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Failed to sign in with Google",
+        description: error.message || "An error occurred",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
+  const continueWithLinkedIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: "Failed to sign in with LinkedIn",
+        description: error.message || "An error occurred",
         variant: "destructive"
       });
       throw error;
@@ -244,7 +299,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       register,
       logout,
       updateProfile,
-      updateCompany
+      updateCompany,
+      continueWithGoogle,
+      continueWithLinkedIn
     }}>
       {children}
     </AuthContext.Provider>

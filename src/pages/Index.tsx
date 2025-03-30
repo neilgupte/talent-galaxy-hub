@@ -56,10 +56,10 @@ const Index = () => {
       <section className="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Find Your Dream Job or<br />Perfect Candidate
+            Finally, a Job Platform That Respects Your Time.
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Connect talent with opportunity through our AI-powered job platform that matches job seekers with their ideal roles and employers with their perfect candidates.
+            No more endless applications or ghosting — just smart matches, real feedback, and better outcomes for everyone.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -204,7 +204,7 @@ const Index = () => {
               <div>
                 <h3 className="font-semibold mb-4">For Employers</h3>
                 <ul className="space-y-2">
-                  <li><Link to="/auth" className="text-muted-foreground hover:text-primary">Post a Job</Link></li>
+                  <li><Link to="/jobs/post" className="text-muted-foreground hover:text-primary">Post a Job</Link></li>
                   <li><Link to="/talent" className="text-muted-foreground hover:text-primary">Search Talent</Link></li>
                   <li><Link to="/pricing" className="text-muted-foreground hover:text-primary">Pricing</Link></li>
                 </ul>
