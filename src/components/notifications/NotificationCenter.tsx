@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 export type NotificationType = 'info' | 'success' | 'warning' | 'error';
 
@@ -73,6 +74,9 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
     }
   };
 
+  // Show only the most recent 5 notifications in the dropdown
+  const recentNotifications = notifications.slice(0, 5);
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -111,7 +115,7 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
             </div>
           ) : (
             <ul>
-              {notifications.map((notification) => (
+              {recentNotifications.map((notification) => (
                 <li 
                   key={notification.id} 
                   className={cn(
@@ -158,8 +162,14 @@ const NotificationCenter: React.FC<NotificationCenterProps> = ({
         </div>
         <Separator />
         <div className="p-2 flex justify-center">
-          <Button variant="ghost" size="sm" className="w-full text-xs">
-            View all notifications
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full text-xs"
+            onClick={() => setOpen(false)}
+            asChild
+          >
+            <Link to="/notifications">View all notifications</Link>
           </Button>
         </div>
       </PopoverContent>

@@ -20,6 +20,7 @@ import ProfileForm from "@/components/profile/ProfileForm";
 import JobPostFormWrapper from "@/components/jobs/JobPostFormWrapper";
 import JobDetails from "@/pages/JobDetails";
 import ApplicationDetails from "@/pages/ApplicationDetails";
+import NotificationsPage from "@/pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
                   <Route path="/jobs" element={<JobSearch />} />
                   <Route path="/jobs/:id" element={<JobDetails />} />
                   <Route path="/account/upgrade" element={<AccountUpgrade />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
                   
                   {/* Protected Job Seeker Routes */}
                   <Route 
