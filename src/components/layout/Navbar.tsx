@@ -17,6 +17,7 @@ import {
 import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -32,6 +33,13 @@ const Navbar = () => {
     e.preventDefault();
     // Implement job search functionality
     window.location.href = `/jobs?query=${encodeURIComponent(searchQuery)}`;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch(e);
+    }
   };
 
   return (
@@ -55,9 +63,9 @@ const Navbar = () => {
                 className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
               />
             </div>
-            <Button type="submit" className="ml-2">Search</Button>
           </form>
         </div>
         
@@ -69,16 +77,6 @@ const Navbar = () => {
             >
               Browse Jobs
             </Link>
-            
-            {isAuthenticated && user?.role === 'employer' ? (
-              <Button asChild variant="default">
-                <Link to="/jobs/post">Post a Job</Link>
-              </Button>
-            ) : !isAuthenticated ? (
-              <Button asChild variant="outline">
-                <Link to="/auth?mode=signup&role=employer">Post a Job</Link>
-              </Button>
-            ) : null}
           </nav>
           
           {/* User is authenticated */}
@@ -168,6 +166,11 @@ const Navbar = () => {
               <Button asChild>
                 <Link to="/auth?mode=signup">Sign up</Link>
               </Button>
+              <Separator orientation="vertical" className="h-6" />
+              {/* Post a Job button after separator */}
+              <Button asChild variant="outline">
+                <Link to="/auth?mode=signup&role=employer">Post a Job</Link>
+              </Button>
             </>
           )}
         </div>
@@ -184,9 +187,9 @@ const Navbar = () => {
               className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
-          <Button type="submit" className="ml-2">Search</Button>
         </form>
       </div>
     </header>
