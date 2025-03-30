@@ -16,6 +16,8 @@ import EmployerDashboard from "@/components/dashboard/EmployerDashboard";
 import JobSearch from "@/components/jobs/JobSearch";
 import ProfileForm from "@/components/profile/ProfileForm";
 import JobPostFormWrapper from "@/components/jobs/JobPostFormWrapper";
+import JobDetails from "@/pages/JobDetails";
+import ApplicationDetails from "@/pages/ApplicationDetails";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,7 @@ const App = () => (
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/jobs" element={<JobSearch />} />
+                <Route path="/jobs/:id" element={<JobDetails />} />
                 <Route path="/account/upgrade" element={<AccountUpgrade />} />
                 
                 {/* Protected Job Seeker Routes */}
@@ -79,6 +82,14 @@ const App = () => (
                   element={
                     <ProtectedRoute requiredRole="job_seeker">
                       <ProfileForm />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/applications/:id" 
+                  element={
+                    <ProtectedRoute requiredRole="job_seeker">
+                      <ApplicationDetails />
                     </ProtectedRoute>
                   } 
                 />

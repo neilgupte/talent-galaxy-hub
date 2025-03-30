@@ -24,6 +24,7 @@ import {
   Check, 
   CheckCircle2, 
   Clock, 
+  ExternalLink,
   Heart, 
   MapPin, 
   MoreVertical, 
@@ -224,8 +225,9 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
             </span>
           </div>
           
-          <Button size="sm">
-            {job.hasApplied ? 'View Application' : 'Apply Now'}
+          <Button size="sm" className="gap-1">
+            {job.hasApplied ? 'View Application' : 'Full Job Details'}
+            <ExternalLink className="h-3 w-3" />
           </Button>
         </CardFooter>
       </Link>
