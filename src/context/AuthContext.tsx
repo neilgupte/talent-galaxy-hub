@@ -182,6 +182,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = async (name: string, email: string, password: string, role: UserRole) => {
     try {
+      // Configure registration with options
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -189,7 +190,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data: {
             name,
             role
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         }
       });
 
@@ -197,17 +199,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast({
         title: "Registration successful",
-        description: `Welcome, ${name}!`,
+        description: "Please check your email to confirm your account.",
       });
-
-      // Redirect to appropriate onboarding page based on role
-      setTimeout(() => {
-        if (role === 'job_seeker') {
-          navigate('/onboarding/profile');
-        } else {
-          navigate('/dashboard/employer');
-        }
-      }, 1000);
+      
+      // Don't redirect yet - wait for email confirmation
     } catch (error: any) {
       toast({
         title: "Registration failed",
@@ -243,7 +238,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       
-      // Send password reset email
+      // Send password reset email with correct redirect
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });

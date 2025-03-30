@@ -184,7 +184,7 @@ const Index = () => {
             <div className="mb-8 md:mb-0">
               <div className="flex items-center">
                 <Briefcase className="h-8 w-8 text-primary" />
-                <span className="ml-2 text-xl font-bold">TalentHub</span>
+                <span className="ml-2 text-xl font-bold">Talent Hub</span>
               </div>
               <p className="mt-2 text-muted-foreground max-w-md">
                 Connecting talent with opportunity through intelligent job matching
@@ -223,7 +223,7 @@ const Index = () => {
           
           <div className="border-t mt-12 pt-8 text-center">
             <p className="text-muted-foreground">
-              &copy; {new Date().getFullYear()} TalentHub. All rights reserved.
+              &copy; {new Date().getFullYear()} Talent Hub. All rights reserved.
             </p>
           </div>
         </div>

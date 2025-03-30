@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
@@ -13,16 +14,24 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User, LayoutDashboard, Bell } from "lucide-react";
+import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
+import { Input } from "@/components/ui/input";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
   const { isAuthenticated, user } = authState;
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Implement job search functionality
+    window.location.href = `/jobs?query=${encodeURIComponent(searchQuery)}`;
   };
 
   return (
@@ -30,20 +39,47 @@ const Navbar = () => {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="font-bold text-2xl text-primary">JobMatch</span>
-            <span className="font-light text-2xl">AI</span>
+            <Briefcase className="h-6 w-6 text-primary" />
+            <span className="font-bold text-2xl text-primary">Talent</span>
+            <span className="font-light text-2xl">Hub</span>
           </Link>
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
+        
+        <div className="hidden md:flex mx-4 flex-1 items-center">
+          <form onSubmit={handleSearch} className="flex w-full max-w-lg">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                type="search"
+                placeholder="Search jobs..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="ml-2">Search</Button>
+          </form>
+        </div>
+        
+        <div className="flex items-center justify-end space-x-2 sm:space-x-4">
           <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
             <Link
               to="/jobs"
               className="text-sm font-medium transition-colors hover:text-primary"
             >
-              Jobs
+              Browse Jobs
             </Link>
+            
+            {isAuthenticated && user?.role === 'employer' ? (
+              <Button asChild variant="default">
+                <Link to="/jobs/post">Post a Job</Link>
+              </Button>
+            ) : !isAuthenticated ? (
+              <Button asChild variant="outline">
+                <Link to="/auth?mode=signup&role=employer">Post a Job</Link>
+              </Button>
+            ) : null}
           </nav>
-          <div className="flex-1"></div>
           
           {/* User is authenticated */}
           {isAuthenticated ? (
@@ -135,6 +171,23 @@ const Navbar = () => {
             </>
           )}
         </div>
+      </div>
+      
+      {/* Mobile search - only shown on smaller screens */}
+      <div className="md:hidden px-4 pb-3">
+        <form onSubmit={handleSearch} className="flex w-full">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              type="search"
+              placeholder="Search jobs..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button type="submit" className="ml-2">Search</Button>
+        </form>
       </div>
     </header>
   );
