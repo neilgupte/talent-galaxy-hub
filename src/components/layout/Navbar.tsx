@@ -70,14 +70,7 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center justify-end space-x-2 sm:space-x-4">
-          <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
-            <Link
-              to="/jobs"
-              className="text-sm font-medium transition-colors hover:text-primary"
-            >
-              Browse Jobs
-            </Link>
-          </nav>
+          {/* Removed Browse Jobs link as requested */}
           
           {/* User is authenticated */}
           {isAuthenticated ? (

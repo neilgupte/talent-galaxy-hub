@@ -21,6 +21,8 @@ import JobPostFormWrapper from "@/components/jobs/JobPostFormWrapper";
 import JobDetails from "@/pages/JobDetails";
 import ApplicationDetails from "@/pages/ApplicationDetails";
 import NotificationsPage from "@/pages/NotificationsPage";
+import JobApplicationForm from "@/components/applications/JobApplicationForm";
+import JobApplicationSuccess from "@/pages/JobApplicationSuccess";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +97,23 @@ const App = () => (
                     element={
                       <ProtectedRoute requiredRole="job_seeker">
                         <ApplicationDetails />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  {/* New job application routes */}
+                  <Route 
+                    path="/applications/job/:id/apply" 
+                    element={
+                      <ProtectedRoute requiredRole="job_seeker">
+                        <JobApplicationForm />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/applications/:id/success" 
+                    element={
+                      <ProtectedRoute requiredRole="job_seeker">
+                        <JobApplicationSuccess />
                       </ProtectedRoute>
                     } 
                   />
