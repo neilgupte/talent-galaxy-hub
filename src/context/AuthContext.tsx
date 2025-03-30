@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               id: userData.id,
               name: userData.name,
               email: userData.email,
-              role: userData.role,
+              role: userData.role as UserRole, // Cast to UserRole type
               createdAt: userData.created_at
             };
 
