@@ -14,6 +14,7 @@ type AuthContextType = {
   updateCompany: (company: Company) => Promise<void>;
   continueWithGoogle: () => Promise<void>;
   continueWithLinkedIn: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 };
 
 const defaultAuthState: AuthState = {
@@ -30,6 +31,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authState, setAuthState] = useState<AuthState>(defaultAuthState);
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Track password reset attempts per user (in-memory tracker for rate limiting)
+  const [resetAttempts, setResetAttempts] = useState<Record<string, {count: number, lastAttempt: number}>>({});
 
   useEffect(() => {
     // Set up auth state listener
@@ -214,6 +218,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      // Check for rate limiting
+      const now = Date.now();
+      const userAttempts = resetAttempts[email] || { count: 0, lastAttempt: 0 };
+      
+      // If the last attempt was more than an hour ago, reset the counter
+      if (now - userAttempts.lastAttempt > 60 * 60 * 1000) {
+        userAttempts.count = 0;
+      }
+      
+      // Check if user has exceeded maximum attempts
+      if (userAttempts.count >= 5) {
+        throw new Error("Too many password reset attempts. Please try again later.");
+      }
+      
+      // Update attempts counter
+      setResetAttempts({
+        ...resetAttempts,
+        [email]: {
+          count: userAttempts.count + 1,
+          lastAttempt: now
+        }
+      });
+      
+      // Send password reset email
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for the password reset link. The link will expire in 60 minutes.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Password reset failed",
+        description: error.message || "An error occurred",
+        variant: "destructive"
+      });
+      throw error;
+    }
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     setAuthState({
@@ -356,7 +406,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateProfile,
       updateCompany,
       continueWithGoogle,
-      continueWithLinkedIn
+      continueWithLinkedIn,
+      resetPassword
     }}>
       {children}
     </AuthContext.Provider>

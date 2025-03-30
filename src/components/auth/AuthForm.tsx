@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { UserRole } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,14 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate } from 'react-router-dom';
-import { Linkedin } from 'lucide-react';
+import { Linkedin, Eye, EyeOff, Check, X } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+
+// Common weak passwords list
+const COMMON_PASSWORDS = [
+  'password', 'password123', 'qwerty', '123456', 'admin', 'welcome', 
+  'abc123', 'letmein', '111111', '12345678', 'default'
+];
 
 const AuthForm = () => {
   const { login, register, continueWithGoogle, continueWithLinkedIn } = useAuth();
@@ -19,6 +27,7 @@ const AuthForm = () => {
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   
   // Register form state
   const [registerName, setRegisterName] = useState('');
@@ -26,9 +35,93 @@ const AuthForm = () => {
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
   const [registerRole, setRegisterRole] = useState<UserRole>('job_seeker');
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Password validation state
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   
   // Error state
   const [error, setError] = useState<string | null>(null);
+
+  // Password validation function
+  useEffect(() => {
+    if (!registerPassword) {
+      setPasswordStrength(0);
+      setPasswordErrors([
+        'Minimum 8 characters',
+        'At least 1 uppercase letter',
+        'At least 1 lowercase letter',
+        'At least 1 number',
+        'At least 1 special character',
+        'No more than 3 identical characters in a row',
+        'Must not be a common password'
+      ]);
+      return;
+    }
+
+    const errors: string[] = [];
+
+    // Check minimum length
+    if (registerPassword.length < 8) {
+      errors.push('Minimum 8 characters');
+    }
+
+    // Check uppercase
+    if (!/[A-Z]/.test(registerPassword)) {
+      errors.push('At least 1 uppercase letter');
+    }
+
+    // Check lowercase
+    if (!/[a-z]/.test(registerPassword)) {
+      errors.push('At least 1 lowercase letter');
+    }
+
+    // Check number
+    if (!/[0-9]/.test(registerPassword)) {
+      errors.push('At least 1 number');
+    }
+
+    // Check special character
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(registerPassword)) {
+      errors.push('At least 1 special character');
+    }
+
+    // Check repeated characters
+    if (/(.)\1{3,}/.test(registerPassword)) {
+      errors.push('No more than 3 identical characters in a row');
+    }
+
+    // Check common passwords
+    if (COMMON_PASSWORDS.some(pwd => registerPassword.toLowerCase().includes(pwd))) {
+      errors.push('Must not be a common password');
+    }
+
+    setPasswordErrors(errors);
+
+    // Calculate password strength
+    const totalChecks = 7;
+    const passedChecks = totalChecks - errors.length;
+    const strength = Math.floor((passedChecks / totalChecks) * 100);
+    setPasswordStrength(strength);
+  }, [registerPassword]);
+
+  const getStrengthLabel = (strength: number) => {
+    if (strength === 0) return 'Very Weak';
+    if (strength < 40) return 'Weak';
+    if (strength < 70) return 'Moderate';
+    if (strength < 100) return 'Strong';
+    return 'Very Strong';
+  };
+
+  const getStrengthColor = (strength: number) => {
+    if (strength === 0) return 'bg-red-500';
+    if (strength < 40) return 'bg-red-500';
+    if (strength < 70) return 'bg-yellow-500';
+    if (strength < 100) return 'bg-green-400';
+    return 'bg-green-600';
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +148,8 @@ const AuthForm = () => {
       return;
     }
     
-    if (registerPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (passwordErrors.length > 0) {
+      setError('Please fix all password requirements before continuing');
       return;
     }
     
@@ -133,13 +226,24 @@ const AuthForm = () => {
                     Forgot password?
                   </Button>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={loginPassword}
-                  onChange={e => setLoginPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showLoginPassword ? "text" : "password"}
+                    value={loginPassword}
+                    onChange={e => setLoginPassword(e.target.value)}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  >
+                    {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
@@ -240,24 +344,92 @@ const AuthForm = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="registerPassword">Password</Label>
-                <Input
-                  id="registerPassword"
-                  type="password"
-                  value={registerPassword}
-                  onChange={e => setRegisterPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="registerPassword"
+                    type={showRegisterPassword ? "text" : "password"}
+                    value={registerPassword}
+                    onChange={e => setRegisterPassword(e.target.value)}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                  >
+                    {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+
+                {/* Password strength meter */}
+                {registerPassword && (
+                  <div className="mt-2 space-y-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <span>Password Strength:</span>
+                      <span className={
+                        passwordStrength >= 70 ? "text-green-600" : 
+                        passwordStrength >= 40 ? "text-yellow-600" : 
+                        "text-red-600"
+                      }>
+                        {getStrengthLabel(passwordStrength)}
+                      </span>
+                    </div>
+                    <Progress value={passwordStrength} className={getStrengthColor(passwordStrength)} />
+                    
+                    <div className="space-y-1 mt-3">
+                      <p className="text-xs font-medium">Password requirements:</p>
+                      <ul className="space-y-1">
+                        {[
+                          'Minimum 8 characters',
+                          'At least 1 uppercase letter',
+                          'At least 1 lowercase letter',
+                          'At least 1 number',
+                          'At least 1 special character',
+                          'No more than 3 identical characters in a row',
+                          'Must not be a common password'
+                        ].map((req, index) => (
+                          <li key={index} className="flex items-center text-xs">
+                            {passwordErrors.includes(req) ? (
+                              <X className="h-3 w-3 text-red-500 mr-2 shrink-0" />
+                            ) : (
+                              <Check className="h-3 w-3 text-green-500 mr-2 shrink-0" />
+                            )}
+                            <span className={passwordErrors.includes(req) ? "text-red-500" : "text-green-500"}>
+                              {req}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={registerConfirmPassword}
-                  onChange={e => setRegisterConfirmPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={registerConfirmPassword}
+                    onChange={e => setRegisterConfirmPassword(e.target.value)}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+                {registerPassword && registerConfirmPassword && registerPassword !== registerConfirmPassword && (
+                  <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -274,7 +446,11 @@ const AuthForm = () => {
                 </RadioGroup>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading || passwordErrors.length > 0 || registerPassword !== registerConfirmPassword}
+              >
                 {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>
 
