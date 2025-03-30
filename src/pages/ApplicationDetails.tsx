@@ -1,72 +1,57 @@
+
 import React from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
+import { Application, Job, ApplicationStatus } from '@/types';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { 
-  AlertCircle,
-  ArrowUpRight, 
-  Building, 
   CalendarClock, 
-  ChevronLeft, 
   CheckCircle, 
-  ClipboardCheck, 
-  Clock, 
+  ChevronLeft, 
   FileText, 
-  Info, 
-  MapPin,
-  MessageSquare
+  HelpCircle, 
+  MessageSquare, 
+  XCircle 
 } from 'lucide-react';
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Application, Job } from '@/types';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/context/AuthContext';
 
+// Mock function to fetch application details - replace with actual API call
 const fetchApplicationDetails = async (id: string): Promise<Application> => {
+  // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
+  // Return mock data
   return {
     id,
     userId: 'user-123',
     jobId: 'job-123',
-    appliedAt: '2023-09-15T14:30:00Z',
-    status: 'reviewing',
+    appliedAt: '2023-08-15T10:30:00Z',
+    status: 'reviewing', 
     aiScore: 85,
-    feedbackText: 'Your application shows strong relevant experience. Consider highlighting more specific achievements in your responses.',
+    feedbackText: 'Your application shows strong technical skills, but we would like to see more detail about your team collaboration experience. Your problem-solving examples were excellent.',
     job: {
       id: 'job-123',
-      companyId: 'company-123',
+      companyId: 'company-456',
       title: 'Senior Frontend Developer',
       description: 'We are seeking an experienced Frontend Developer to join our team...',
       location: 'New York, NY',
       employmentType: 'full_time',
       onsiteType: 'hybrid',
       jobLevel: 'senior',
+      requirements: ['React', 'TypeScript', 'Responsive Design', 'UI/UX', '5+ years experience'],
       status: 'active',
       isHighPriority: true,
       isBoosted: false,
       endDate: '2023-12-31',
-      createdAt: '2023-09-01',
-      updatedAt: '2023-09-01',
-      requirements: ['5+ years of React experience', 'TypeScript proficiency', 'Experience with modern frontend tools'],
+      createdAt: '2023-08-01T00:00:00Z',
+      updatedAt: '2023-08-01T00:00:00Z',
       company: {
-        id: 'company-123',
-        name: 'Tech Solutions Inc',
+        id: 'company-456',
+        name: 'Tech Innovations Inc',
         industry: 'Software Development',
-        description: 'Leading software development company',
+        description: 'Leading tech company focused on innovative solutions',
         logoUrl: '/placeholder.svg',
         planType: 'premium'
       }
@@ -76,75 +61,28 @@ const fetchApplicationDetails = async (id: string): Promise<Application> => {
         id: 'answer-1',
         applicationId: id,
         questionId: 'question-1',
-        answerText: 'I have 6+ years of experience with React and modern JavaScript frameworks. I have built and maintained several large-scale applications using React, Redux, and TypeScript.',
+        answerText: 'I have 6+ years of experience with React, including work with hooks, context API, and Redux for state management.',
         aiScore: 90
       },
       {
         id: 'answer-2',
         applicationId: id,
         questionId: 'question-2',
-        answerText: 'In my previous role, I improved application performance by implementing code splitting and lazy loading, which reduced initial load time by 45%.',
+        answerText: 'My approach to responsive design involves using a mobile-first strategy, flexbox/grid layouts, and media queries for breakpoints. I also implement accessibility best practices throughout.',
         aiScore: 85
-      },
-      {
-        id: 'answer-3',
-        applicationId: id,
-        questionId: 'question-3',
-        answerText: 'Yes, I am available to start immediately and can work with the hybrid schedule as described.',
-        aiScore: 100
       }
     ]
   };
 };
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-600';
-    case 'reviewing':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-600';
-    case 'interview':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-600';
-    case 'offer':
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-600';
-    case 'accepted':
-      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-600';
-    case 'rejected':
-      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-600';
-    case 'withdrawn':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-600';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-600';
-  }
-};
-
-const getScoreColor = (score?: number) => {
-  if (!score) return '';
-  
-  if (score >= 80) return 'text-green-600 dark:text-green-400';
-  if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
-  return 'text-red-600 dark:text-red-400';
-};
-
 const ApplicationDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   
   const { data: application, isLoading, error } = useQuery({
     queryKey: ['application', id],
     queryFn: () => fetchApplicationDetails(id!),
     enabled: !!id
   });
-  
-  const handleWithdraw = () => {
-    toast({
-      title: "Application withdrawn",
-      description: "Your application has been withdrawn successfully."
-    });
-    
-    navigate('/dashboard/job-seeker');
-  };
   
   if (isLoading) {
     return (
@@ -160,257 +98,205 @@ const ApplicationDetails: React.FC = () => {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
-          <Info className="h-16 w-16 text-muted-foreground mb-4" />
           <h2 className="text-2xl font-semibold mb-2">Application Not Found</h2>
           <p className="text-muted-foreground mb-6">The application you're looking for doesn't exist or has been removed.</p>
           <Button asChild>
-            <Link to="/dashboard/job-seeker">Go to Dashboard</Link>
+            <Link to="/dashboard/job-seeker">Back to Dashboard</Link>
           </Button>
         </div>
       </div>
     );
   }
   
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  const getStatusBadge = (status: ApplicationStatus) => {
+    switch(status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-gray-100 text-gray-800">Pending</Badge>;
+      case 'reviewing':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800">Under Review</Badge>;
+      case 'interview':
+        return <Badge variant="outline" className="bg-purple-100 text-purple-800">Interview</Badge>;
+      case 'offer':
+        return <Badge variant="outline" className="bg-green-100 text-green-800">Offer</Badge>;
+      case 'rejected':
+        return <Badge variant="outline" className="bg-red-100 text-red-800">Rejected</Badge>;
+      case 'accepted':
+        return <Badge variant="outline" className="bg-emerald-100 text-emerald-800">Accepted</Badge>;
+      case 'withdrawn':
+        return <Badge variant="outline" className="bg-gray-100 text-gray-800">Withdrawn</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
   
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-  
-  const formatStatus = (status: string) => {
-    return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const getStatusIcon = (status: ApplicationStatus) => {
+    switch(status) {
+      case 'pending':
+        return <HelpCircle className="h-5 w-5 text-gray-500" />;
+      case 'reviewing':
+        return <FileText className="h-5 w-5 text-blue-500" />;
+      case 'interview':
+        return <CalendarClock className="h-5 w-5 text-purple-500" />;
+      case 'offer':
+        return <MessageSquare className="h-5 w-5 text-green-500" />;
+      case 'rejected':
+        return <XCircle className="h-5 w-5 text-red-500" />;
+      case 'accepted':
+        return <CheckCircle className="h-5 w-5 text-emerald-500" />;
+      case 'withdrawn':
+        return <XCircle className="h-5 w-5 text-gray-500" />;
+      default:
+        return <HelpCircle className="h-5 w-5 text-gray-500" />;
+    }
   };
   
   return (
     <div className="container mx-auto py-8 px-4">
+      {/* Back button */}
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="gap-1">
-          <ChevronLeft className="h-4 w-4" />
-          Back to Dashboard
+        <Button 
+          variant="ghost" 
+          className="gap-1"
+          asChild
+        >
+          <Link to="/dashboard/job-seeker">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Link>
         </Button>
       </div>
       
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Application for {application.job?.title}</h1>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-muted-foreground">
-          <div className="flex items-center">
-            <Building className="h-4 w-4 mr-1" />
-            <span>{application.job?.company?.name}</span>
+      {/* Application header */}
+      <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Application for {application.job.title}</h1>
+          <div className="flex items-center text-muted-foreground mt-1">
+            <span>{application.job.company?.name}</span>
+            <span className="mx-2">•</span>
+            <span>{application.job.location}</span>
           </div>
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-1" />
-            <span>{application.job?.location}</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-2">
+            {getStatusIcon(application.status)}
+            <span className="font-medium">Status:</span>
+            {getStatusBadge(application.status)}
           </div>
-          <div className="flex items-center">
-            <CalendarClock className="h-4 w-4 mr-1" />
-            <span>Applied on {formatDate(application.appliedAt)}</span>
-          </div>
+          {application.status === 'rejected' && (
+            <Button variant="outline">
+              Appeal Decision
+            </Button>
+          )}
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      {/* Application content */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          {/* Application details card */}
           <Card>
             <CardHeader>
-              <CardTitle>Application Status</CardTitle>
-              <CardDescription>Track the progress of your application</CardDescription>
+              <CardTitle>Application Details</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between mb-6">
-                <Badge className={`px-3 py-1 ${getStatusColor(application.status)}`}>
-                  {formatStatus(application.status)}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  Last updated: {formatDate(application.appliedAt)} at {formatTime(application.appliedAt)}
-                </span>
+            <CardContent className="space-y-4">
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-2">Date Applied</h3>
+                <p>{new Date(application.appliedAt).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}</p>
               </div>
               
-              <div className="relative pt-1">
-                <div className="flex mb-2 items-center justify-between">
-                  <div>
-                    <span className={`text-xs font-semibold inline-block ${getScoreColor(application.aiScore)}`}>
-                      AI Match Score
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className={`text-xs font-semibold inline-block ${getScoreColor(application.aiScore)}`}>
-                      {application.aiScore}%
-                    </span>
+              {application.aiScore !== undefined && (
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground mb-2">AI Match Score</h3>
+                  <div className="flex items-center">
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full px-3 py-1 text-sm font-medium">
+                      {application.aiScore}% Match
+                    </div>
                   </div>
                 </div>
-                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200 dark:bg-gray-700">
-                  <div 
-                    style={{ width: `${application.aiScore}%` }}
-                    className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${
-                      application.aiScore && application.aiScore >= 80 
-                        ? 'bg-green-500' 
-                        : application.aiScore && application.aiScore >= 60 
-                          ? 'bg-yellow-500' 
-                          : 'bg-red-500'
-                    }`}
-                  ></div>
-                </div>
-              </div>
+              )}
               
               {application.feedbackText && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4 mt-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <Info className="h-5 w-5 text-blue-400" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-blue-800 dark:text-blue-300">AI Feedback</h3>
-                      <div className="mt-2 text-sm text-blue-700 dark:text-blue-200">
-                        {application.feedbackText}
-                      </div>
-                    </div>
-                  </div>
+                <div>
+                  <h3 className="font-medium text-sm text-muted-foreground mb-2">Feedback</h3>
+                  <p className="text-sm">{application.feedbackText}</p>
                 </div>
               )}
             </CardContent>
           </Card>
           
+          {/* Application answers */}
           <Card>
             <CardHeader>
               <CardTitle>Your Responses</CardTitle>
-              <CardDescription>Your answers to the application questions</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Accordion type="single" collapsible className="w-full">
-                {application.answers?.map((answer, index) => (
-                  <AccordionItem key={answer.id} value={answer.id}>
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex justify-between w-full pr-4">
-                        <span>Question {index + 1}</span>
-                        {answer.aiScore && (
-                          <Badge className={`${getScoreColor(answer.aiScore)} bg-opacity-10`}>
-                            Score: {answer.aiScore}%
-                          </Badge>
-                        )}
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pt-2">
-                      <div className="space-y-2">
-                        <p className="font-medium">Your Answer:</p>
-                        <p className="text-muted-foreground">{answer.answerText}</p>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
+            <CardContent className="space-y-6">
+              {application.answers?.map((answer, index) => (
+                <div key={answer.id} className="space-y-2">
+                  <h3 className="font-medium">Question {index + 1}</h3>
+                  <p className="text-sm">{answer.answerText}</p>
+                  {answer.aiScore !== undefined && (
+                    <div className="flex items-center mt-2">
+                      <span className="text-xs text-muted-foreground mr-2">AI Score:</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        {answer.aiScore}%
+                      </Badge>
+                    </div>
+                  )}
+                  {index < application.answers.length - 1 && <Separator className="my-4" />}
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
         
-        <div className="space-y-6">
+        {/* Job summary */}
+        <div>
           <Card>
             <CardHeader>
-              <CardTitle>Job Information</CardTitle>
+              <CardTitle>Job Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Avatar className="h-10 w-10 rounded-md">
-                  <AvatarImage src={application.job?.company?.logoUrl} alt={application.job?.company?.name} />
-                  <AvatarFallback className="rounded-md bg-primary/10">
-                    {application.job?.company?.name?.charAt(0) || 'C'}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div>
-                  <h3 className="font-medium">{application.job?.title}</h3>
-                  <p className="text-sm text-muted-foreground">{application.job?.company?.name}</p>
-                </div>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-2">Company</h3>
+                <p>{application.job.company?.name}</p>
               </div>
               
-              <Button asChild variant="outline" className="w-full gap-1">
-                <Link to={`/jobs/${application.jobId}`}>
-                  View Job Details
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full gap-1">
-                <MessageSquare className="h-4 w-4" />
-                Contact Recruiter
-              </Button>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-2">Location</h3>
+                <p>{application.job.location}</p>
+              </div>
               
-              <Button variant="outline" className="w-full gap-1">
-                <FileText className="h-4 w-4" />
-                Upload Additional Documents
-              </Button>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-2">Employment Type</h3>
+                <p className="capitalize">{application.job.employmentType.replace('_', ' ')}</p>
+              </div>
               
-              <Button variant="destructive" className="w-full gap-1" onClick={handleWithdraw}>
-                <AlertCircle className="h-4 w-4" />
-                Withdraw Application
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Timeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex">
-                  <div className="mr-4 flex flex-col items-center">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                      <CheckCircle className="h-4 w-4" />
-                    </div>
-                    <div className="h-full w-px bg-border"></div>
-                  </div>
-                  <div>
-                    <p className="font-medium">Application Submitted</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(application.appliedAt)} at {formatTime(application.appliedAt)}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex">
-                  <div className="mr-4 flex flex-col items-center">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                      <ClipboardCheck className="h-4 w-4" />
-                    </div>
-                    <div className="h-full w-px bg-border"></div>
-                  </div>
-                  <div>
-                    <p className="font-medium">Under Review</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(application.appliedAt)} at {formatTime(application.appliedAt)}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex opacity-50">
-                  <div className="mr-4 flex flex-col items-center">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-border">
-                      <Clock className="h-4 w-4" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="font-medium">Next Steps Pending</p>
-                    <p className="text-sm text-muted-foreground">
-                      Waiting for recruiter action
-                    </p>
-                  </div>
-                </div>
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-2">Work Type</h3>
+                <p className="capitalize">{application.job.onsiteType}</p>
+              </div>
+              
+              <Separator className="my-2" />
+              
+              <div>
+                <h3 className="font-medium text-sm text-muted-foreground mb-2">Key Requirements</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm">
+                  {application.job.requirements?.map((req, index) => (
+                    <li key={index}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div className="pt-2">
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to={`/jobs/${application.job.id}`}>
+                    View Full Job Details
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>

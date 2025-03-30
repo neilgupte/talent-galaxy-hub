@@ -12,11 +12,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Bell, Menu, Search, User, Briefcase, LogOut, PlusCircle } from 'lucide-react';
+import NotificationCenter from '@/components/notifications/NotificationCenter';
+import { useNotifications } from '@/context/NotificationContext';
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
   const { isAuthenticated, user } = authState;
   const navigate = useNavigate();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   
   const handleLogout = () => {
     logout();
@@ -92,10 +95,12 @@ const Navbar = () => {
             
             {isAuthenticated ? (
               <>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500"></span>
-                </Button>
+                <NotificationCenter 
+                  notifications={notifications}
+                  onMarkAsRead={markAsRead}
+                  onMarkAllAsRead={markAllAsRead}
+                  onDelete={deleteNotification}
+                />
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
