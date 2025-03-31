@@ -14,10 +14,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search } from "lucide-react";
+import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search, BookmarkCheck } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import SearchBox from "@/components/jobs/SearchBox";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -29,17 +30,8 @@ const Navbar = () => {
     await logout();
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Implement job search functionality
-    window.location.href = `/jobs?query=${encodeURIComponent(searchQuery)}`;
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch(e);
-    }
+  const handleSearch = (query: string) => {
+    window.location.href = `/jobs?query=${encodeURIComponent(query)}`;
   };
 
   return (
@@ -54,19 +46,11 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex mx-4 flex-1 items-center">
-          <form onSubmit={handleSearch} className="flex w-full max-w-lg">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="search"
-                placeholder="Search jobs..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-          </form>
+          <SearchBox 
+            onSearch={handleSearch}
+            placeholder="Search jobs or locations..."
+            className="w-full max-w-lg"
+          />
         </div>
         
         <div className="flex items-center justify-end space-x-2 sm:space-x-4">
@@ -121,6 +105,18 @@ const Navbar = () => {
                             <span>Profile</span>
                           </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/saved-jobs">
+                            <BookmarkCheck className="mr-2 h-4 w-4" />
+                            <span>Saved Jobs</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/account/settings">
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Settings</span>
+                          </Link>
+                        </DropdownMenuItem>
                       </>
                     ) : (
                       <DropdownMenuItem asChild>
@@ -134,12 +130,6 @@ const Navbar = () => {
                       <Link to="/notifications">
                         <Bell className="mr-2 h-4 w-4" />
                         <span>Notifications</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/account/settings">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -160,7 +150,7 @@ const Navbar = () => {
               <Button asChild>
                 <Link to="/auth?mode=signup">Sign up</Link>
               </Button>
-              <Separator orientation="vertical" className="h-6" />
+              <Separator orientation="vertical" className="h-6 bg-gray-400 dark:bg-gray-600" />
               {/* Post a Job button after separator */}
               <Button asChild variant="outline">
                 <Link to="/auth?mode=signup&role=employer">Post a Job</Link>
@@ -172,19 +162,11 @@ const Navbar = () => {
       
       {/* Mobile search - only shown on smaller screens */}
       <div className="md:hidden px-4 pb-3">
-        <form onSubmit={handleSearch} className="flex w-full">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="search"
-              placeholder="Search jobs..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-          </div>
-        </form>
+        <SearchBox 
+          onSearch={handleSearch}
+          placeholder="Search jobs or locations..."
+          className="w-full"
+        />
       </div>
     </header>
   );

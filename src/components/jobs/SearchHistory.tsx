@@ -1,31 +1,33 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Clock, X, Search } from 'lucide-react';
+import { Clock, X, Search, Trash2 } from 'lucide-react';
 
 interface SearchHistoryProps {
   recentSearches: string[];
   onSelectSearch: (search: string) => void;
   onClearSearch: (search: string) => void;
   onClearAllSearches: () => void;
+  className?: string;
 }
 
 const SearchHistory: React.FC<SearchHistoryProps> = ({
   recentSearches,
   onSelectSearch,
   onClearSearch,
-  onClearAllSearches
+  onClearAllSearches,
+  className = ''
 }) => {
   if (recentSearches.length === 0) {
     return (
-      <div className="py-3 px-4 text-sm text-muted-foreground">
+      <div className={`py-3 px-4 text-sm text-muted-foreground ${className}`}>
         No recent searches
       </div>
     );
   }
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       <div className="flex items-center justify-between px-4 py-2 border-b">
         <h3 className="text-sm font-medium">Recent Searches</h3>
         <Button
@@ -34,6 +36,7 @@ const SearchHistory: React.FC<SearchHistoryProps> = ({
           className="text-xs h-7 px-2 hover:bg-transparent hover:text-destructive"
           onClick={onClearAllSearches}
         >
+          <Trash2 className="h-3.5 w-3.5 mr-1" />
           Clear All
         </Button>
       </div>

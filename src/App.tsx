@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
 import AccountUpgrade from "./pages/AccountUpgrade";
+import AccountSettingsPage from "./pages/AccountSettingsPage";
 import JobSeekerDashboard from "@/components/dashboard/JobSeekerDashboard";
 import EmployerDashboard from "@/components/dashboard/EmployerDashboard";
 import JobSearch from "@/components/jobs/JobSearch";
@@ -108,6 +109,14 @@ const App = () => (
                     element={
                       <ProtectedRoute requiredRole="job_seeker">
                         <ProfileForm />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/account/settings" 
+                    element={
+                      <ProtectedRoute>
+                        <AccountSettingsPage />
                       </ProtectedRoute>
                     } 
                   />

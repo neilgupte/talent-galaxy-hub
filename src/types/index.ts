@@ -1,4 +1,3 @@
-
 export type UserRole = 'job_seeker' | 'employer' | 'admin';
 
 export type JobEmploymentType = 'full_time' | 'part_time' | 'contract' | 'temporary' | 'internship' | 'job_share';
@@ -18,6 +17,10 @@ export type ApplicationStatus =
 
 export type QuestionType = 'text' | 'mcq' | 'yesno';
 
+export type JobSeekerStatus = 'not_open' | 'employed_but_open' | 'actively_seeking';
+
+export type ContactPreference = 'email' | 'phone' | 'both';
+
 export interface User {
   id: string;
   name: string;
@@ -35,6 +38,10 @@ export interface Profile {
   currentTitle: string;
   skills: string[];
   avatarUrl?: string;
+  phone?: string;
+  contactPreference?: ContactPreference;
+  jobSeekerStatus?: JobSeekerStatus;
+  cvs?: CV[];
 }
 
 export interface Experience {
@@ -131,6 +138,15 @@ export interface Answer {
   questionId: string;
   answerText: string;
   aiScore?: number;
+}
+
+export interface CV {
+  id: string;
+  userId: string;
+  fileName: string;
+  fileUrl: string;
+  uploadDate: string;
+  isDefault?: boolean;
 }
 
 export interface AuthState {
