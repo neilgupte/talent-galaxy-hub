@@ -1,17 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Job, JobQuestion } from '@/types';
-import { ChevronLeft, BookOpen, Send, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Send } from 'lucide-react';
+import { Job } from '@/types';
+
+// Import refactored components
+import ApplicationContactSection from './ApplicationContactSection';
+import ApplicationCoverLetterSection from './ApplicationCoverLetterSection';
+import ApplicationQuestionsSection from './ApplicationQuestionsSection';
 
 // Mock function to fetch job details - replace with actual API call
 const fetchJobDetails = async (id: string): Promise<Job> => {
@@ -110,7 +109,7 @@ const JobApplicationForm = () => {
   });
 
   // Initialize answers state when job data is loaded
-  React.useEffect(() => {
+  useEffect(() => {
     if (job?.questions) {
       const initialAnswers: Record<string, string> = {};
       job.questions.forEach(question => {
@@ -155,6 +154,13 @@ const JobApplicationForm = () => {
         [questionId]: ''
       }));
     }
+  };
+  
+  const clearCoverLetterError = () => {
+    setValidationErrors(prev => ({
+      ...prev,
+      coverLetter: ''
+    }));
   };
   
   const validateForm = (): boolean => {
@@ -246,131 +252,25 @@ const JobApplicationForm = () => {
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-        <Card>
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-            <CardDescription>
-              We'll use this information to contact you about your application.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input 
-                  id="fullName" 
-                  value={user?.name || ''} 
-                  disabled 
-                  className="bg-muted" 
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  This comes from your profile
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  value={user?.email || ''} 
-                  disabled 
-                  className="bg-muted" 
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  This comes from your account
-                </p>
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="phoneNumber">Phone Number</Label>
-              <Input 
-                id="phoneNumber" 
-                type="tel" 
-                placeholder="(555) 555-5555" 
-                value={phoneNumber} 
-                onChange={(e) => setPhoneNumber(e.target.value)} 
-                required 
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <ApplicationContactSection 
+          user={user}
+          phoneNumber={phoneNumber}
+          setPhoneNumber={setPhoneNumber}
+        />
         
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Cover Letter <span className="text-red-500">*</span>
-            </CardTitle>
-            <CardDescription>
-              Tell the employer why you're the perfect fit for this role.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Textarea 
-              placeholder="Write your cover letter here..." 
-              className={`min-h-[200px] ${validationErrors.coverLetter ? 'border-red-500' : ''}`}
-              value={coverLetter}
-              onChange={(e) => {
-                setCoverLetter(e.target.value);
-                if (validationErrors.coverLetter) {
-                  setValidationErrors(prev => ({ ...prev, coverLetter: '' }));
-                }
-              }}
-              aria-invalid={!!validationErrors.coverLetter}
-            />
-            {validationErrors.coverLetter && (
-              <div className="flex items-center mt-2 text-red-500 text-sm">
-                <AlertCircle className="h-4 w-4 mr-1" />
-                <span>{validationErrors.coverLetter}</span>
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-between items-center border-t px-6 py-4">
-            <div className="flex items-center text-muted-foreground">
-              <BookOpen className="h-4 w-4 mr-2" />
-              <span className="text-sm">Aim for 250-300 words</span>
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {coverLetter.split(/\s+/).filter(Boolean).length} words
-            </span>
-          </CardFooter>
-        </Card>
+        <ApplicationCoverLetterSection 
+          coverLetter={coverLetter}
+          setCoverLetter={setCoverLetter}
+          validationError={validationErrors.coverLetter}
+          clearValidationError={clearCoverLetterError}
+        />
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Screening Questions</CardTitle>
-            <CardDescription>
-              Please answer the following questions to help the employer assess your fit for the role.
-              <div className="mt-1 text-sm text-muted-foreground">
-                <span className="text-red-500">*</span> indicates required questions
-              </div>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {job.questions?.map((question, index) => (
-              <div key={question.id} className="space-y-2">
-                <Label htmlFor={question.id} className="text-base font-medium">
-                  {question.questionText}
-                  {question.isRequired && <span className="text-red-500 ml-1">*</span>}
-                </Label>
-                <Textarea 
-                  id={question.id} 
-                  className={`mt-2 min-h-[120px] ${validationErrors[question.id] ? 'border-red-500' : ''}`}
-                  value={answers[question.id] || ''}
-                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                  aria-invalid={!!validationErrors[question.id]}
-                />
-                {validationErrors[question.id] && (
-                  <div className="flex items-center mt-1 text-red-500 text-sm">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    <span>{validationErrors[question.id]}</span>
-                  </div>
-                )}
-                {index < (job.questions?.length || 0) - 1 && <Separator className="my-4" />}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <ApplicationQuestionsSection 
+          questions={job.questions || []}
+          answers={answers}
+          handleAnswerChange={handleAnswerChange}
+          validationErrors={validationErrors}
+        />
         
         <div className="flex justify-end space-x-4">
           <Button

@@ -9,13 +9,13 @@ import { QueryProvider } from './providers/QueryProvider';
 import Index from './pages/Index'; 
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
-import JobsPage from './pages/JobsPage'; // Updated import
+import JobsPage from './pages/JobsPage';
 import JobDetailsPage from './pages/JobDetails';
 import PostJobPage from './pages/NotFound'; // Temporary placeholder
 import PricingPage from './pages/PricingPage';
 import EmployerDashboard from './components/dashboard/EmployerDashboard';
 import JobSeekerDashboard from './components/dashboard/JobSeekerDashboard';
-import ProfilePage from './pages/NotFound'; // Temporary placeholder
+import ProfilePage from './pages/ProfilePage'; // Updated import
 import SavedJobsPage from './pages/SavedJobsPage';
 import ApplicationsPage from './pages/NotFound'; // Temporary placeholder
 import ApplicationDetails from './pages/ApplicationDetails';
