@@ -10,8 +10,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Job } from '@/types';
-import { ChevronLeft, BookOpen, Send } from 'lucide-react';
+import { Job, JobQuestion } from '@/types';
+import { ChevronLeft, BookOpen, Send, AlertCircle } from 'lucide-react';
 
 // Mock function to fetch job details - replace with actual API call
 const fetchJobDetails = async (id: string): Promise<Job> => {
@@ -56,7 +56,25 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
       planType: 'premium'
     },
     matchPercentage: 92,
-    hasApplied: false
+    hasApplied: false,
+    questions: [
+      {
+        id: 'q1',
+        jobId: id,
+        questionText: 'Describe your experience with React.js and modern frontend frameworks.',
+        type: 'text',
+        isRequired: true,
+        isKnockout: false
+      },
+      {
+        id: 'q2',
+        jobId: id,
+        questionText: 'How would you approach building a responsive, accessible UI?',
+        type: 'text',
+        isRequired: true,
+        isKnockout: false
+      }
+    ]
   };
 };
 
@@ -78,17 +96,27 @@ const JobApplicationForm = () => {
   
   const [coverLetter, setCoverLetter] = useState('');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
-  const [answers, setAnswers] = useState<Record<string, string>>({
-    'experience': '',
-    'skills': ''
-  });
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({
+    coverLetter: '',
+  });
   
   // Fetch job details
   const { data: job, isLoading, error } = useQuery({
     queryKey: ['job', id],
     queryFn: () => fetchJobDetails(id!),
-    enabled: !!id
+    enabled: !!id,
+    onSuccess: (data) => {
+      // Initialize answers state with empty strings for each question
+      if (data.questions) {
+        const initialAnswers: Record<string, string> = {};
+        data.questions.forEach(question => {
+          initialAnswers[question.id] = '';
+        });
+        setAnswers(initialAnswers);
+      }
+    }
   });
   
   if (isLoading) {
@@ -118,10 +146,50 @@ const JobApplicationForm = () => {
       ...prev,
       [questionId]: value
     }));
+    
+    // Clear validation error when user types
+    if (validationErrors[questionId]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [questionId]: ''
+      }));
+    }
+  };
+  
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+    
+    // Validate cover letter
+    if (!coverLetter.trim()) {
+      newErrors.coverLetter = 'Cover letter is required';
+      isValid = false;
+    }
+    
+    // Validate each required question
+    job.questions?.forEach(question => {
+      if (question.isRequired && !answers[question.id]?.trim()) {
+        newErrors[question.id] = 'This answer is required';
+        isValid = false;
+      }
+    });
+    
+    setValidationErrors(newErrors);
+    return isValid;
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
@@ -176,7 +244,7 @@ const JobApplicationForm = () => {
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-8" noValidate>
         <Card>
           <CardHeader>
             <CardTitle>Contact Information</CardTitle>
@@ -229,7 +297,9 @@ const JobApplicationForm = () => {
         
         <Card>
           <CardHeader>
-            <CardTitle>Cover Letter</CardTitle>
+            <CardTitle>
+              Cover Letter <span className="text-red-500">*</span>
+            </CardTitle>
             <CardDescription>
               Tell the employer why you're the perfect fit for this role.
             </CardDescription>
@@ -237,11 +307,22 @@ const JobApplicationForm = () => {
           <CardContent>
             <Textarea 
               placeholder="Write your cover letter here..." 
-              className="min-h-[200px]" 
+              className={`min-h-[200px] ${validationErrors.coverLetter ? 'border-red-500' : ''}`}
               value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
-              required
+              onChange={(e) => {
+                setCoverLetter(e.target.value);
+                if (validationErrors.coverLetter) {
+                  setValidationErrors(prev => ({ ...prev, coverLetter: '' }));
+                }
+              }}
+              aria-invalid={!!validationErrors.coverLetter}
             />
+            {validationErrors.coverLetter && (
+              <div className="flex items-center mt-2 text-red-500 text-sm">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                <span>{validationErrors.coverLetter}</span>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex justify-between items-center border-t px-6 py-4">
             <div className="flex items-center text-muted-foreground">
@@ -259,36 +340,34 @@ const JobApplicationForm = () => {
             <CardTitle>Screening Questions</CardTitle>
             <CardDescription>
               Please answer the following questions to help the employer assess your fit for the role.
+              <div className="mt-1 text-sm text-muted-foreground">
+                <span className="text-red-500">*</span> indicates required questions
+              </div>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="experience" className="text-base font-medium">
-                Describe your experience with React.js and modern frontend frameworks.
-              </Label>
-              <Textarea 
-                id="experience" 
-                className="mt-2 min-h-[120px]"
-                value={answers.experience}
-                onChange={(e) => handleAnswerChange('experience', e.target.value)}
-                required
-              />
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <Label htmlFor="skills" className="text-base font-medium">
-                How would you approach building a responsive, accessible UI?
-              </Label>
-              <Textarea 
-                id="skills" 
-                className="mt-2 min-h-[120px]"
-                value={answers.skills}
-                onChange={(e) => handleAnswerChange('skills', e.target.value)}
-                required
-              />
-            </div>
+            {job.questions?.map((question, index) => (
+              <div key={question.id} className="space-y-2">
+                <Label htmlFor={question.id} className="text-base font-medium">
+                  {question.questionText}
+                  {question.isRequired && <span className="text-red-500 ml-1">*</span>}
+                </Label>
+                <Textarea 
+                  id={question.id} 
+                  className={`mt-2 min-h-[120px] ${validationErrors[question.id] ? 'border-red-500' : ''}`}
+                  value={answers[question.id] || ''}
+                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                  aria-invalid={!!validationErrors[question.id]}
+                />
+                {validationErrors[question.id] && (
+                  <div className="flex items-center mt-1 text-red-500 text-sm">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    <span>{validationErrors[question.id]}</span>
+                  </div>
+                )}
+                {index < (job.questions?.length || 0) - 1 && <Separator className="my-4" />}
+              </div>
+            ))}
           </CardContent>
         </Card>
         

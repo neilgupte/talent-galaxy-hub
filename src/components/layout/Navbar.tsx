@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search, BookmarkCheck, FileText } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import SearchBox from "@/components/jobs/SearchBox";
 
@@ -24,9 +23,9 @@ const Navbar = () => {
   const { authState, logout } = useAuth();
   const { isAuthenticated, user, profile } = authState;
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
-  const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = async () => {
+    console.log("Logging out user");
     await logout();
   };
 
@@ -50,6 +49,7 @@ const Navbar = () => {
             onSearch={handleSearch}
             placeholder="Search jobs or locations..."
             className="w-full max-w-lg"
+            required={false}
           />
         </div>
         
@@ -172,6 +172,7 @@ const Navbar = () => {
           onSearch={handleSearch}
           placeholder="Search jobs or locations..."
           className="w-full"
+          required={false}
         />
       </div>
     </header>
