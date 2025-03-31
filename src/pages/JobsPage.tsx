@@ -7,6 +7,7 @@ import JobFiltersComponent from '@/components/jobs/JobFilters';
 import JobSearchBar from '@/components/jobs/JobSearchBar';
 import JobsPageContent from '@/components/jobs/JobsPageContent';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const JOBS_PER_PAGE = 20;
 
@@ -52,7 +53,11 @@ const JobsPage = () => {
   // Add automatic refetch when page loads
   useEffect(() => {
     // Refetch on component mount
-    refetch();
+    console.log("Component mounted, triggering refetch");
+    refetch().catch(err => {
+      console.error("Failed to fetch jobs:", err);
+      toast.error("Failed to load jobs. Please try refreshing the page.");
+    });
   }, [refetch]);
   
   const totalPages = data ? Math.ceil(data.totalCount / JOBS_PER_PAGE) : 0;
@@ -103,6 +108,7 @@ const JobsPage = () => {
               onClick={() => {
                 console.log('Manual refetch triggered');
                 refetch();
+                toast.info('Refreshing job listings...');
               }}
             >
               Refresh Jobs

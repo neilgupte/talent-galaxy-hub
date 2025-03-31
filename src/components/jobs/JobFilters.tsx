@@ -24,6 +24,8 @@ interface JobFiltersProps {
 
 const JobFilters: React.FC<JobFiltersProps> = ({ filters, onChange }) => {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  // Default open accordion values
+  const [openAccordionItems, setOpenAccordionItems] = useState<string[]>(['salary', 'employment', 'level', 'location']);
   
   const handleEmploymentTypeChange = (value: string) => {
     const newTypes = filters.employmentTypes.includes(value)
@@ -92,7 +94,7 @@ const JobFilters: React.FC<JobFiltersProps> = ({ filters, onChange }) => {
         )}
       </div>
       
-      <Accordion type="multiple" className="w-full">
+      <Accordion type="multiple" className="w-full" value={openAccordionItems} onValueChange={setOpenAccordionItems}>
         <AccordionItem value="salary">
           <AccordionTrigger>Salary Range</AccordionTrigger>
           <AccordionContent>

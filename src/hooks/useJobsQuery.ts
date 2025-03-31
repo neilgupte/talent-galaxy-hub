@@ -91,19 +91,17 @@ export const useJobsQuery = ({
         
         // Add salary range filter
         if (selectedFilters.salaryRange[0] > 0) {
-          const salaryMinStr = selectedFilters.salaryRange[0].toString();
-          query = query.gte('salary_range', `${salaryMinStr}-`);
+          query = query.gte('salary_min', selectedFilters.salaryRange[0]);
         }
         
         if (selectedFilters.salaryRange[1] < 250000) {
-          const salaryMaxStr = selectedFilters.salaryRange[1].toString();
-          query = query.lte('salary_range', `-${salaryMaxStr}`);
+          query = query.lte('salary_max', selectedFilters.salaryRange[1]);
         }
         
         if (sortBy === 'date') {
           query = query.order('created_at', { ascending: false });
         } else if (sortBy === 'salary') {
-          query = query.order('salary_range', { ascending: false });
+          query = query.order('salary_max', { ascending: false });
         }
         
         query = query.range(from, to);
@@ -120,21 +118,18 @@ export const useJobsQuery = ({
         let jobsData = data || [];
         console.log(`Fetched ${jobsData.length} jobs out of ${count || 0} total`);
         
-        // No mock data generation anymore - we only want to show real data
-        // We just need to properly process the data from Supabase
-        
         const mappedJobs = jobsData.map(job => mapDatabaseJobToModel(job));
         console.log('🟢 Final job data:', mappedJobs.length, mappedJobs);
 
         return {
           jobs: mappedJobs,
-          totalCount: count || jobsData.length || 0,
+          totalCount: count || 0,
         };
       } catch (err) {
         console.error('Exception fetching jobs:', err);
         throw err;
       }
     },
-    staleTime: 1000 * 30, // Reduce stale time to 30 seconds while debugging
+    staleTime: 1000 * 30, // 30 seconds stale time
   });
 };
