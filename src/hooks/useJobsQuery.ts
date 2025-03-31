@@ -70,7 +70,7 @@ export const useJobsQuery = ({
       try {
         let query = supabase
           .from('jobs')
-          .select('*, companies(*)', { count: 'exact' });
+          .select('*, companies(*)', { count: 'exact' })
           .eq('status', 'active'); // ✅ only fetch active jobs
         
         if (searchQuery) {
