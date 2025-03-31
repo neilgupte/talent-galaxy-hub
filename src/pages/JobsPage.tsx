@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -109,6 +110,7 @@ const JobsPage = () => {
             company_id: 'mock-company',
             salary_min: 30000 + i * 1000,
             salary_max: 60000 + i * 1500,
+            salary_range: `${30000 + i * 1000}-${60000 + i * 1500}`, // Add the missing salary_range property
             employment_type: i % 3 === 0 ? 'full_time' : i % 3 === 1 ? 'part_time' : 'contract',
             onsite_type: i % 3 === 0 ? 'remote' : i % 3 === 1 ? 'onsite' : 'hybrid',
             job_level: i % 3 === 0 ? 'entry' : i % 3 === 1 ? 'mid' : 'senior',
