@@ -8,7 +8,7 @@ const AuthPage = () => {
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">Welcome to TalentHub</h1>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Connect with top companies and find your dream job, or recruit the best talent for your organization.
+          Connect with top companies and find your dream job, or recruit the best talent for your organisation.
         </p>
       </div>
       

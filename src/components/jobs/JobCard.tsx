@@ -52,9 +52,9 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
   
   const formatSalary = (min?: number, max?: number) => {
     if (!min && !max) return 'Salary not specified';
-    if (min && !max) return `$${min.toLocaleString()}+`;
-    if (!min && max) return `Up to $${max.toLocaleString()}`;
-    return `$${min?.toLocaleString()} - $${max?.toLocaleString()}`;
+    if (min && !max) return `£${min.toLocaleString()}+`;
+    if (!min && max) return `Up to £${max.toLocaleString()}`;
+    return `£${min?.toLocaleString()} - £${max?.toLocaleString()}`;
   };
   
   const handleSaveJob = (e: React.MouseEvent) => {
@@ -225,10 +225,21 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
             </span>
           </div>
           
-          <Button size="sm" className="gap-1">
-            {job.hasApplied ? 'View Application' : 'Full Job Details'}
-            <ExternalLink className="h-3 w-3" />
-          </Button>
+          {job.hasApplied ? (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="gap-1 border-primary text-primary hover:bg-primary/10"
+            >
+              View Application
+              <ExternalLink className="h-3 w-3" />
+            </Button>
+          ) : (
+            <Button size="sm" className="gap-1">
+              Full Job Details
+              <ExternalLink className="h-3 w-3" />
+            </Button>
+          )}
         </CardFooter>
       </Link>
     </Card>

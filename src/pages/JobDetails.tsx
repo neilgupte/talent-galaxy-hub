@@ -44,7 +44,7 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
         <li>Develop new user-facing features using React.js</li>
         <li>Build reusable components and front-end libraries for future use</li>
         <li>Translate designs and wireframes into high-quality code</li>
-        <li>Optimize components for maximum performance</li>
+        <li>Optimise components for maximum performance</li>
         <li>Collaborate with the design team to improve user experience</li>
       </ul>
       
@@ -65,7 +65,7 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
         <li>Collaborative and innovative work environment</li>
       </ul>
     `,
-    location: 'New York, NY',
+    location: 'London, UK',
     salaryMin: 100000,
     salaryMax: 130000,
     employmentType: 'full_time',
@@ -85,9 +85,9 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
     endDate: '2023-12-31',
     createdAt: '2023-09-01',
     updatedAt: '2023-09-01',
-    country: 'USA',
-    city: 'New York',
-    currency: 'USD',
+    country: 'UK',
+    city: 'London',
+    currency: 'GBP',
     company: {
       id: '123',
       name: 'Tech Solutions Inc',
@@ -97,7 +97,8 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
       planType: 'premium'
     },
     matchPercentage: 92,
-    hasApplied: false
+    hasApplied: false,
+    applicationId: 'app-123' // This will be set if the user has applied
   };
 };
 
@@ -151,6 +152,12 @@ const JobDetails: React.FC = () => {
     navigate(`/applications/job/${id}/apply`);
   };
   
+  const handleViewApplication = () => {
+    if (job?.applicationId) {
+      navigate(`/applications/${job.applicationId}`);
+    }
+  };
+  
   if (isLoading) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -178,9 +185,9 @@ const JobDetails: React.FC = () => {
   
   const formatSalary = (min?: number, max?: number) => {
     if (!min && !max) return 'Salary not specified';
-    if (min && !max) return `$${min.toLocaleString()}+`;
-    if (!min && max) return `Up to $${max.toLocaleString()}`;
-    return `$${min?.toLocaleString()} - $${max?.toLocaleString()}`;
+    if (min && !max) return `£${min.toLocaleString()}+`;
+    if (!min && max) return `Up to £${max.toLocaleString()}`;
+    return `£${min?.toLocaleString()} - £${max?.toLocaleString()}`;
   };
   
   return (
@@ -278,19 +285,30 @@ const JobDetails: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-muted-foreground">
                       <Clock className="h-4 w-4 mr-2" />
-                      <span>Posted on {new Date(job.createdAt).toLocaleDateString(undefined, { 
+                      <span>Posted on {new Date(job.createdAt).toLocaleDateString('en-GB', { 
                         year: 'numeric', month: 'long', day: 'numeric' 
                       })}</span>
                     </div>
                   </div>
                   
-                  <Button
-                    onClick={handleApply} 
-                    className="w-full"
-                    size="lg"
-                  >
-                    Apply Now
-                  </Button>
+                  {job.hasApplied ? (
+                    <Button
+                      onClick={handleViewApplication}
+                      className="w-full border-primary text-primary bg-white hover:bg-primary/10 hover:text-primary dark:bg-transparent"
+                      variant="outline"
+                      size="lg"
+                    >
+                      View Application
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleApply} 
+                      className="w-full"
+                      size="lg"
+                    >
+                      Apply Now
+                    </Button>
+                  )}
                   
                   <div className="flex gap-2">
                     <Button
@@ -342,7 +360,7 @@ const JobDetails: React.FC = () => {
                     <Calendar className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     <div>
                       <h3 className="font-medium">Closing Date</h3>
-                      <p className="text-muted-foreground">{new Date(job.endDate).toLocaleDateString(undefined, { 
+                      <p className="text-muted-foreground">{new Date(job.endDate).toLocaleDateString('en-GB', { 
                         year: 'numeric', month: 'long', day: 'numeric' 
                       })}</p>
                     </div>

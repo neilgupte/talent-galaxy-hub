@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Linkedin, Eye, EyeOff, Check, X } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
@@ -22,6 +22,7 @@ const COMMON_PASSWORDS = [
 const AuthForm = () => {
   const { login, register, continueWithGoogle, continueWithLinkedIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   
   // Login form state
@@ -33,10 +34,8 @@ const AuthForm = () => {
   const [registerName, setRegisterName] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
-  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
-  const [registerRole, setRegisterRole] = useState<UserRole>('job_seeker');
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [registerRole, setRegisterRole] = useState<UserRole>('job_seeker');
   
   // Password validation state
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -44,6 +43,9 @@ const AuthForm = () => {
   
   // Error state
   const [error, setError] = useState<string | null>(null);
+
+  // Get redirect path from location state
+  const redirectTo = location.state?.redirectTo || '/';
 
   // Password validation function
   useEffect(() => {
@@ -130,7 +132,8 @@ const AuthForm = () => {
     
     try {
       await login(loginEmail, loginPassword);
-      // Navigation will be handled by the auth state change in AuthContext
+      // After successful login, navigate to the redirect URL
+      navigate(redirectTo);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -143,11 +146,6 @@ const AuthForm = () => {
     setError(null);
     
     // Validation
-    if (registerPassword !== registerConfirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    
     if (passwordErrors.length > 0) {
       setError('Please fix all password requirements before continuing');
       return;
@@ -157,7 +155,7 @@ const AuthForm = () => {
     
     try {
       await register(registerName, registerEmail, registerPassword, registerRole);
-      // Navigation will be handled by the register function in AuthContext
+      // Redirect will be handled by the auth state change in AuthContext
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
@@ -187,14 +185,14 @@ const AuthForm = () => {
     <Card className="w-full max-w-md mx-auto">
       <Tabs defaultValue="login">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="register">Register</TabsTrigger>
+          <TabsTrigger value="login">Sign In</TabsTrigger>
+          <TabsTrigger value="register">Create Account</TabsTrigger>
         </TabsList>
         
         <TabsContent value="login">
           <form onSubmit={handleLogin}>
             <CardHeader>
-              <CardTitle>Login to Your Account</CardTitle>
+              <CardTitle>Sign In</CardTitle>
               <CardDescription>
                 Enter your credentials to access your account
               </CardDescription>
@@ -247,7 +245,7 @@ const AuthForm = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? 'Signing in...' : 'Sign In'}
               </Button>
 
               <div className="relative my-4">
@@ -408,31 +406,6 @@ const AuthForm = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    value={registerConfirmPassword}
-                    onChange={e => setRegisterConfirmPassword(e.target.value)}
-                    required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-                {registerPassword && registerConfirmPassword && registerPassword !== registerConfirmPassword && (
-                  <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
                 <Label>I am a:</Label>
                 <RadioGroup value={registerRole} onValueChange={value => setRegisterRole(value as UserRole)}>
                   <div className="flex items-center space-x-2">
@@ -449,7 +422,7 @@ const AuthForm = () => {
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isLoading || passwordErrors.length > 0 || registerPassword !== registerConfirmPassword}
+                disabled={isLoading || passwordErrors.length > 0}
               >
                 {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>

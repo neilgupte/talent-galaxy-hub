@@ -20,6 +20,7 @@ import ProfileForm from "@/components/profile/ProfileForm";
 import JobPostFormWrapper from "@/components/jobs/JobPostFormWrapper";
 import JobDetails from "@/pages/JobDetails";
 import ApplicationDetails from "@/pages/ApplicationDetails";
+import ViewApplicationPage from "@/pages/ViewApplicationPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import JobApplicationForm from "@/components/applications/JobApplicationForm";
 import JobApplicationSuccess from "@/pages/JobApplicationSuccess";
@@ -114,7 +115,7 @@ const App = () => (
                     path="/applications/:id" 
                     element={
                       <ProtectedRoute requiredRole="job_seeker">
-                        <ApplicationDetails />
+                        <ViewApplicationPage />
                       </ProtectedRoute>
                     } 
                   />
