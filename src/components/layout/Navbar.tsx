@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
@@ -25,21 +24,13 @@ const Navbar = () => {
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const navigate = useNavigate();
 
-  console.log("Navbar: Rendering with auth state:", { 
-    isAuthenticated, 
-    userRole: user?.role,
-    isLoading: authState.isLoading 
-  });
-
   const handleLogout = async () => {
-    console.log("Navbar: Logging out user");
     await logout();
   };
 
   const handleSearch = (query: string, parsedQuery?: { title: string; location: string }) => {
     let searchUrl = `/jobs?query=${encodeURIComponent(query)}`;
     
-    // If we have parsed title and location, add them to the query
     if (parsedQuery && parsedQuery.title && parsedQuery.location) {
       searchUrl = `/jobs?query=${encodeURIComponent(query)}&title=${encodeURIComponent(parsedQuery.title)}&location=${encodeURIComponent(parsedQuery.location)}`;
     }
@@ -48,13 +39,13 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center">
+    <header className="w-full border-b bg-white">
+      <div className="container mx-auto flex h-16 items-center px-4">
         <div className="mr-4 flex">
           <Link to="/" className="flex items-center space-x-2">
-            <Briefcase className="h-6 w-6 text-primary" />
-            <span className="font-bold text-2xl text-primary">Talent</span>
-            <span className="font-light text-2xl">Hub</span>
+            <Briefcase className="h-6 w-6 text-blue-600" />
+            <span className="font-bold text-2xl text-blue-600">Talent</span>
+            <span className="font-normal text-2xl text-gray-800">Hub</span>
           </Link>
         </div>
         
@@ -67,11 +58,9 @@ const Navbar = () => {
           />
         </div>
         
-        <div className="flex items-center justify-end space-x-2 sm:space-x-4">
-          {/* User is authenticated */}
+        <div className="flex items-center justify-end space-x-4">
           {isAuthenticated ? (
             <>
-              {/* Notifications */}
               <NotificationCenter 
                 notifications={notifications}
                 onMarkAsRead={markAsRead}
@@ -79,7 +68,6 @@ const Navbar = () => {
                 onDelete={deleteNotification}
               />
               
-              {/* User Menu - Now using Avatar component */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
@@ -163,31 +151,18 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              {/* Login and sign up buttons */}
               <Button variant="ghost" asChild>
                 <Link to="/auth?mode=login">Log in</Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="bg-blue-600 hover:bg-blue-700">
                 <Link to="/auth?mode=signup">Sign up</Link>
               </Button>
-              <Separator orientation="vertical" className="h-6 bg-gray-400 dark:bg-gray-600" />
-              {/* Post a Job button after separator */}
-              <Button asChild variant="outline">
+              <Button asChild className="ml-2">
                 <Link to="/auth?mode=signup&role=employer">Post a Job</Link>
               </Button>
             </>
           )}
         </div>
-      </div>
-      
-      {/* Mobile search - only shown on smaller screens */}
-      <div className="md:hidden px-4 pb-3">
-        <SmartSearchBox 
-          onSearch={handleSearch}
-          placeholder="Search jobs or locations..."
-          className="w-full"
-          required={false}
-        />
       </div>
     </header>
   );

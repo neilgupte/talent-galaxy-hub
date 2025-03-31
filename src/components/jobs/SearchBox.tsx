@@ -8,6 +8,7 @@ interface SearchBoxProps {
   className?: string;
   defaultValue?: string;
   required?: boolean;
+  showHistory?: boolean;
 }
 
 const SearchBox = ({ 
@@ -15,7 +16,8 @@ const SearchBox = ({
   onSearch, 
   className = "", 
   defaultValue = "",
-  required = true
+  required = true,
+  showHistory = true
 }: SearchBoxProps) => {
   const handleSearch = (query: string, parsedQuery?: { title: string; location: string }) => {
     if (query.trim()) {
@@ -30,7 +32,7 @@ const SearchBox = ({
       className={className}
       defaultValue={defaultValue}
       required={required}
-      showHistory={true}
+      showHistory={showHistory}
       showAutocomplete={true}
     />
   );
