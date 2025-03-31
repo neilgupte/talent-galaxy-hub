@@ -1,9 +1,9 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRole, AuthState } from '@/types';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from '@/hooks/use-toast';
+import { mapDatabaseUserToModel, mapDatabaseProfileToModel, mapDatabaseCompanyToModel } from '@/services/auth/authUtils';
 
 type AuthContextType = {
   authState: AuthState;
@@ -96,32 +96,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       // Map the data to our frontend models
-      const user = {
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        role: userData.role as UserRole,
-        createdAt: userData.created_at
-      };
-      
-      const profile = profileData ? {
-        userId: profileData.user_id,
-        headline: profileData.headline || '',
-        bio: profileData.bio || '',
-        location: profileData.location || '',
-        currentTitle: profileData.current_title || '',
-        skills: profileData.skills || [],
-        avatarUrl: profileData.avatar_url
-      } : null;
-      
-      const company = companyData ? {
-        id: companyData.id,
-        name: companyData.name,
-        industry: companyData.industry || '',
-        description: companyData.description || '',
-        logoUrl: companyData.logo_url,
-        planType: companyData.plan_type || 'free'
-      } : null;
+      const user = mapDatabaseUserToModel(userData);
+      const profile = mapDatabaseProfileToModel(profileData);
+      const company = mapDatabaseCompanyToModel(companyData);
       
       console.log("AuthContext: Session refresh complete", { 
         userRole: user.role,
@@ -169,7 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               } else if (userRole === 'employer') {
                 navigate('/dashboard/employer', { replace: true });
               }
-            }, 300);
+            }, 500);
           }
         } else {
           // If no session, clear the auth state

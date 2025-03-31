@@ -19,10 +19,18 @@ const AuthCallback = () => {
         setVerifying(true);
         console.log("Auth callback: Starting verification");
         
-        // Check if there's an access token in the URL (Supabase auth flow)
-        const params = new URLSearchParams(location.hash.substring(1));
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
+        // Get the URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(location.hash.substring(1));
+        
+        // Check if there's an error in the URL
+        if (params.get('error')) {
+          throw new Error(params.get('error_description') || 'Authentication error');
+        }
+        
+        // Check if there's an access token in the URL hash (Supabase auth flow)
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
         
         if (accessToken && refreshToken) {
           console.log("Auth callback: Found tokens in URL, setting session");
@@ -37,7 +45,7 @@ const AuthCallback = () => {
           // Force refresh the session in the auth context
           await refreshSession();
         } else {
-          console.log("Auth callback: No tokens in URL, checking existing session");
+          console.log("Auth callback: No tokens in URL hash, checking existing session");
           // Standard email verification flow
           const { data, error } = await supabase.auth.getSession();
           
