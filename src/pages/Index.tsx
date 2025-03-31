@@ -1,237 +1,110 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
-import { Search, Briefcase, Zap, Award, BarChart, Clock } from 'lucide-react';
-import SmartSearchBox from '@/components/jobs/SmartSearchBox';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Search, Building2, Briefcase, Globe } from 'lucide-react';
+import SearchBox from '@/components/jobs/SearchBox';
 import FeaturedJobs from '@/components/jobs/FeaturedJobs';
+import FetchAllJobsTestButton from '@/components/jobs/FetchAllJobsTestButton';
 
 const Index = () => {
-  const { authState } = useAuth();
-  const { isAuthenticated, user } = authState;
-  const navigate = useNavigate();
-  
-  const features = [
-    {
-      icon: <Search className="h-10 w-10 text-primary mb-4" />,
-      title: 'Smart Job Matching',
-      description: 'Our AI-powered matching algorithm connects you with jobs that fit your skills and experience.'
-    },
-    {
-      icon: <Briefcase className="h-10 w-10 text-primary mb-4" />,
-      title: 'Streamlined Applications',
-      description: 'Apply to multiple jobs with your profile and track your application status in real-time.'
-    },
-    {
-      icon: <Zap className="h-10 w-10 text-primary mb-4" />,
-      title: 'AI Feedback & Scoring',
-      description: 'Get personalized feedback on your applications to improve your chances of landing interviews.'
-    },
-    {
-      icon: <Award className="h-10 w-10 text-primary mb-4" />,
-      title: 'Top Talent Pool',
-      description: 'Employers can search our pool of qualified candidates and reach out directly.'
-    },
-    {
-      icon: <BarChart className="h-10 w-10 text-primary mb-4" />,
-      title: 'Detailed Analytics',
-      description: 'Track your job search performance and see how you compare to other applicants.'
-    },
-    {
-      icon: <Clock className="h-10 w-10 text-primary mb-4" />,
-      title: 'Time-Saving Tools',
-      description: 'Save time with one-click applications for jobs that match your profile.'
-    }
-  ];
-  
-  const getDashboardLink = () => {
-    if (!isAuthenticated) return '/auth';
-    
-    return user?.role === 'job_seeker' 
-      ? '/dashboard/job-seeker' 
-      : '/dashboard/employer';
-  };
-
-  const handleSearch = (query: string, parsedQuery?: { title: string; location: string }) => {
-    let searchUrl = `/jobs?query=${encodeURIComponent(query)}`;
-    
-    if (parsedQuery && parsedQuery.title && parsedQuery.location) {
-      searchUrl = `/jobs?query=${encodeURIComponent(query)}&title=${encodeURIComponent(parsedQuery.title)}&location=${encodeURIComponent(parsedQuery.location)}`;
-    }
-    
-    navigate(searchUrl);
-  };
-
   return (
-    <div className="min-h-screen">
+    <div>
       {/* Hero Section */}
-      <section className="bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 py-16 md:py-24">
+      <section className="bg-gradient-to-r from-blue-100 to-blue-300 py-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Finally, a Job Platform That Respects Your Time.
+          <h1 className="text-5xl font-bold text-blue-800 mb-8">
+            Find Your Dream Job Today
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            No more endless applications or ghosting — just smart matches, real feedback, and better outcomes for everyone.
+          <p className="text-xl text-blue-600 mb-12">
+            Explore thousands of job opportunities in various industries and locations.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button asChild size="lg" className="text-lg py-6">
-              <Link to={getDashboardLink()}>
-                {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="text-lg py-6">
-              <Link to="/jobs">
-                Browse Jobs
-              </Link>
-            </Button>
-          </div>
-          
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
-            <SmartSearchBox
-              onSearch={handleSearch}
-              placeholder="Job title, keywords, or location..."
-              className="w-full"
-              showHistory={true}
-              showAutocomplete={true}
-            />
+          <div className="flex justify-center">
+            <Link to="/jobs">
+              <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                Get Started <Search className="ml-2" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
+
+      {/* Search Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+            Search for Jobs
+          </h2>
+          <SearchBox />
+        </div>
+      </section>
       
-      {/* Featured Jobs Section */}
       <FeaturedJobs />
       
-      {/* Features Section */}
-      <section className="py-16 md:py-24 bg-white dark:bg-gray-950">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Intelligent Job Matching Platform
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our AI-powered platform connects the right talent with the right opportunities
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="p-6 border rounded-lg hover:shadow-md transition-shadow">
-                <div className="text-center">
-                  {feature.icon}
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Add testing button - only visible in development */}
+      {import.meta.env.DEV && (
+        <div className="container mx-auto px-4 my-8">
+          <FetchAllJobsTestButton />
         </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Transform Your Job Search?
+      )}
+
+      {/* Categories Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+            Browse by Category
           </h2>
-          <p className="text-xl opacity-90 max-w-2xl mx-auto mb-10">
-            Join thousands of job seekers and employers already using our platform
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Example Category */}
+            <Link to="/jobs?category=engineering" className="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
+              <div className="flex items-center mb-4">
+                <Building2 className="text-blue-500 mr-4" />
+                <h3 className="text-xl font-semibold text-gray-700">Engineering</h3>
+              </div>
+              <p className="text-gray-600">Explore engineering jobs in software, hardware, and more.</p>
+              <Badge className="mt-4 bg-blue-100 text-blue-700 border-none">245 Jobs</Badge>
+            </Link>
+
+            {/* Example Category */}
+            <Link to="/jobs?category=marketing" className="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
+              <div className="flex items-center mb-4">
+                <Briefcase className="text-green-500 mr-4" />
+                <h3 className="text-xl font-semibold text-gray-700">Marketing</h3>
+              </div>
+              <p className="text-gray-600">Find marketing positions in digital, content, and brand marketing.</p>
+              <Badge className="mt-4 bg-green-100 text-green-700 border-none">189 Jobs</Badge>
+            </Link>
+
+            {/* Example Category */}
+            <Link to="/jobs?category=remote" className="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition duration-300">
+              <div className="flex items-center mb-4">
+                <Globe className="text-purple-500 mr-4" />
+                <h3 className="text-xl font-semibold text-gray-700">Remote</h3>
+              </div>
+              <p className="text-gray-600">Discover remote job opportunities from around the world.</p>
+              <Badge className="mt-4 bg-purple-100 text-purple-700 border-none">322 Jobs</Badge>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="bg-blue-100 py-24">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-blue-800 mb-8">
+            Ready to Take the Next Step?
+          </h2>
+          <p className="text-xl text-blue-600 mb-12">
+            Create an account and start applying for jobs today.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" variant="secondary" className="text-lg py-6">
-              <Link to="/auth">Create Account</Link>
+          <Link to="/auth">
+            <Button className="bg-blue-600 text-white hover:bg-blue-700">
+              Sign Up Now
             </Button>
-            <Button asChild size="lg" variant="outline" className="text-lg py-6 border-primary-foreground hover:bg-primary-foreground hover:text-primary">
-              <Link to="/jobs">Browse Jobs</Link>
-            </Button>
-          </div>
+          </Link>
         </div>
       </section>
-      
-      {/* Stats Section */}
-      <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Trusted by Job Seekers and Employers
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our platform is making a difference in the hiring process
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <p className="text-4xl md:text-5xl font-bold text-primary mb-2">5k+</p>
-              <p className="text-lg text-muted-foreground">Active Jobs</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl md:text-5xl font-bold text-primary mb-2">2k+</p>
-              <p className="text-lg text-muted-foreground">Companies</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl md:text-5xl font-bold text-primary mb-2">10k+</p>
-              <p className="text-lg text-muted-foreground">Job Seekers</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl md:text-5xl font-bold text-primary mb-2">85%</p>
-              <p className="text-lg text-muted-foreground">Match Rate</p>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer className="bg-gray-100 dark:bg-gray-950 py-12">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between">
-            <div className="mb-8 md:mb-0">
-              <div className="flex items-center">
-                <Briefcase className="h-8 w-8 text-primary" />
-                <span className="ml-2 text-xl font-bold">Talent Hub</span>
-              </div>
-              <p className="mt-2 text-muted-foreground max-w-md">
-                Connecting talent with opportunity through intelligent job matching
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-              <div>
-                <h3 className="font-semibold mb-4">For Job Seekers</h3>
-                <ul className="space-y-2">
-                  <li><Link to="/jobs" className="text-muted-foreground hover:text-primary">Browse Jobs</Link></li>
-                  <li><Link to="/auth" className="text-muted-foreground hover:text-primary">Create Profile</Link></li>
-                  <li><Link to="/resources" className="text-muted-foreground hover:text-primary">Career Resources</Link></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-4">For Employers</h3>
-                <ul className="space-y-2">
-                  <li><Link to="/jobs/post" className="text-muted-foreground hover:text-primary">Post a Job</Link></li>
-                  <li><Link to="/talent" className="text-muted-foreground hover:text-primary">Search Talent</Link></li>
-                  <li><Link to="/pricing" className="text-muted-foreground hover:text-primary">Pricing</Link></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold mb-4">Company</h3>
-                <ul className="space-y-2">
-                  <li><Link to="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
-                  <li><Link to="/contact" className="text-muted-foreground hover:text-primary">Contact</Link></li>
-                  <li><Link to="/privacy" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t mt-12 pt-8 text-center">
-            <p className="text-muted-foreground">
-              &copy; {new Date().getFullYear()} Talent Hub. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };
