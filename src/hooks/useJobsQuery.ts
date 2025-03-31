@@ -19,7 +19,7 @@ interface UseJobsQueryProps {
   selectedFilters: JobFilters;
   sortBy: 'date' | 'salary';
   jobsPerPage: number;
-  fetchAllJobs?: boolean; // New parameter to fetch all jobs without filters
+  fetchAllJobs?: boolean; // Parameter to fetch all jobs without filters
 }
 
 export const useJobsQuery = ({
@@ -28,7 +28,7 @@ export const useJobsQuery = ({
   selectedFilters,
   sortBy,
   jobsPerPage,
-  fetchAllJobs = false // Default to false to maintain backwards compatibility
+  fetchAllJobs = false
 }: UseJobsQueryProps) => {
   return useQuery({
     queryKey: ['jobs', currentPage, searchQuery, selectedFilters, sortBy, fetchAllJobs],
@@ -109,5 +109,6 @@ export const useJobsQuery = ({
       }
     },
     staleTime: 1000 * 30, // 30 seconds stale time
+    retry: 2, // Add retry logic in case of network issues
   });
 };
