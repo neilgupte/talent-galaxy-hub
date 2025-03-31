@@ -27,7 +27,7 @@ interface PricingPlan {
   currency: string;
   features: PlanFeature[];
   highlighted?: boolean;
-  jobPostings: number;
+  jobPostings: number | string;
   featuredJobs: number;
   candidateSearches: string;
 }
