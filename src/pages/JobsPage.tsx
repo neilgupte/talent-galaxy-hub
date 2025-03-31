@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Job } from '@/types';
-import { useJobsQuery, JobFilters } from '@/hooks/useJobsQuery';
-import JobFilters from '@/components/jobs/JobFilters';
+import { useJobsQuery, JobFilters as JobFiltersType } from '@/hooks/useJobsQuery';
+import JobFiltersComponent from '@/components/jobs/JobFilters';
 import JobSearchBar from '@/components/jobs/JobSearchBar';
 import JobsPageContent from '@/components/jobs/JobsPageContent';
 
@@ -21,7 +21,7 @@ const JobsPage = () => {
   
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [selectedFilters, setSelectedFilters] = useState<JobFilters>({
+  const [selectedFilters, setSelectedFilters] = useState<JobFiltersType>({
     employmentTypes: [],
     jobLevels: [],
     onsiteTypes: [],
@@ -56,7 +56,7 @@ const JobsPage = () => {
     setCurrentPage(1);
   };
   
-  const handleFilterChange = (newFilters: JobFilters) => {
+  const handleFilterChange = (newFilters: JobFiltersType) => {
     setSelectedFilters(newFilters);
     setCurrentPage(1);
   };
@@ -79,7 +79,7 @@ const JobsPage = () => {
       
       <div className="flex flex-col lg:flex-row gap-6">
         <div className="w-full lg:w-72">
-          <JobFilters 
+          <JobFiltersComponent 
             filters={selectedFilters}
             onChange={handleFilterChange}
           />
