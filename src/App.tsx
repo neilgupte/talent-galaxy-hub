@@ -5,7 +5,8 @@ import { ThemeProvider } from "./components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
-import Index from './pages/Index'; // Updated import statement
+import { QueryProvider } from './providers/QueryProvider';
+import Index from './pages/Index'; 
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
 import JobsPage from './pages/JobDetails';
@@ -29,46 +30,48 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <NotificationProvider>
-          <ThemeProvider defaultTheme="light" storageKey="talenthub-theme">
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-1">
-                <Routes>
-                  {/* Landing Page */}
-                  <Route path="/" element={<Index />} />
-                  
-                  {/* Auth Routes */}
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/auth/callback" element={<AuthCallback />} />
+          <QueryProvider>
+            <ThemeProvider defaultTheme="light" storageKey="talenthub-theme">
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1">
+                  <Routes>
+                    {/* Landing Page */}
+                    <Route path="/" element={<Index />} />
+                    
+                    {/* Auth Routes */}
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
 
-                  {/* Job Routes */}
-                  <Route path="/jobs" element={<JobsPage />} />
-                  <Route path="/jobs/:id" element={<JobDetailsPage />} />
-                  <Route path="/jobs/post" element={<PostJobPage />} />
+                    {/* Job Routes */}
+                    <Route path="/jobs" element={<JobsPage />} />
+                    <Route path="/jobs/:id" element={<JobDetailsPage />} />
+                    <Route path="/jobs/post" element={<PostJobPage />} />
 
-                  {/* Application Routes */}
-                  <Route path="/apply/:id" element={<JobApplicationForm />} />
-                  <Route path="/applications/:id" element={<ViewApplicationPage />} />
-                  <Route path="/applications/history" element={<ApplicationsPage />} />
-                  <Route path="/application/:id" element={<ApplicationDetails />} />
-                  <Route path="/application/success/:id" element={<JobApplicationSuccess />} />
+                    {/* Application Routes */}
+                    <Route path="/apply/:id" element={<JobApplicationForm />} />
+                    <Route path="/applications/:id" element={<ViewApplicationPage />} />
+                    <Route path="/applications/history" element={<ApplicationsPage />} />
+                    <Route path="/application/:id" element={<ApplicationDetails />} />
+                    <Route path="/application/success/:id" element={<JobApplicationSuccess />} />
 
-                  {/* Pricing */}
-                  <Route path="/pricing" element={<PricingPage />} />
+                    {/* Pricing */}
+                    <Route path="/pricing" element={<PricingPage />} />
 
-                  {/* Dashboard Routes */}
-                  <Route path="/dashboard/employer" element={<EmployerDashboard />} />
-                  <Route path="/dashboard/job-seeker" element={<JobSeekerDashboard />} />
+                    {/* Dashboard Routes */}
+                    <Route path="/dashboard/employer" element={<EmployerDashboard />} />
+                    <Route path="/dashboard/job-seeker" element={<JobSeekerDashboard />} />
 
-                  {/* Profile Routes */}
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/saved-jobs" element={<SavedJobsPage />} />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
-            <Toaster />
-          </ThemeProvider>
+                    {/* Profile Routes */}
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/saved-jobs" element={<SavedJobsPage />} />
+                  </Routes>
+                </main>
+                <Footer />
+              </div>
+              <Toaster />
+            </ThemeProvider>
+          </QueryProvider>
         </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
