@@ -5,7 +5,7 @@ import { ThemeProvider } from "./components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
-import { Index as LandingPage } from './pages/Index';
+import Index from './pages/Index'; // Updated import statement
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
 import JobsPage from './pages/JobDetails';
@@ -35,7 +35,7 @@ function App() {
               <main className="flex-1">
                 <Routes>
                   {/* Landing Page */}
-                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/" element={<Index />} />
                   
                   {/* Auth Routes */}
                   <Route path="/auth" element={<AuthPage />} />
