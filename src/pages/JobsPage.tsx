@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -95,10 +94,8 @@ const JobsPage = () => {
           throw error;
         }
         
-        // Debug log to see what data we're getting back
         console.log(`Fetched ${data?.length || 0} jobs out of ${count || 0} total`);
         
-        // Create mock data if we don't have real data for testing purposes
         let jobsData = data || [];
         if (!jobsData || jobsData.length === 0) {
           console.log('No real data found, generating mock data for testing');
@@ -110,7 +107,7 @@ const JobsPage = () => {
             company_id: 'mock-company',
             salary_min: 30000 + i * 1000,
             salary_max: 60000 + i * 1500,
-            salary_range: `${30000 + i * 1000}-${60000 + i * 1500}`, // Add the missing salary_range property
+            salary_range: `${30000 + i * 1000}-${60000 + i * 1500}`,
             employment_type: i % 3 === 0 ? 'full_time' : i % 3 === 1 ? 'part_time' : 'contract',
             onsite_type: i % 3 === 0 ? 'remote' : i % 3 === 1 ? 'onsite' : 'hybrid',
             job_level: i % 3 === 0 ? 'entry' : i % 3 === 1 ? 'mid' : 'senior',
@@ -130,7 +127,8 @@ const JobsPage = () => {
               logo_url: '/placeholder.svg',
               industry: 'Technology',
               description: 'A leading technology company',
-              plan_type: 'premium'
+              plan_type: 'premium',
+              created_at: new Date().toISOString()
             }
           }));
         }
