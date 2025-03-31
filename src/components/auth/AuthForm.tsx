@@ -138,13 +138,13 @@ const AuthForm = () => {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Sign In</TabsTrigger>
           <TabsTrigger value="register">Create Account</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="login">
+        <TabsContent value="login" className="m-0">
           <CardHeader>
             <CardTitle>Sign In</CardTitle>
             <CardDescription>
@@ -164,7 +164,7 @@ const AuthForm = () => {
           />
         </TabsContent>
         
-        <TabsContent value="register">
+        <TabsContent value="register" className="m-0">
           <CardHeader>
             <CardTitle>Create an Account</CardTitle>
             <CardDescription>

@@ -22,18 +22,6 @@ const AuthPage = () => {
     }
   }, [authState, navigate]);
 
-  if (authState.isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-12 flex flex-col items-center">
-        <div className="animate-pulse">
-          <div className="h-8 w-64 bg-gray-200 rounded mb-4"></div>
-          <div className="h-4 w-96 bg-gray-200 rounded mb-8"></div>
-          <div className="h-96 w-full max-w-md bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="container mx-auto px-4 py-12 flex flex-col items-center">
       <div className="text-center mb-8">

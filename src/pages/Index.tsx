@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { Search, Briefcase, Zap, Award, BarChart, Clock } from 'lucide-react';
 import SmartSearchBox from '@/components/jobs/SmartSearchBox';
+import FeaturedJobs from '@/components/jobs/FeaturedJobs';
 
 const Index = () => {
   const { authState } = useAuth();
@@ -97,6 +98,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      {/* Featured Jobs Section */}
+      <FeaturedJobs />
       
       {/* Features Section */}
       <section className="py-16 md:py-24 bg-white dark:bg-gray-950">
