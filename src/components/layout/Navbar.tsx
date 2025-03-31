@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -46,7 +47,7 @@ const Navbar = () => {
           
           <div className="hidden md:flex relative max-w-md">
             <SearchBox
-              placeholder="UX Designer"
+              placeholder="UX Designer, Software Engineer, etc."
               onSearch={handleSearch}
               className="w-64 md:w-80"
               showHistory={true}
