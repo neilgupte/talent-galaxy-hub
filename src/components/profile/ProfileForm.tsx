@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,9 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Profile } from '@/types';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ContactPreference, JobSeekerStatus, Profile } from '@/types';
 import { useToast } from "@/components/ui/use-toast";
 import { CheckCircle, Plus, Upload, X } from 'lucide-react';
 
@@ -27,6 +29,7 @@ const ProfileForm = () => {
   const { user, profile } = authState;
   const navigate = useNavigate();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<Partial<Profile>>({
     userId: user?.id || '',
@@ -35,18 +38,45 @@ const ProfileForm = () => {
     location: profile?.location || '',
     currentTitle: profile?.currentTitle || '',
     skills: profile?.skills || [],
-    avatarUrl: profile?.avatarUrl || ''
+    avatarUrl: profile?.avatarUrl || '',
+    phone: profile?.phone || '',
+    contactPreference: profile?.contactPreference || 'email',
+    jobSeekerStatus: profile?.jobSeekerStatus || 'actively_seeking',
   });
   
   const [newSkill, setNewSkill] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(formData.avatarUrl || null);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value
+    });
+  };
+  
+  const handleContactPreferenceChange = (value: string[]) => {
+    let preference: ContactPreference = 'email';
+    
+    if (value.includes('email') && value.includes('phone')) {
+      preference = 'both';
+    } else if (value.includes('phone')) {
+      preference = 'phone';
+    }
+    
+    setFormData({
+      ...formData,
+      contactPreference: preference
+    });
+  };
+
+  const handleStatusChange = (value: JobSeekerStatus) => {
+    setFormData({
+      ...formData,
+      jobSeekerStatus: value
     });
   };
   
@@ -65,6 +95,36 @@ const ProfileForm = () => {
       ...formData,
       skills: formData.skills?.filter(skill => skill !== skillToRemove) || []
     });
+  };
+  
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setUploadingPhoto(true);
+      
+      // Create a preview URL for the image
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
+      
+      // In a real app, you would upload the file to a server here
+      // For this demo, we'll simulate a file upload
+      setTimeout(() => {
+        setFormData({
+          ...formData,
+          avatarUrl: previewUrl
+        });
+        setUploadingPhoto(false);
+        
+        toast({
+          title: "Photo updated",
+          description: "Your profile photo has been updated"
+        });
+      }, 1000);
+    }
   };
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +158,7 @@ const ProfileForm = () => {
   
   const calculateProfileCompleteness = (): number => {
     let completed = 0;
-    let total = 6; // Total number of fields we're checking
+    let total = 9; // Total number of fields we're checking
     
     if (formData.headline) completed++;
     if (formData.bio) completed++;
@@ -106,6 +166,9 @@ const ProfileForm = () => {
     if (formData.currentTitle) completed++;
     if (formData.skills && formData.skills.length > 0) completed++;
     if (formData.avatarUrl) completed++;
+    if (formData.phone) completed++;
+    if (formData.contactPreference) completed++;
+    if (formData.jobSeekerStatus) completed++;
     
     return Math.round((completed / total) * 100);
   };
@@ -181,14 +244,36 @@ const ProfileForm = () => {
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center">
                 <Avatar className="h-24 w-24 mb-2">
-                  <AvatarImage src={formData.avatarUrl || ''} alt={user?.name} />
+                  <AvatarImage src={previewImage || ''} alt={user?.name} />
                   <AvatarFallback className="text-lg">
                     {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </AvatarFallback>
                 </Avatar>
-                <Button variant="outline" size="sm" type="button">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handlePhotoChange}
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  type="button" 
+                  onClick={handlePhotoClick}
+                  disabled={uploadingPhoto}
+                >
+                  {uploadingPhoto ? (
+                    <>
+                      <Upload className="h-4 w-4 mr-2 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Photo
+                    </>
+                  )}
                 </Button>
               </div>
               
@@ -204,6 +289,17 @@ const ProfileForm = () => {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" value={user?.email || ''} disabled />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    placeholder="e.g. +44 7123 456789"
+                    value={formData.phone || ''}
+                    onChange={handleInputChange}
+                  />
                 </div>
               </div>
             </div>
@@ -243,11 +339,74 @@ const ProfileForm = () => {
                 <Input
                   id="location"
                   name="location"
-                  placeholder="e.g. New York, NY"
+                  placeholder="e.g. London, UK"
                   value={formData.location || ''}
                   onChange={handleInputChange}
                   required
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="jobSeekerStatus">Job Seeking Status</Label>
+                <RadioGroup 
+                  value={formData.jobSeekerStatus}
+                  onValueChange={value => handleStatusChange(value as JobSeekerStatus)}
+                  className="pt-2"
+                >
+                  <div className="flex items-center space-x-2 mb-2">
+                    <RadioGroupItem value="actively_seeking" id="actively_seeking" />
+                    <Label htmlFor="actively_seeking" className="font-normal">
+                      Actively seeking jobs
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 mb-2">
+                    <RadioGroupItem value="employed_but_open" id="employed_but_open" />
+                    <Label htmlFor="employed_but_open" className="font-normal">
+                      Employed but open to opportunities
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="not_open" id="not_open" />
+                    <Label htmlFor="not_open" className="font-normal">
+                      Not open to job offers
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Contact Preferences</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  How should recruiters contact you?
+                </p>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="contact-email" 
+                      checked={formData.contactPreference === 'email' || formData.contactPreference === 'both'} 
+                      onCheckedChange={(checked) => {
+                        const current = formData.contactPreference === 'email' || formData.contactPreference === 'both' ? ['email'] : [];
+                        const phone = formData.contactPreference === 'phone' || formData.contactPreference === 'both' ? ['phone'] : [];
+                        const newValue = checked ? [...phone, 'email'] : phone;
+                        handleContactPreferenceChange(newValue);
+                      }}
+                    />
+                    <Label htmlFor="contact-email" className="font-normal">Email</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="contact-phone" 
+                      checked={formData.contactPreference === 'phone' || formData.contactPreference === 'both'} 
+                      onCheckedChange={(checked) => {
+                        const current = formData.contactPreference === 'phone' || formData.contactPreference === 'both' ? ['phone'] : [];
+                        const email = formData.contactPreference === 'email' || formData.contactPreference === 'both' ? ['email'] : [];
+                        const newValue = checked ? [...email, 'phone'] : email;
+                        handleContactPreferenceChange(newValue);
+                      }}
+                    />
+                    <Label htmlFor="contact-phone" className="font-normal">Phone</Label>
+                  </div>
+                </div>
               </div>
               
               <div className="space-y-2">

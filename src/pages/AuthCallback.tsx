@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const AuthCallback = () => {
-  const { authState } = useAuth();
+  const { authState, refreshSession } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
@@ -31,10 +31,16 @@ const AuthCallback = () => {
           });
           
           if (error) throw error;
+          
+          // Force refresh the session in the auth context
+          await refreshSession();
         } else {
           // Standard email verification flow
           const { error } = await supabase.auth.getSession();
           if (error) throw error;
+          
+          // Force refresh the session in the auth context
+          await refreshSession();
         }
         
         setVerifying(false);
@@ -46,11 +52,12 @@ const AuthCallback = () => {
     };
     
     handleAuthRedirect();
-  }, [location.hash]);
+  }, [location.hash, refreshSession]);
   
   useEffect(() => {
     if (!verifying && !error) {
       if (authState.isAuthenticated) {
+        console.log("Authentication successful, redirecting based on role:", authState.user?.role);
         // Redirect based on user role
         if (authState.user?.role === 'job_seeker') {
           navigate('/dashboard/job-seeker');
@@ -60,6 +67,7 @@ const AuthCallback = () => {
           navigate('/');
         }
       } else if (!authState.isLoading) {
+        console.log("Authentication failed, redirecting to auth page");
         // If authentication failed and not still loading
         navigate('/auth');
       }

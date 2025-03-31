@@ -1,3 +1,4 @@
+
 export type UserRole = 'job_seeker' | 'employer' | 'admin';
 
 export type JobEmploymentType = 'full_time' | 'part_time' | 'contract' | 'temporary' | 'internship' | 'job_share';

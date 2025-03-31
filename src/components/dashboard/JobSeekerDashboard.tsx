@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLocation } from 'react-router-dom';
 import { 
   Card, 
   CardContent, 
@@ -22,8 +23,10 @@ import {
   Heart, 
   Search, 
   Award,
-  BookOpen
+  BookOpen,
+  FileArchive
 } from 'lucide-react';
+import MyCVsTab from './MyCVsTab';
 
 // Mock data
 const mockApplications = [
@@ -78,6 +81,19 @@ const JobSeekerDashboard = () => {
   const { authState } = useAuth();
   const { user, profile } = authState;
   const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const [lastSearchTerm, setLastSearchTerm] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Get the last search term from local storage
+    const savedSearches = localStorage.getItem('recentSearches');
+    if (savedSearches) {
+      const searches = JSON.parse(savedSearches);
+      if (searches.length > 0) {
+        setLastSearchTerm(searches[0]);
+      }
+    }
+  }, []);
   
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
@@ -112,6 +128,13 @@ const JobSeekerDashboard = () => {
     if (percentage >= 60) return 'job-match-badge job-match-medium';
     return 'job-match-badge job-match-low';
   };
+  
+  // Filter applications by status
+  const appliedApplications = mockApplications.filter(app => 
+    app.status === 'pending' || app.status === 'rejected');
+  
+  const inProgressApplications = mockApplications.filter(app => 
+    app.status === 'interview' || app.status === 'under_review' || app.status === 'offered');
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
@@ -119,9 +142,24 @@ const JobSeekerDashboard = () => {
         <h1 className="text-3xl font-bold mb-2">
           {profile?.headline ? profile.headline : 'Your Dashboard'}
         </h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-muted-foreground mb-2">
           {profile?.location ? profile.location : 'Complete your profile to improve your matches'}
         </p>
+        
+        {lastSearchTerm && (
+          <div className="mt-1 mb-4">
+            <Button 
+              variant="outline" 
+              className="flex items-center text-sm" 
+              asChild
+            >
+              <Link to={`/jobs?q=${encodeURIComponent(lastSearchTerm)}`}>
+                <Search className="mr-1 h-4 w-4" />
+                <span>Continue searching for: <span className="font-semibold">{lastSearchTerm}</span></span>
+              </Link>
+            </Button>
+          </div>
+        )}
         
         {!profile && (
           <Card className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950 dark:border-amber-800">
@@ -147,7 +185,7 @@ const JobSeekerDashboard = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full sm:w-auto grid grid-cols-4 sm:inline-flex">
+        <TabsList className="w-full sm:w-auto grid grid-cols-5 sm:inline-flex">
           <TabsTrigger value="overview" className="gap-1 sm:gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
@@ -158,7 +196,11 @@ const JobSeekerDashboard = () => {
           </TabsTrigger>
           <TabsTrigger value="saved" className="gap-1 sm:gap-2">
             <Heart className="h-4 w-4" />
-            <span className="hidden sm:inline">Saved</span>
+            <span className="hidden sm:inline">Saved Jobs</span>
+          </TabsTrigger>
+          <TabsTrigger value="cvs" className="gap-1 sm:gap-2">
+            <FileArchive className="h-4 w-4" />
+            <span className="hidden sm:inline">My CVs</span>
           </TabsTrigger>
           <TabsTrigger value="resources" className="gap-1 sm:gap-2">
             <BookOpen className="h-4 w-4" />
@@ -297,7 +339,12 @@ const JobSeekerDashboard = () => {
                       <div className="text-xs text-muted-foreground">
                         Applied on {new Date(app.appliedDate).toLocaleDateString()}
                       </div>
-                      <Button variant="ghost" size="sm" className="mt-1" asChild>
+                      <Button 
+                        variant={app.status !== 'pending' ? "outline" : "default"} 
+                        size="sm" 
+                        className={app.status !== 'pending' ? "mt-1 border-primary text-primary" : "mt-1"} 
+                        asChild
+                      >
                         <Link to={`/applications/${app.id}`}>View</Link>
                       </Button>
                     </div>
@@ -321,40 +368,93 @@ const JobSeekerDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                {mockApplications.map((app) => (
-                  <div key={app.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 last:border-0 last:pb-0 gap-2">
-                    <div>
-                      <h4 className="font-medium">{app.jobTitle}</h4>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                        <Building className="h-3 w-3" />
-                        <span>{app.companyName}</span>
+              <Tabs defaultValue="in-progress" className="mt-2 mb-6">
+                <TabsList>
+                  <TabsTrigger value="in-progress">In Progress ({inProgressApplications.length})</TabsTrigger>
+                  <TabsTrigger value="applied">Applied ({appliedApplications.length})</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="in-progress" className="mt-4">
+                  <div className="space-y-6">
+                    {inProgressApplications.length > 0 ? (
+                      inProgressApplications.map((app) => (
+                        <div key={app.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 last:border-0 last:pb-0 gap-2">
+                          <div>
+                            <h4 className="font-medium">{app.jobTitle}</h4>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                              <Building className="h-3 w-3" />
+                              <span>{app.companyName}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <span className={`${getStatusBadgeClass(app.status)} text-xs px-2 py-1 rounded-full`}>
+                                {getStatusText(app.status)}
+                              </span>
+                              <span className={getMatchBadgeClass(app.matchPercentage)}>
+                                {app.matchPercentage}% Match
+                              </span>
+                              <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+                                Applied on {new Date(app.appliedDate).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 self-end sm:self-center mt-2 sm:mt-0">
+                            <Button variant="outline" size="sm" className="border-primary text-primary" asChild>
+                              <Link to={`/applications/${app.id}`}>View Application</Link>
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No in-progress applications at the moment.
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <span className={`${getStatusBadgeClass(app.status)} text-xs px-2 py-1 rounded-full`}>
-                          {getStatusText(app.status)}
-                        </span>
-                        <span className={getMatchBadgeClass(app.matchPercentage)}>
-                          {app.matchPercentage}% Match
-                        </span>
-                        <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
-                          Applied on {new Date(app.appliedDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 self-end sm:self-center mt-2 sm:mt-0">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/applications/${app.id}`}>View Details</Link>
-                      </Button>
-                      {app.status === 'rejected' && (
-                        <Button variant="outline" size="sm">
-                          Appeal
-                        </Button>
-                      )}
-                    </div>
+                    )}
                   </div>
-                ))}
-              </div>
+                </TabsContent>
+                
+                <TabsContent value="applied" className="mt-4">
+                  <div className="space-y-6">
+                    {appliedApplications.length > 0 ? (
+                      appliedApplications.map((app) => (
+                        <div key={app.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 last:border-0 last:pb-0 gap-2">
+                          <div>
+                            <h4 className="font-medium">{app.jobTitle}</h4>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                              <Building className="h-3 w-3" />
+                              <span>{app.companyName}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <span className={`${getStatusBadgeClass(app.status)} text-xs px-2 py-1 rounded-full`}>
+                                {getStatusText(app.status)}
+                              </span>
+                              <span className={getMatchBadgeClass(app.matchPercentage)}>
+                                {app.matchPercentage}% Match
+                              </span>
+                              <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+                                Applied on {new Date(app.appliedDate).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 self-end sm:self-center mt-2 sm:mt-0">
+                            <Button variant="outline" size="sm" className="border-primary text-primary" asChild>
+                              <Link to={`/applications/${app.id}`}>View Application</Link>
+                            </Button>
+                            {app.status === 'rejected' && (
+                              <Button variant="outline" size="sm">
+                                Appeal
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No applications in this category.
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
@@ -404,6 +504,10 @@ const JobSeekerDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="cvs">
+          <MyCVsTab />
         </TabsContent>
         
         <TabsContent value="resources">

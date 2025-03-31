@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search, BookmarkCheck } from "lucide-react";
+import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search, BookmarkCheck, FileText } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -109,6 +109,12 @@ const Navbar = () => {
                           <Link to="/saved-jobs">
                             <BookmarkCheck className="mr-2 h-4 w-4" />
                             <span>Saved Jobs</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/profile#cvs">
+                            <FileText className="mr-2 h-4 w-4" />
+                            <span>My CVs</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
