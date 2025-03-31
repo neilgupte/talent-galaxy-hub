@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useNotifications } from "@/context/NotificationContext";
 import { Button } from "@/components/ui/button";
@@ -23,14 +23,21 @@ const Navbar = () => {
   const { authState, logout } = useAuth();
   const { isAuthenticated, user, profile } = authState;
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const navigate = useNavigate();
+
+  console.log("Navbar: Rendering with auth state:", { 
+    isAuthenticated, 
+    userRole: user?.role,
+    isLoading: authState.isLoading 
+  });
 
   const handleLogout = async () => {
-    console.log("Logging out user");
+    console.log("Navbar: Logging out user");
     await logout();
   };
 
   const handleSearch = (query: string) => {
-    window.location.href = `/jobs?query=${encodeURIComponent(query)}`;
+    navigate(`/jobs?query=${encodeURIComponent(query)}`);
   };
 
   return (

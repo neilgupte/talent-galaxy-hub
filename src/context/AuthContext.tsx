@@ -45,19 +45,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Refresh the user session data
   const refreshSession = async () => {
+    console.log("AuthContext: Refreshing session");
     const newAuthState = await refreshUserSession();
+    console.log("AuthContext: New auth state", newAuthState);
     setAuthState(newAuthState);
+    return newAuthState;
   };
 
   useEffect(() => {
+    console.log("AuthContext: Setting up auth state listener");
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("AuthContext: Auth state changed", event, !!session);
         if (session) {
           // If we have a session, refresh the user data from the database
-          refreshSession();
+          const updatedState = await refreshSession();
+          
+          // If this was a login or signup event, redirect to the appropriate dashboard
+          if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
+            console.log("AuthContext: Redirecting after sign in/up", updatedState.user?.role);
+            if (updatedState.user?.role === 'job_seeker') {
+              navigate('/dashboard/job-seeker', { replace: true });
+            } else if (updatedState.user?.role === 'employer') {
+              navigate('/dashboard/employer', { replace: true });
+            }
+          }
         } else {
           // If no session, clear the auth state
+          console.log("AuthContext: No session, clearing auth state");
           setAuthState({
             user: null,
             profile: null,
@@ -71,29 +87,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("AuthContext: Checking for existing session", !!session);
       if (!session) {
         setAuthState({
           ...defaultAuthState,
           isLoading: false
         });
+      } else {
+        // If we have a session, refresh the user data from the database
+        refreshSession();
       }
     });
 
     return () => {
+      console.log("AuthContext: Cleaning up auth state listener");
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   // Auth methods
   const login = async (email: string, password: string) => {
+    console.log("AuthContext: Login attempt", email);
     await loginWithEmailPassword(email, password);
   };
 
   const register = async (name: string, email: string, password: string, role: UserRole) => {
+    console.log("AuthContext: Register attempt", email, role);
     await registerUser(name, email, password, role);
   };
 
   const logout = () => {
+    console.log("AuthContext: Logout");
     logoutUser(navigate);
     setAuthState({
       user: null,
@@ -125,10 +149,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const continueWithGoogle = async () => {
+    console.log("AuthContext: Google login attempt");
     await continueWithOAuth('google');
   };
 
   const continueWithLinkedIn = async () => {
+    console.log("AuthContext: LinkedIn login attempt");
     await continueWithOAuth('linkedin_oidc');
   };
 

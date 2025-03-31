@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { CardContent } from '@/components/ui/card';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -13,13 +15,43 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit(email, password);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Email required",
+        description: "Please enter a valid email address to reset your password",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setIsResettingPassword(true);
+      await resetPassword(email);
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for instructions to reset your password"
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to send reset email",
+        description: err instanceof Error ? err.message : "An error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResettingPassword(false);
+    }
   };
 
   return (
@@ -40,14 +72,21 @@ const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
             value={email}
             onChange={e => setEmail(e.target.value)}
             required
+            autoComplete="email"
           />
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Button variant="link" className="p-0 h-auto text-xs" type="button">
-              Forgot password?
+            <Button 
+              variant="link" 
+              className="p-0 h-auto text-xs" 
+              type="button"
+              onClick={handleForgotPassword}
+              disabled={isResettingPassword}
+            >
+              {isResettingPassword ? "Sending..." : "Forgot password?"}
             </Button>
           </div>
           <div className="relative">
@@ -57,6 +96,7 @@ const LoginForm = ({ onSubmit, isLoading, error }: LoginFormProps) => {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
             <Button
               type="button"

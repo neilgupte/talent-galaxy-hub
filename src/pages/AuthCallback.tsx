@@ -17,6 +17,7 @@ const AuthCallback = () => {
     const handleAuthRedirect = async () => {
       try {
         setVerifying(true);
+        console.log("Auth callback: Starting verification");
         
         // Check if there's an access token in the URL (Supabase auth flow)
         const params = new URLSearchParams(location.hash.substring(1));
@@ -24,6 +25,7 @@ const AuthCallback = () => {
         const refreshToken = params.get('refresh_token');
         
         if (accessToken && refreshToken) {
+          console.log("Auth callback: Found tokens in URL, setting session");
           // Handle OAuth callback with tokens in URL
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -35,6 +37,7 @@ const AuthCallback = () => {
           // Force refresh the session in the auth context
           await refreshSession();
         } else {
+          console.log("Auth callback: No tokens in URL, checking existing session");
           // Standard email verification flow
           const { error } = await supabase.auth.getSession();
           if (error) throw error;
@@ -60,16 +63,16 @@ const AuthCallback = () => {
         console.log("Authentication successful, redirecting based on role:", authState.user?.role);
         // Redirect based on user role
         if (authState.user?.role === 'job_seeker') {
-          navigate('/dashboard/job-seeker');
+          navigate('/dashboard/job-seeker', { replace: true });
         } else if (authState.user?.role === 'employer') {
-          navigate('/dashboard/employer');
+          navigate('/dashboard/employer', { replace: true });
         } else {
-          navigate('/');
+          navigate('/', { replace: true });
         }
       } else if (!authState.isLoading) {
         console.log("Authentication failed, redirecting to auth page");
         // If authentication failed and not still loading
-        navigate('/auth');
+        navigate('/auth', { replace: true });
       }
     }
   }, [authState, navigate, verifying, error]);
