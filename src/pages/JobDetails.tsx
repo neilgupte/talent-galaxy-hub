@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Briefcase, 
   Building, 
@@ -25,81 +25,157 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Job } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import JobCard from '@/components/jobs/JobCard';
 
-// Mock function to fetch job details - replace with actual API call
+// Function to fetch job details from Supabase
 const fetchJobDetails = async (id: string): Promise<Job> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Return mock data
-  return {
-    id,
-    companyId: '123',
-    title: 'Senior Frontend Developer',
-    description: `
-      <p>We are seeking an experienced Frontend Developer to join our team...</p>
+  try {
+    console.log('Fetching job details for ID:', id);
+    const { data, error } = await supabase
+      .from('jobs')
+      .select('*, companies(*)')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching job details:', error);
+      throw error;
+    }
+
+    if (!data) {
+      throw new Error('Job not found');
+    }
+
+    console.log('Fetched job details:', data);
+    
+    // Map database job to model
+    return {
+      id: data.id,
+      companyId: data.company_id,
+      title: data.title,
+      description: data.description || '',
+      location: data.location || '',
+      salaryMin: data.salary_min || 0,
+      salaryMax: data.salary_max || 0,
+      employmentType: data.employment_type || 'full_time',
+      onsiteType: data.onsite_type || 'onsite',
+      jobLevel: data.job_level || 'entry',
+      requirements: data.requirements ? (typeof data.requirements === 'string' ? data.requirements.split(',').map((item: string) => item.trim()) : data.requirements) : [],
+      status: data.status || 'active',
+      isHighPriority: data.is_high_priority || false,
+      isBoosted: data.is_boosted || false,
+      endDate: data.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: data.created_at,
+      updatedAt: data.updated_at || data.created_at,
+      country: data.country || '',
+      city: data.city || '',
+      currency: data.currency || 'USD',
+      company: data.companies ? {
+        id: data.companies.id,
+        name: data.companies.name,
+        industry: data.companies.industry || '',
+        description: data.companies.description || '',
+        logoUrl: data.companies.logo_url || '/placeholder.svg',
+        planType: data.companies.plan_type || 'free'
+      } : undefined
+    };
+  } catch (error) {
+    console.error('Failed to fetch job details:', error);
+    throw error;
+  }
+};
+
+// Function to fetch similar jobs
+const fetchSimilarJobs = async (currentJobId: string, jobTitle: string, jobLocation: string): Promise<Job[]> => {
+  try {
+    console.log('Fetching similar jobs for:', { jobTitle, jobLocation });
+    
+    // Extract keywords from job title
+    const keywords = jobTitle.split(' ').filter(word => word.length > 3);
+    
+    // Create a query to find jobs with similar titles or in the same location
+    let query = supabase
+      .from('jobs')
+      .select('*, companies(*)')
+      .eq('status', 'active')
+      .neq('id', currentJobId) // Exclude current job
+      .limit(4);
+    
+    // If we have location, prioritize same location
+    if (jobLocation) {
+      query = query.or(`location.ilike.%${jobLocation}%`);
+    }
+    
+    // Add title keywords to search
+    if (keywords.length > 0) {
+      const titleSearch = keywords.map(keyword => `title.ilike.%${keyword}%`).join(',');
+      query = query.or(titleSearch);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching similar jobs:', error);
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      console.log('No similar jobs found, fetching recent jobs instead');
+      // Fall back to recent jobs if no similar jobs found
+      const { data: recentJobs, error: recentError } = await supabase
+        .from('jobs')
+        .select('*, companies(*)')
+        .eq('status', 'active')
+        .neq('id', currentJobId)
+        .order('created_at', { ascending: false })
+        .limit(4);
+        
+      if (recentError) {
+        console.error('Error fetching recent jobs:', recentError);
+        return [];
+      }
       
-      <h3>Responsibilities:</h3>
-      <ul>
-        <li>Develop new user-facing features using React.js</li>
-        <li>Build reusable components and front-end libraries for future use</li>
-        <li>Translate designs and wireframes into high-quality code</li>
-        <li>Optimise components for maximum performance</li>
-        <li>Collaborate with the design team to improve user experience</li>
-      </ul>
-      
-      <h3>Requirements:</h3>
-      <ul>
-        <li>5+ years of experience with React.js</li>
-        <li>Strong proficiency in JavaScript, HTML, and CSS</li>
-        <li>Experience with TypeScript, Redux, and modern frontend frameworks</li>
-        <li>Familiarity with RESTful APIs</li>
-        <li>Understanding of responsive design</li>
-      </ul>
-      
-      <h3>Benefits:</h3>
-      <ul>
-        <li>Competitive salary and benefits package</li>
-        <li>Flexible work schedule and remote options</li>
-        <li>Professional development opportunities</li>
-        <li>Collaborative and innovative work environment</li>
-      </ul>
-    `,
-    location: 'London, UK',
-    salaryMin: 100000,
-    salaryMax: 130000,
-    employmentType: 'full_time',
-    onsiteType: 'hybrid',
-    jobLevel: 'senior',
-    requirements: [
-      'React.js',
-      'TypeScript',
-      'JavaScript',
-      'HTML/CSS',
-      'Redux',
-      'REST APIs'
-    ],
-    status: 'active',
-    isHighPriority: true,
-    isBoosted: false,
-    endDate: '2023-12-31',
-    createdAt: '2023-09-01',
-    updatedAt: '2023-09-01',
-    country: 'UK',
-    city: 'London',
-    currency: 'GBP',
-    company: {
-      id: '123',
-      name: 'Tech Solutions Inc',
-      industry: 'Software Development',
-      description: 'Leading software development company focused on creating innovative solutions.',
-      logoUrl: '/placeholder.svg',
-      planType: 'premium'
-    },
-    matchPercentage: 92,
-    hasApplied: false,
-    applicationId: 'app-123' // This will be set if the user has applied
-  };
+      data = recentJobs || [];
+    }
+    
+    console.log(`Found ${data.length} similar/recent jobs`);
+    
+    // Map database jobs to model
+    return data.map(job => ({
+      id: job.id,
+      companyId: job.company_id,
+      title: job.title,
+      description: job.description || '',
+      location: job.location || '',
+      salaryMin: job.salary_min || 0,
+      salaryMax: job.salary_max || 0,
+      employmentType: job.employment_type || 'full_time',
+      onsiteType: job.onsite_type || 'onsite',
+      jobLevel: job.job_level || 'entry',
+      requirements: job.requirements ? (typeof job.requirements === 'string' ? job.requirements.split(',').map((item: string) => item.trim()) : job.requirements) : [],
+      status: job.status || 'active',
+      isHighPriority: job.is_high_priority || false,
+      isBoosted: job.is_boosted || false,
+      endDate: job.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: job.created_at,
+      updatedAt: job.updated_at || job.created_at,
+      country: job.country || '',
+      city: job.city || '',
+      currency: job.currency || 'USD',
+      company: job.companies ? {
+        id: job.companies.id,
+        name: job.companies.name,
+        industry: job.companies.industry || '',
+        description: job.companies.description || '',
+        logoUrl: job.companies.logo_url || '/placeholder.svg',
+        planType: job.companies.plan_type || 'free'
+      } : undefined
+    }));
+  } catch (error) {
+    console.error('Failed to fetch similar jobs:', error);
+    return [];
+  }
 };
 
 const JobDetails: React.FC = () => {
@@ -113,6 +189,13 @@ const JobDetails: React.FC = () => {
     queryKey: ['job', id],
     queryFn: () => fetchJobDetails(id!),
     enabled: !!id
+  });
+  
+  // Fetch similar jobs once we have the job details
+  const { data: similarJobs = [], isLoading: isSimilarJobsLoading } = useQuery({
+    queryKey: ['similarJobs', id, job?.title, job?.location],
+    queryFn: () => fetchSimilarJobs(id!, job!.title, job!.location),
+    enabled: !!id && !!job,
   });
   
   const handleSaveJob = () => {
@@ -383,6 +466,27 @@ const JobDetails: React.FC = () => {
             </CardContent>
           </Card>
         </div>
+      </div>
+      
+      {/* Similar Jobs Section */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-6">Similar Jobs</h2>
+        
+        {isSimilarJobsLoading ? (
+          <div className="flex justify-center py-8">
+            <p>Loading similar jobs...</p>
+          </div>
+        ) : similarJobs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {similarJobs.map(similarJob => (
+              <JobCard key={similarJob.id} job={similarJob} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No similar jobs found at this time.</p>
+          </div>
+        )}
       </div>
     </div>
   );
