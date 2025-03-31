@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Job, JobEmploymentType, JobOnsiteType, JobLevel } from '@/types';
 import JobFilters from '@/components/jobs/JobFilters';
@@ -11,7 +12,6 @@ import JobList from '@/components/jobs/JobList';
 import JobSearchBar from '@/components/jobs/JobSearchBar';
 import JobListHeader from '@/components/jobs/JobListHeader';
 
-// Jobs per page for pagination - increased to show more jobs per page
 const JOBS_PER_PAGE = 20;
 
 const JobsPage = () => {
@@ -19,7 +19,6 @@ const JobsPage = () => {
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   
-  // Get initial search params from URL
   const initialQuery = queryParams.get('query') || '';
   const initialTitle = queryParams.get('title') || '';
   const initialLocation = queryParams.get('location') || '';
@@ -40,66 +39,51 @@ const JobsPage = () => {
   });
   const [sortBy, setSortBy] = useState<'date' | 'salary'>('date');
   
-  // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchQuery) params.set('query', searchQuery);
     if (currentPage > 1) params.set('page', currentPage.toString());
     
-    // Add other filter params as needed
     navigate({
       pathname: location.pathname,
       search: params.toString()
     }, { replace: true });
   }, [searchQuery, currentPage, navigate, location.pathname]);
   
-  // Fetch jobs with pagination
   const { data, isLoading, error } = useQuery({
     queryKey: ['jobs', currentPage, searchQuery, selectedFilters, sortBy],
     queryFn: async () => {
       console.log('Fetching jobs, page:', currentPage, 'query:', searchQuery);
-      // Calculate range for pagination
       const from = (currentPage - 1) * JOBS_PER_PAGE;
       const to = from + JOBS_PER_PAGE - 1;
       
       try {
-        // Start building the query
         let query = supabase
           .from('jobs')
           .select('*, companies(*)', { count: 'exact' });
         
-        // Uncomment this if you only want to show active jobs
-        // query = query.eq('status', 'active');
-        
-        // Apply search filter if provided
         if (searchQuery) {
           query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
         }
         
-        // Apply employment type filter
         if (selectedFilters.employmentTypes.length > 0) {
           query = query.in('employment_type', selectedFilters.employmentTypes);
         }
         
-        // Apply job level filter
         if (selectedFilters.jobLevels.length > 0) {
           query = query.in('job_level', selectedFilters.jobLevels);
         }
         
-        // Apply onsite type filter
         if (selectedFilters.onsiteTypes.length > 0) {
           query = query.in('onsite_type', selectedFilters.onsiteTypes);
         }
         
-        // Apply sorting
         if (sortBy === 'date') {
           query = query.order('created_at', { ascending: false });
         } else if (sortBy === 'salary') {
-          // This is an imperfect sort as we're using a text field for salary range
           query = query.order('salary_max', { ascending: false });
         }
         
-        // Apply pagination
         query = query.range(from, to);
         
         const { data, error, count } = await query;
@@ -121,10 +105,9 @@ const JobsPage = () => {
         throw err;
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
   
-  // Map database job to frontend model
   const mapDatabaseJobToModel = (job: any): Job => {
     return {
       id: job.id,
@@ -155,18 +138,17 @@ const JobsPage = () => {
     };
   };
   
-  // Calculate total pages
   const totalPages = data ? Math.ceil(data.totalCount / JOBS_PER_PAGE) : 0;
   
   const handleSearch = (query: string) => {
     console.log('Search query:', query);
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
   
   const handleFilterChange = (newFilters: typeof selectedFilters) => {
     setSelectedFilters(newFilters);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1);
   };
   
   const handleSortChange = (sortValue: 'date' | 'salary') => {
@@ -175,14 +157,11 @@ const JobsPage = () => {
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll to top of page
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
-  // Generate pagination items
   const renderPaginationItems = () => {
     if (totalPages <= 7) {
-      // Show all pages if 7 or fewer
       return Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
         <PaginationItem key={page}>
           <PaginationLink 
@@ -194,10 +173,8 @@ const JobsPage = () => {
         </PaginationItem>
       ));
     } else {
-      // Show pages with ellipsis for many pages
       const items = [];
       
-      // Always add first page
       items.push(
         <PaginationItem key="first">
           <PaginationLink 
@@ -209,7 +186,6 @@ const JobsPage = () => {
         </PaginationItem>
       );
       
-      // Add ellipsis if current page is far from start
       if (currentPage > 3) {
         items.push(
           <PaginationItem key="ellipsis1">
@@ -218,7 +194,6 @@ const JobsPage = () => {
         );
       }
       
-      // Add pages around current page
       const startPage = Math.max(2, currentPage - 1);
       const endPage = Math.min(totalPages - 1, currentPage + 1);
       
@@ -235,7 +210,6 @@ const JobsPage = () => {
         );
       }
       
-      // Add ellipsis if current page is far from end
       if (currentPage < totalPages - 2) {
         items.push(
           <PaginationItem key="ellipsis2">
@@ -244,7 +218,6 @@ const JobsPage = () => {
         );
       }
       
-      // Always add last page
       items.push(
         <PaginationItem key="last">
           <PaginationLink 
@@ -269,7 +242,6 @@ const JobsPage = () => {
       </div>
       
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Filters */}
         <div className="w-full lg:w-72">
           <JobFilters 
             filters={selectedFilters}
@@ -277,7 +249,6 @@ const JobsPage = () => {
           />
         </div>
         
-        {/* Results */}
         <div className="flex-1">
           <JobListHeader 
             totalJobs={data?.totalCount || 0}
@@ -311,14 +282,12 @@ const JobsPage = () => {
           ) : (
             <>
               <JobList jobs={data?.jobs || []} />
-              {/* Show debug info */}
               <div className="text-xs text-muted-foreground mt-2">
                 Showing {data?.jobs.length || 0} of {data?.totalCount || 0} jobs
               </div>
             </>
           )}
           
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination className="my-8">
               <PaginationContent>
