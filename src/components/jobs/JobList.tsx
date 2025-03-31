@@ -3,12 +3,15 @@ import React from 'react';
 import { Job } from '@/types';
 import JobCard from '@/components/jobs/JobCard';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface JobListProps {
   jobs: Job[];
 }
 
 const JobList: React.FC<JobListProps> = ({ jobs }) => {
+  const navigate = useNavigate();
+  
   if (!jobs || jobs.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg">
@@ -16,10 +19,16 @@ const JobList: React.FC<JobListProps> = ({ jobs }) => {
         <p className="text-muted-foreground mb-4">
           Try adjusting your search filters or search terms
         </p>
-        <Button onClick={() => window.location.reload()}>Reset Filters</Button>
+        <Button onClick={() => {
+          // Reset the search and filters
+          navigate('/jobs');
+          window.location.reload();
+        }}>Reset Filters</Button>
       </div>
     );
   }
+  
+  console.log(`Rendering ${jobs.length} jobs in JobList component`);
   
   return (
     <div className="space-y-4">

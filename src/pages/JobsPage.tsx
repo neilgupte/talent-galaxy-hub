@@ -1,21 +1,32 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 import { Job, JobEmploymentType, JobOnsiteType, JobLevel } from '@/types';
 import JobFilters from '@/components/jobs/JobFilters';
 import JobList from '@/components/jobs/JobList';
 import JobSearchBar from '@/components/jobs/JobSearchBar';
 import JobListHeader from '@/components/jobs/JobListHeader';
 
-// Jobs per page for pagination
+// Jobs per page for pagination - increased to show more jobs per page
 const JOBS_PER_PAGE = 20;
 
 const JobsPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const queryParams = new URLSearchParams(location.search);
+  
+  // Get initial search params from URL
+  const initialQuery = queryParams.get('query') || '';
+  const initialTitle = queryParams.get('title') || '';
+  const initialLocation = queryParams.get('location') || '';
+  const initialPage = parseInt(queryParams.get('page') || '1', 10);
+  
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedFilters, setSelectedFilters] = useState<{
     employmentTypes: string[];
     jobLevels: string[];
@@ -29,67 +40,88 @@ const JobsPage = () => {
   });
   const [sortBy, setSortBy] = useState<'date' | 'salary'>('date');
   
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('query', searchQuery);
+    if (currentPage > 1) params.set('page', currentPage.toString());
+    
+    // Add other filter params as needed
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    }, { replace: true });
+  }, [searchQuery, currentPage, navigate, location.pathname]);
+  
   // Fetch jobs with pagination
   const { data, isLoading, error } = useQuery({
     queryKey: ['jobs', currentPage, searchQuery, selectedFilters, sortBy],
     queryFn: async () => {
-      console.log('Fetching jobs, page:', currentPage);
+      console.log('Fetching jobs, page:', currentPage, 'query:', searchQuery);
       // Calculate range for pagination
       const from = (currentPage - 1) * JOBS_PER_PAGE;
       const to = from + JOBS_PER_PAGE - 1;
       
-      // Start building the query
-      let query = supabase
-        .from('jobs')
-        .select('*, companies(*)', { count: 'exact' })
-        .eq('status', 'active');
-      
-      // Apply search filter if provided
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+      try {
+        // Start building the query
+        let query = supabase
+          .from('jobs')
+          .select('*, companies(*)', { count: 'exact' });
+        
+        // Uncomment this if you only want to show active jobs
+        // query = query.eq('status', 'active');
+        
+        // Apply search filter if provided
+        if (searchQuery) {
+          query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
+        }
+        
+        // Apply employment type filter
+        if (selectedFilters.employmentTypes.length > 0) {
+          query = query.in('employment_type', selectedFilters.employmentTypes);
+        }
+        
+        // Apply job level filter
+        if (selectedFilters.jobLevels.length > 0) {
+          query = query.in('job_level', selectedFilters.jobLevels);
+        }
+        
+        // Apply onsite type filter
+        if (selectedFilters.onsiteTypes.length > 0) {
+          query = query.in('onsite_type', selectedFilters.onsiteTypes);
+        }
+        
+        // Apply sorting
+        if (sortBy === 'date') {
+          query = query.order('created_at', { ascending: false });
+        } else if (sortBy === 'salary') {
+          // This is an imperfect sort as we're using a text field for salary range
+          query = query.order('salary_max', { ascending: false });
+        }
+        
+        // Apply pagination
+        query = query.range(from, to);
+        
+        const { data, error, count } = await query;
+        
+        if (error) {
+          console.error('Error fetching jobs:', error);
+          toast.error('Failed to fetch jobs. Please try again.');
+          throw error;
+        }
+        
+        console.log(`Fetched ${data.length} jobs out of ${count} total`);
+        
+        return {
+          jobs: data.map(job => mapDatabaseJobToModel(job)),
+          totalCount: count || 0,
+        };
+      } catch (err) {
+        console.error('Exception fetching jobs:', err);
+        throw err;
       }
-      
-      // Apply employment type filter
-      if (selectedFilters.employmentTypes.length > 0) {
-        query = query.in('employment_type', selectedFilters.employmentTypes);
-      }
-      
-      // Apply job level filter
-      if (selectedFilters.jobLevels.length > 0) {
-        query = query.in('job_level', selectedFilters.jobLevels);
-      }
-      
-      // Apply onsite type filter
-      if (selectedFilters.onsiteTypes.length > 0) {
-        query = query.in('onsite_type', selectedFilters.onsiteTypes);
-      }
-      
-      // Apply sorting
-      if (sortBy === 'date') {
-        query = query.order('created_at', { ascending: false });
-      } else if (sortBy === 'salary') {
-        // This is an imperfect sort as we're using a text field for salary range
-        // A better approach would be to have min and max salary as separate numeric fields
-        query = query.order('salary_range', { ascending: false });
-      }
-      
-      // Apply pagination
-      query = query.range(from, to);
-      
-      const { data, error, count } = await query;
-      
-      if (error) {
-        console.error('Error fetching jobs:', error);
-        throw error;
-      }
-      
-      console.log(`Fetched ${data.length} jobs out of ${count} total`);
-      
-      return {
-        jobs: data.map(job => mapDatabaseJobToModel(job)),
-        totalCount: count || 0,
-      };
     },
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
   
   // Map database job to frontend model
@@ -100,12 +132,12 @@ const JobsPage = () => {
       title: job.title,
       description: job.description,
       location: job.location,
-      salaryMin: job.salary_range ? parseInt(job.salary_range.split('-')[0]) : undefined,
-      salaryMax: job.salary_range ? parseInt(job.salary_range.split('-')[1]) : undefined,
+      salaryMin: job.salary_min || parseInt(job.salary_range?.split('-')[0]) || 0,
+      salaryMax: job.salary_max || parseInt(job.salary_range?.split('-')[1]) || 0,
       employmentType: job.employment_type as JobEmploymentType,
       onsiteType: job.onsite_type as JobOnsiteType,
       jobLevel: job.job_level as JobLevel,
-      requirements: job.requirements ? job.requirements.split(',').map((item: string) => item.trim()) : [],
+      requirements: job.requirements ? (typeof job.requirements === 'string' ? job.requirements.split(',').map((item: string) => item.trim()) : job.requirements) : [],
       status: job.status as 'draft' | 'active' | 'expired' | 'closed',
       isHighPriority: job.is_high_priority,
       isBoosted: job.is_boosted,
@@ -127,6 +159,7 @@ const JobsPage = () => {
   const totalPages = data ? Math.ceil(data.totalCount / JOBS_PER_PAGE) : 0;
   
   const handleSearch = (query: string) => {
+    console.log('Search query:', query);
     setSearchQuery(query);
     setCurrentPage(1); // Reset to first page on new search
   };
@@ -273,9 +306,16 @@ const JobsPage = () => {
               <p className="text-muted-foreground mb-4">
                 {error instanceof Error ? error.message : 'An error occurred while loading jobs.'}
               </p>
+              <Button onClick={() => window.location.reload()}>Try Again</Button>
             </div>
           ) : (
-            <JobList jobs={data?.jobs || []} />
+            <>
+              <JobList jobs={data?.jobs || []} />
+              {/* Show debug info */}
+              <div className="text-xs text-muted-foreground mt-2">
+                Showing {data?.jobs.length || 0} of {data?.totalCount || 0} jobs
+              </div>
+            </>
           )}
           
           {/* Pagination */}
