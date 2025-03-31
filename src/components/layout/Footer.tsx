@@ -5,61 +5,50 @@ import { Briefcase } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-      <div className="container mx-auto py-8 px-4 md:px-6">
+    <footer className="bg-white border-t border-gray-200">
+      <div className="container mx-auto py-12 px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold flex items-center">
-              <Briefcase className="h-5 w-5 text-primary mr-2" />
-              <span className="font-bold text-primary">Talent</span>
-              <span className="font-light">Hub</span>
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Matching the best talent with the perfect job opportunities through our intelligent platform.
+            <Link to="/" className="flex items-center">
+              <Briefcase className="h-6 w-6 text-blue-600 mr-2" />
+              <span className="font-bold text-xl text-blue-600">Talent</span>
+              <span className="font-normal text-xl text-gray-800">Hub</span>
+            </Link>
+            <p className="text-sm text-gray-600">
+              Connecting talent with opportunity through intelligent job matching
             </p>
           </div>
           
           <div>
             <h4 className="font-medium mb-4">For Job Seekers</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/jobs" className="hover:underline">Browse Jobs</Link></li>
-              <li><Link to="/dashboard/job-seeker" className="hover:underline">Your Dashboard</Link></li>
-              <li><Link to="/profile" className="hover:underline">Build Profile</Link></li>
-              <li><Link to="/saved-jobs" className="hover:underline">Saved Jobs</Link></li>
-              <li><Link to="/applications/history" className="hover:underline">Applications</Link></li>
+              <li><Link to="/jobs" className="text-gray-600 hover:text-blue-600">Browse Jobs</Link></li>
+              <li><Link to="/profile" className="text-gray-600 hover:text-blue-600">Create Profile</Link></li>
+              <li><Link to="/dashboard/job-seeker" className="text-gray-600 hover:text-blue-600">Career Resources</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="font-medium mb-4">For Employers</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/dashboard/employer" className="hover:underline">Employer Dashboard</Link></li>
-              <li><Link to="/jobs/post" className="hover:underline">Post a Job</Link></li>
-              <li><Link to="/pricing" className="hover:underline">Pricing</Link></li>
-              <li><Link to="/companies" className="hover:underline">Companies</Link></li>
+              <li><Link to="/jobs/post" className="text-gray-600 hover:text-blue-600">Post a Job</Link></li>
+              <li><Link to="/companies" className="text-gray-600 hover:text-blue-600">Search Talent</Link></li>
+              <li><Link to="/pricing" className="text-gray-600 hover:text-blue-600">Pricing</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-medium mb-4">Resources</h4>
+            <h4 className="font-medium mb-4">Company</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/about" className="hover:underline">About Us</Link></li>
-              <li><Link to="/contact" className="hover:underline">Contact</Link></li>
-              <li><Link to="/faq" className="hover:underline">FAQ</Link></li>
-              <li><Link to="/privacy" className="hover:underline">Privacy Policy</Link></li>
-              <li><Link to="/terms" className="hover:underline">Terms of Service</Link></li>
+              <li><Link to="/about" className="text-gray-600 hover:text-blue-600">About Us</Link></li>
+              <li><Link to="/contact" className="text-gray-600 hover:text-blue-600">Contact</Link></li>
+              <li><Link to="/privacy" className="text-gray-600 hover:text-blue-600">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
         
-        <div className="flex flex-col md:flex-row justify-between items-center mt-12 pt-6 border-t border-gray-200 dark:border-gray-800 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Talent Hub. All rights reserved.</p>
-          <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" className="hover:text-primary">Twitter</a>
-            <a href="#" className="hover:text-primary">LinkedIn</a>
-            <a href="#" className="hover:text-primary">Facebook</a>
-            <a href="#" className="hover:text-primary">Instagram</a>
-          </div>
+        <div className="mt-12 pt-8 border-t border-gray-200 text-center text-sm text-gray-600">
+          © 2025 Talent Hub. All rights reserved.
         </div>
       </div>
     </footer>

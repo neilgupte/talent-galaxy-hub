@@ -39,26 +39,31 @@ const Navbar = () => {
   };
 
   return (
-    <header className="w-full border-b bg-white">
-      <div className="container mx-auto flex h-16 items-center px-4">
-        <div className="mr-4 flex">
-          <Link to="/" className="flex items-center space-x-2">
-            <Briefcase className="h-6 w-6 text-blue-600" />
-            <span className="font-bold text-2xl text-blue-600">Talent</span>
-            <span className="font-normal text-2xl text-gray-800">Hub</span>
+    <header className="w-full border-b bg-white py-3">
+      <div className="container mx-auto flex items-center justify-between px-4">
+        <div className="flex items-center">
+          <Link to="/" className="flex items-center mr-8">
+            <Briefcase className="h-6 w-6 text-blue-600 mr-2" />
+            <span className="font-bold text-xl text-blue-600">Talent</span>
+            <span className="font-normal text-xl text-gray-800">Hub</span>
           </Link>
+          
+          <div className="hidden md:flex relative max-w-md">
+            <input
+              type="text"
+              placeholder="UX Designer"
+              className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1">
+              <X className="h-4 w-4 text-gray-400" />
+            </button>
+            <button className="absolute right-8 top-1/2 transform -translate-y-1/2 p-1">
+              <Search className="h-4 w-4 text-gray-400" />
+            </button>
+          </div>
         </div>
         
-        <div className="hidden md:flex mx-4 flex-1 items-center">
-          <SmartSearchBox 
-            onSearch={handleSearch}
-            placeholder="Search jobs or locations..."
-            className="w-full max-w-lg"
-            required={false}
-          />
-        </div>
-        
-        <div className="flex items-center justify-end space-x-4">
+        <div className="flex items-center space-x-4">
           {isAuthenticated ? (
             <>
               <NotificationCenter 
@@ -151,13 +156,13 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="text-gray-700">
                 <Link to="/auth?mode=login">Log in</Link>
               </Button>
               <Button asChild className="bg-blue-600 hover:bg-blue-700">
                 <Link to="/auth?mode=signup">Sign up</Link>
               </Button>
-              <Button asChild className="ml-2">
+              <Button asChild className="bg-white border border-gray-300 text-gray-800 hover:bg-gray-50">
                 <Link to="/auth?mode=signup&role=employer">Post a Job</Link>
               </Button>
             </>
