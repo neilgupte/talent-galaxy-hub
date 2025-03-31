@@ -1,13 +1,14 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { Search, Briefcase, Zap, Award, BarChart, Clock } from 'lucide-react';
+import SmartSearchBox from '@/components/jobs/SmartSearchBox';
 
 const Index = () => {
   const { authState } = useAuth();
   const { isAuthenticated, user } = authState;
+  const navigate = useNavigate();
   
   const features = [
     {
@@ -50,6 +51,16 @@ const Index = () => {
       : '/dashboard/employer';
   };
 
+  const handleSearch = (query: string, parsedQuery?: { title: string; location: string }) => {
+    let searchUrl = `/jobs?query=${encodeURIComponent(query)}`;
+    
+    if (parsedQuery && parsedQuery.title && parsedQuery.location) {
+      searchUrl = `/jobs?query=${encodeURIComponent(query)}&title=${encodeURIComponent(parsedQuery.title)}&location=${encodeURIComponent(parsedQuery.location)}`;
+    }
+    
+    navigate(searchUrl);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -75,25 +86,14 @@ const Index = () => {
             </Button>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-3xl mx-auto flex items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Job title, keywords, or company"
-                className="w-full pl-10 pr-4 py-3 border rounded-md"
-              />
-            </div>
-            <div className="hidden sm:block border-l h-10 mx-4"></div>
-            <div className="hidden sm:block relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-              <input
-                type="text"
-                placeholder="City, state, or 'Remote'"
-                className="w-full pl-10 pr-4 py-3 border rounded-md"
-              />
-            </div>
-            <Button className="ml-4 px-6 py-3">Search</Button>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-3xl mx-auto">
+            <SmartSearchBox
+              onSearch={handleSearch}
+              placeholder="Job title, keywords, or location..."
+              className="w-full"
+              showHistory={true}
+              showAutocomplete={true}
+            />
           </div>
         </div>
       </section>

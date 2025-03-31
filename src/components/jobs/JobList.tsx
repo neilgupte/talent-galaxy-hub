@@ -9,7 +9,7 @@ interface JobListProps {
 }
 
 const JobList: React.FC<JobListProps> = ({ jobs }) => {
-  if (jobs.length === 0) {
+  if (!jobs || jobs.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg">
         <h3 className="text-lg font-medium mb-2">No jobs found</h3>

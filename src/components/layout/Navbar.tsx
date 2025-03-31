@@ -14,10 +14,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, Search, BookmarkCheck, FileText } from "lucide-react";
+import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, BookmarkCheck, FileText } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Separator } from "@/components/ui/separator";
-import SearchBox from "@/components/jobs/SearchBox";
+import SmartSearchBox from "@/components/jobs/SmartSearchBox";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -36,8 +36,15 @@ const Navbar = () => {
     await logout();
   };
 
-  const handleSearch = (query: string) => {
-    navigate(`/jobs?query=${encodeURIComponent(query)}`);
+  const handleSearch = (query: string, parsedQuery?: { title: string; location: string }) => {
+    let searchUrl = `/jobs?query=${encodeURIComponent(query)}`;
+    
+    // If we have parsed title and location, add them to the query
+    if (parsedQuery && parsedQuery.title && parsedQuery.location) {
+      searchUrl = `/jobs?query=${encodeURIComponent(query)}&title=${encodeURIComponent(parsedQuery.title)}&location=${encodeURIComponent(parsedQuery.location)}`;
+    }
+    
+    navigate(searchUrl);
   };
 
   return (
@@ -52,7 +59,7 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex mx-4 flex-1 items-center">
-          <SearchBox 
+          <SmartSearchBox 
             onSearch={handleSearch}
             placeholder="Search jobs or locations..."
             className="w-full max-w-lg"
@@ -175,7 +182,7 @@ const Navbar = () => {
       
       {/* Mobile search - only shown on smaller screens */}
       <div className="md:hidden px-4 pb-3">
-        <SearchBox 
+        <SmartSearchBox 
           onSearch={handleSearch}
           placeholder="Search jobs or locations..."
           className="w-full"
