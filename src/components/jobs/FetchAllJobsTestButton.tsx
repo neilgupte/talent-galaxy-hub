@@ -13,7 +13,7 @@ const FetchAllJobsTestButton = () => {
     employmentTypes: [],
     jobLevels: [],
     onsiteTypes: [],
-    salaryRange: [0, 250000],
+    salaryRange: [0, 250000] as [number, number], // Fixed: explicitly typed as tuple
   };
   
   const { data, isLoading, error } = useJobsQuery({

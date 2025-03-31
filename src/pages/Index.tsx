@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,14 @@ import FeaturedJobs from '@/components/jobs/FeaturedJobs';
 import FetchAllJobsTestButton from '@/components/jobs/FetchAllJobsTestButton';
 
 const Index = () => {
+  const navigate = useNavigate();
+  
+  // Add a handler for search
+  const handleSearch = (query: string, parsedQuery?: { title: string; location: string }) => {
+    // Navigate to jobs page with search query
+    navigate(`/jobs?q=${encodeURIComponent(query)}`);
+  };
+
   return (
     <div>
       {/* Hero Section */}
@@ -36,7 +45,7 @@ const Index = () => {
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
             Search for Jobs
           </h2>
-          <SearchBox />
+          <SearchBox onSearch={handleSearch} />
         </div>
       </section>
       
