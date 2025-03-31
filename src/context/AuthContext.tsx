@@ -15,6 +15,7 @@ type AuthContextType = {
   continueWithGoogle: () => Promise<void>;
   continueWithLinkedIn: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  refreshSession: () => Promise<void>; // Added refreshSession method
 };
 
 const defaultAuthState: AuthState = {
@@ -34,6 +35,115 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Track password reset attempts per user (in-memory tracker for rate limiting)
   const [resetAttempts, setResetAttempts] = useState<Record<string, {count: number, lastAttempt: number}>>({});
+
+  // Added refreshSession function
+  const refreshSession = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // Get user data from our users table
+        const { data: userData, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (userError) throw userError;
+
+        // Get profile data
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (profileError && profileError.code !== 'PGRST116') throw profileError;
+
+        // Get company data if user is an employer
+        let companyData = null;
+        if (userData.role === 'employer') {
+          const { data: companyUserData, error: companyUserError } = await supabase
+            .from('company_users')
+            .select('company_id')
+            .eq('user_id', session.user.id)
+            .single();
+
+          if (!companyUserError && companyUserData) {
+            const { data: company, error: companyError } = await supabase
+              .from('companies')
+              .select('*')
+              .eq('id', companyUserData.company_id)
+              .single();
+
+            if (!companyError) companyData = company;
+          }
+        }
+
+        // Convert from database model to frontend model
+        const user: User = {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          role: userData.role as UserRole,
+          createdAt: userData.created_at
+        };
+
+        let profile: Profile | null = null;
+        if (profileData) {
+          profile = {
+            userId: profileData.user_id,
+            headline: profileData.headline || '',
+            bio: profileData.bio || '',
+            location: profileData.location || '',
+            currentTitle: profileData.current_title || '',
+            skills: profileData.skills || [],
+            avatarUrl: profileData.avatar_url
+          };
+        }
+
+        let company: Company | null = null;
+        if (companyData) {
+          company = {
+            id: companyData.id,
+            name: companyData.name,
+            industry: companyData.industry || '',
+            description: companyData.description || '',
+            logoUrl: companyData.logo_url,
+            planType: companyData.plan_type || 'free'
+          };
+        }
+
+        setAuthState({
+          user,
+          profile,
+          company,
+          isAuthenticated: true,
+          isLoading: false
+        });
+
+        return;
+      }
+      
+      // If no session
+      setAuthState({
+        user: null,
+        profile: null,
+        company: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Error refreshing session:', error);
+      setAuthState({
+        user: null,
+        profile: null,
+        company: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -402,7 +512,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateCompany,
       continueWithGoogle,
       continueWithLinkedIn,
-      resetPassword
+      resetPassword,
+      refreshSession
     }}>
       {children}
     </AuthContext.Provider>
