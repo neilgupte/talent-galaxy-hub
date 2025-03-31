@@ -44,12 +44,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [resetAttempts, setResetAttempts] = useState<Record<string, {count: number, lastAttempt: number}>>({});
 
   // Refresh the user session data
-  const refreshSession = async () => {
+  const refreshSession = async (): Promise<void> => {
     console.log("AuthContext: Refreshing session");
     const newAuthState = await refreshUserSession();
     console.log("AuthContext: New auth state", newAuthState);
     setAuthState(newAuthState);
-    return newAuthState;
   };
 
   useEffect(() => {
@@ -60,14 +59,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("AuthContext: Auth state changed", event, !!session);
         if (session) {
           // If we have a session, refresh the user data from the database
-          const updatedState = await refreshSession();
+          await refreshSession();
           
           // If this was a login or signup event, redirect to the appropriate dashboard
-          if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
-            console.log("AuthContext: Redirecting after sign in/up", updatedState.user?.role);
-            if (updatedState.user?.role === 'job_seeker') {
+          if (event === 'SIGNED_IN') {
+            console.log("AuthContext: Redirecting after sign in", authState.user?.role);
+            if (authState.user?.role === 'job_seeker') {
               navigate('/dashboard/job-seeker', { replace: true });
-            } else if (updatedState.user?.role === 'employer') {
+            } else if (authState.user?.role === 'employer') {
               navigate('/dashboard/employer', { replace: true });
             }
           }
