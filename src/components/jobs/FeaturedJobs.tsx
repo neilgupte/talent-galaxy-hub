@@ -51,6 +51,7 @@ const FeaturedJobs = () => {
             status: 'active' as 'active',
             isHighPriority: i === 0,
             isBoosted: i === 1,
+            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             company: {
@@ -81,6 +82,7 @@ const FeaturedJobs = () => {
           status: job.status as 'draft' | 'active' | 'expired' | 'closed',
           isHighPriority: job.is_high_priority,
           isBoosted: job.is_boosted,
+          endDate: job.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           createdAt: job.created_at,
           updatedAt: job.updated_at,
           company: job.companies ? {

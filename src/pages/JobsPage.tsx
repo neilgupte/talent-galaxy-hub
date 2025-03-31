@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -114,10 +113,22 @@ const JobsPage = () => {
             onsite_type: i % 3 === 0 ? 'remote' : i % 3 === 1 ? 'onsite' : 'hybrid',
             job_level: i % 3 === 0 ? 'entry' : i % 3 === 1 ? 'mid' : 'senior',
             created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'active',
+            requirements: 'Experience with React, TypeScript, and modern web development',
+            is_high_priority: i % 5 === 0,
+            is_boosted: i % 7 === 0,
+            city: 'London',
+            country: 'UK',
+            currency: 'GBP',
             companies: {
               id: 'mock-company',
               name: `Company ${i + 1}`,
-              logo_url: '/placeholder.svg'
+              logo_url: '/placeholder.svg',
+              industry: 'Technology',
+              description: 'A leading technology company',
+              plan_type: 'premium'
             }
           }));
         }
@@ -148,11 +159,14 @@ const JobsPage = () => {
       jobLevel: job.job_level as JobLevel,
       requirements: job.requirements ? (typeof job.requirements === 'string' ? job.requirements.split(',').map((item: string) => item.trim()) : job.requirements) : [],
       status: job.status as 'draft' | 'active' | 'expired' | 'closed',
-      isHighPriority: job.is_high_priority,
-      isBoosted: job.is_boosted,
-      endDate: job.end_date,
+      isHighPriority: job.is_high_priority || false,
+      isBoosted: job.is_boosted || false,
+      endDate: job.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       createdAt: job.created_at,
-      updatedAt: job.updated_at,
+      updatedAt: job.updated_at || job.created_at,
+      country: job.country || '',
+      city: job.city || '',
+      currency: job.currency || 'USD',
       company: job.companies ? {
         id: job.companies.id,
         name: job.companies.name,
