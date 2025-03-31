@@ -144,7 +144,9 @@ export const useJobsQuery = ({
             }
           }));
         }
-        
+
+        console.log('🟢 Final job data:', jobsData.length, jobsData);
+
         return {
           jobs: jobsData.map(job => mapDatabaseJobToModel(job)),
           totalCount: count || jobsData.length || 0,
