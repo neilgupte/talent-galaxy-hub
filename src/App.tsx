@@ -23,6 +23,15 @@ import ApplicationDetails from "@/pages/ApplicationDetails";
 import NotificationsPage from "@/pages/NotificationsPage";
 import JobApplicationForm from "@/components/applications/JobApplicationForm";
 import JobApplicationSuccess from "@/pages/JobApplicationSuccess";
+import AboutPage from "@/pages/AboutPage";
+import ContactPage from "@/pages/ContactPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import TermsPage from "@/pages/TermsPage";
+import PricingPage from "@/pages/PricingPage";
+import FAQPage from "@/pages/FAQPage";
+import SavedJobsPage from "@/pages/SavedJobsPage";
+import CompaniesPage from "@/pages/CompaniesPage";
+import CompanyProfilePage from "@/pages/CompanyProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -59,11 +68,20 @@ const App = () => (
               <Navbar />
               <main className="flex-1">
                 <Routes>
+                  {/* Public Routes */}
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/jobs" element={<JobSearch />} />
                   <Route path="/jobs/:id" element={<JobDetails />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/faq" element={<FAQPage />} />
+                  <Route path="/companies" element={<CompaniesPage />} />
+                  <Route path="/companies/:id" element={<CompanyProfilePage />} />
                   <Route path="/account/upgrade" element={<AccountUpgrade />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
                   
@@ -100,7 +118,14 @@ const App = () => (
                       </ProtectedRoute>
                     } 
                   />
-                  {/* New job application routes */}
+                  <Route 
+                    path="/saved-jobs" 
+                    element={
+                      <ProtectedRoute requiredRole="job_seeker">
+                        <SavedJobsPage />
+                      </ProtectedRoute>
+                    } 
+                  />
                   <Route 
                     path="/applications/job/:id/apply" 
                     element={

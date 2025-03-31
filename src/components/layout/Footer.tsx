@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Briefcase } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -8,9 +9,13 @@ const Footer = () => {
       <div className="container mx-auto py-8 px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">JobMatch AI</h3>
+            <h3 className="text-lg font-semibold flex items-center">
+              <Briefcase className="h-5 w-5 text-primary mr-2" />
+              <span className="font-bold text-primary">Talent</span>
+              <span className="font-light">Hub</span>
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Powered by AI, matching the best talent with the perfect job opportunities.
+              Matching the best talent with the perfect job opportunities through our intelligent platform.
             </p>
           </div>
           
@@ -20,7 +25,8 @@ const Footer = () => {
               <li><Link to="/jobs" className="hover:underline">Browse Jobs</Link></li>
               <li><Link to="/dashboard/job-seeker" className="hover:underline">Your Dashboard</Link></li>
               <li><Link to="/profile" className="hover:underline">Build Profile</Link></li>
-              <li><Link to="/notifications" className="hover:underline">Notifications</Link></li>
+              <li><Link to="/saved-jobs" className="hover:underline">Saved Jobs</Link></li>
+              <li><Link to="/applications/history" className="hover:underline">Applications</Link></li>
             </ul>
           </div>
           
@@ -47,7 +53,7 @@ const Footer = () => {
         </div>
         
         <div className="flex flex-col md:flex-row justify-between items-center mt-12 pt-6 border-t border-gray-200 dark:border-gray-800 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} JobMatch AI. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Talent Hub. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="#" className="hover:text-primary">Twitter</a>
             <a href="#" className="hover:text-primary">LinkedIn</a>
