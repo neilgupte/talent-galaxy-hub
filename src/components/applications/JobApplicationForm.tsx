@@ -106,18 +106,19 @@ const JobApplicationForm = () => {
   const { data: job, isLoading, error } = useQuery({
     queryKey: ['job', id],
     queryFn: () => fetchJobDetails(id!),
-    enabled: !!id,
-    onSuccess: (data) => {
-      // Initialize answers state with empty strings for each question
-      if (data.questions) {
-        const initialAnswers: Record<string, string> = {};
-        data.questions.forEach(question => {
-          initialAnswers[question.id] = '';
-        });
-        setAnswers(initialAnswers);
-      }
-    }
+    enabled: !!id
   });
+
+  // Initialize answers state when job data is loaded
+  React.useEffect(() => {
+    if (job?.questions) {
+      const initialAnswers: Record<string, string> = {};
+      job.questions.forEach(question => {
+        initialAnswers[question.id] = '';
+      });
+      setAnswers(initialAnswers);
+    }
+  }, [job]);
   
   if (isLoading) {
     return (
@@ -214,8 +215,8 @@ const JobApplicationForm = () => {
         description: "Your application has been successfully submitted.",
       });
       
-      // Redirect to application details
-      navigate(`/applications/${result.id}`);
+      // Redirect to application success page
+      navigate(`/application/success/${result.id}`);
     } catch (error) {
       // Show error toast
       toast({

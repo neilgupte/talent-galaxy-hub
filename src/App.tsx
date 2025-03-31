@@ -1,26 +1,28 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from "@/components/ui/theme-provider"
+import { ThemeProvider } from "./components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
-import LandingPage from './pages/LandingPage';
+import { Index as LandingPage } from './pages/Index';
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
-import JobsPage from './pages/JobsPage';
-import JobDetailsPage from './pages/JobDetailsPage';
-import PostJobPage from './pages/PostJobPage';
+import JobsPage from './pages/JobDetails';
+import JobDetailsPage from './pages/JobDetails';
+import PostJobPage from './pages/NotFound'; // Temporary placeholder
 import PricingPage from './pages/PricingPage';
-import EmployerDashboard from './pages/EmployerDashboard';
-import JobSeekerDashboard from './pages/JobSeekerDashboard';
-import ProfilePage from './pages/ProfilePage';
+import EmployerDashboard from './components/dashboard/EmployerDashboard';
+import JobSeekerDashboard from './components/dashboard/JobSeekerDashboard';
+import ProfilePage from './pages/NotFound'; // Temporary placeholder
 import SavedJobsPage from './pages/SavedJobsPage';
-import ApplicationsPage from './pages/ApplicationsPage';
+import ApplicationsPage from './pages/NotFound'; // Temporary placeholder
 import ApplicationDetails from './pages/ApplicationDetails';
 import JobApplicationForm from './components/applications/JobApplicationForm';
 import ViewApplicationPage from './pages/ViewApplicationPage';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import JobApplicationSuccess from './pages/JobApplicationSuccess';
 
 function App() {
   return (
@@ -49,6 +51,7 @@ function App() {
                   <Route path="/applications/:id" element={<ViewApplicationPage />} />
                   <Route path="/applications/history" element={<ApplicationsPage />} />
                   <Route path="/application/:id" element={<ApplicationDetails />} />
+                  <Route path="/application/success/:id" element={<JobApplicationSuccess />} />
 
                   {/* Pricing */}
                   <Route path="/pricing" element={<PricingPage />} />
