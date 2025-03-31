@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -17,7 +16,7 @@ import {
 import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, BookmarkCheck, FileText, X, Search } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Separator } from "@/components/ui/separator";
-import SmartSearchBox from "@/components/jobs/SmartSearchBox";
+import SearchBox from "@/components/jobs/SearchBox";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -50,17 +49,12 @@ const Navbar = () => {
           </Link>
           
           <div className="hidden md:flex relative max-w-md">
-            <input
-              type="text"
+            <SearchBox
               placeholder="UX Designer"
-              className="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              onSearch={handleSearch}
+              className="w-64 md:w-80"
+              showHistory={true}
             />
-            <button className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1">
-              <X className="h-4 w-4 text-gray-400" />
-            </button>
-            <button className="absolute right-8 top-1/2 transform -translate-y-1/2 p-1">
-              <Search className="h-4 w-4 text-gray-400" />
-            </button>
           </div>
         </div>
         
