@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -47,36 +48,7 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
 
     console.log('Fetched job details:', data);
     
-    return {
-      id: data.id,
-      companyId: data.company_id,
-      title: data.title,
-      description: data.description || '',
-      location: data.location || '',
-      salaryMin: data.salary_min || parseInt(data.salary_range?.split('-')[0]) || 0,
-      salaryMax: data.salary_max || parseInt(data.salary_range?.split('-')[1]) || 0,
-      employmentType: (data.employment_type || 'full_time') as JobEmploymentType,
-      onsiteType: (data.onsite_type || 'onsite') as JobOnsiteType,
-      jobLevel: (data.job_level || 'entry') as JobLevel,
-      requirements: data.requirements ? (typeof data.requirements === 'string' ? data.requirements.split(',').map((item: string) => item.trim()) : data.requirements) : [],
-      status: (data.status || 'active') as 'draft' | 'active' | 'expired' | 'closed',
-      isHighPriority: data.is_high_priority || false,
-      isBoosted: data.is_boosted || false,
-      endDate: data.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: data.created_at,
-      updatedAt: data.updated_at || data.created_at,
-      country: data.country || '',
-      city: data.city || '',
-      currency: data.currency || 'USD',
-      company: data.companies ? {
-        id: data.companies.id,
-        name: data.companies.name,
-        industry: data.companies.industry || '',
-        description: data.companies.description || '',
-        logoUrl: data.companies.logo_url || '/placeholder.svg',
-        planType: data.companies.plan_type || 'free'
-      } : undefined
-    };
+    return mapDatabaseJobToModel(data);
   } catch (error) {
     console.error('Failed to fetch job details:', error);
     throw error;
@@ -146,18 +118,56 @@ const fetchSimilarJobs = async (currentJobId: string, jobTitle: string, jobLocat
 };
 
 const mapDatabaseJobToModel = (job: any): Job => {
+  // Parse salary information from either salary_min/max fields or salary_range string
+  let salaryMin = 0;
+  let salaryMax = 0;
+  
+  if (job.salary_min !== undefined && job.salary_min !== null) {
+    salaryMin = job.salary_min;
+  } else if (job.salary_range) {
+    const parts = job.salary_range.split('-');
+    if (parts.length >= 1) {
+      const parsedMin = parseInt(parts[0].trim(), 10);
+      if (!isNaN(parsedMin)) {
+        salaryMin = parsedMin;
+      }
+    }
+  }
+  
+  if (job.salary_max !== undefined && job.salary_max !== null) {
+    salaryMax = job.salary_max;
+  } else if (job.salary_range) {
+    const parts = job.salary_range.split('-');
+    if (parts.length >= 2) {
+      const parsedMax = parseInt(parts[1].trim(), 10);
+      if (!isNaN(parsedMax)) {
+        salaryMax = parsedMax;
+      }
+    }
+  }
+  
+  // Handle requirements properly
+  let requirements: string[] = [];
+  if (job.requirements) {
+    if (typeof job.requirements === 'string') {
+      requirements = job.requirements.split(',').map((item: string) => item.trim());
+    } else if (Array.isArray(job.requirements)) {
+      requirements = job.requirements;
+    }
+  }
+  
   return {
     id: job.id,
     companyId: job.company_id,
     title: job.title,
     description: job.description || '',
     location: job.location || '',
-    salaryMin: job.salary_min || parseInt(job.salary_range?.split('-')[0]) || 0,
-    salaryMax: job.salary_max || parseInt(job.salary_range?.split('-')[1]) || 0,
+    salaryMin: salaryMin,
+    salaryMax: salaryMax,
     employmentType: (job.employment_type || 'full_time') as JobEmploymentType,
     onsiteType: (job.onsite_type || 'onsite') as JobOnsiteType,
     jobLevel: (job.job_level || 'entry') as JobLevel,
-    requirements: job.requirements ? (typeof job.requirements === 'string' ? job.requirements.split(',').map((item: string) => item.trim()) : job.requirements) : [],
+    requirements: requirements,
     status: (job.status || 'active') as 'draft' | 'active' | 'expired' | 'closed',
     isHighPriority: job.is_high_priority || false,
     isBoosted: job.is_boosted || false,
