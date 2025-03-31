@@ -106,7 +106,7 @@ export const useJobsQuery = ({
         
         query = query.range(from, to);
         
-        const { data, error, count } = await query;
+        let { data, error, count } = await query;
         console.log('🔥 Supabase returned:', data, 'Count:', count);
         
         if (error) {
