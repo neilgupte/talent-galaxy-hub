@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "./components/ui/theme-provider"
@@ -10,6 +9,7 @@ import Index from './pages/Index';
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
 import JobsPage from './pages/JobsPage';
+import SearchResultsPage from './pages/SearchResultsPage';
 import JobDetailsPage from './pages/JobDetails';
 import PostJobPage from './pages/NotFound'; // Temporary placeholder
 import PricingPage from './pages/PricingPage';
@@ -45,6 +45,7 @@ function App() {
 
                     {/* Job Routes */}
                     <Route path="/jobs" element={<JobsPage />} />
+                    <Route path="/search-results" element={<SearchResultsPage />} />
                     <Route path="/jobs/:id" element={<JobDetailsPage />} />
                     <Route path="/jobs/post" element={<PostJobPage />} />
 

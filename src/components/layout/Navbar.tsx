@@ -29,13 +29,9 @@ const Navbar = () => {
   };
 
   const handleSearch = (query: string, parsedQuery?: { title: string; location: string }) => {
-    let searchUrl = `/jobs?query=${encodeURIComponent(query)}`;
-    
-    if (parsedQuery && parsedQuery.title && parsedQuery.location) {
-      searchUrl = `/jobs?query=${encodeURIComponent(query)}&title=${encodeURIComponent(parsedQuery.title)}&location=${encodeURIComponent(parsedQuery.location)}`;
+    if (query.trim()) {
+      navigate(`/search-results?q=${encodeURIComponent(query)}`);
     }
-    
-    navigate(searchUrl);
   };
 
   return (
