@@ -71,7 +71,7 @@ export const useJobsQuery = ({
         let query = supabase
           .from('jobs')
           .select('*, companies(*)', { count: 'exact' })
-          .eq('status', 'active'); // ✅ only fetch active jobs
+          .eq('status', 'active'); 
         
         if (searchQuery) {
           query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);
@@ -98,6 +98,7 @@ export const useJobsQuery = ({
         query = query.range(from, to);
         
         const { data, error, count } = await query;
+        console.log('JOB DATA:', data);
         
         if (error) {
           console.error('Error fetching jobs:', error);
