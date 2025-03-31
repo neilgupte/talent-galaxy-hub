@@ -96,6 +96,7 @@ export interface Job {
   matchPercentage?: number; // Calculated field for job seekers
   hasApplied?: boolean; // Flag if the current user has applied
   applicationStatus?: ApplicationStatus; // Current status if applied
+  applicationId?: string; // Reference to the user's application for this job
 }
 
 export interface JobQuestion {
