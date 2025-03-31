@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 import SocialLogin from './SocialLogin';
@@ -52,10 +53,22 @@ const AuthForm = () => {
     try {
       console.log("AuthForm: Attempting login");
       await login(email, password);
-      // Navigation will be handled by the useEffect above
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      
+      // Navigation will be handled by the useEffect above once auth state updates
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
+      
+      toast({
+        title: "Login failed",
+        description: err instanceof Error ? err.message : "An error occurred during login",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -68,10 +81,22 @@ const AuthForm = () => {
     try {
       console.log("AuthForm: Attempting registration");
       await register(name, email, password, role);
+      
+      toast({
+        title: "Registration successful",
+        description: "Welcome to TalentHub! Please check your email to confirm your account.",
+      });
+      
       // Redirect will be handled by the auth state change in AuthContext
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : 'Registration failed');
+      
+      toast({
+        title: "Registration failed",
+        description: err instanceof Error ? err.message : "An error occurred during registration",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +108,14 @@ const AuthForm = () => {
       console.log("AuthForm: Attempting Google login");
       await continueWithGoogle();
     } catch (err) {
+      console.error("Google login error:", err);
       setError(err instanceof Error ? err.message : 'Google login failed');
+      
+      toast({
+        title: "Google login failed",
+        description: err instanceof Error ? err.message : "An error occurred",
+        variant: "destructive",
+      });
     }
   };
 
@@ -93,7 +125,14 @@ const AuthForm = () => {
       console.log("AuthForm: Attempting LinkedIn login");
       await continueWithLinkedIn();
     } catch (err) {
+      console.error("LinkedIn login error:", err);
       setError(err instanceof Error ? err.message : 'LinkedIn login failed');
+      
+      toast({
+        title: "LinkedIn login failed",
+        description: err instanceof Error ? err.message : "An error occurred",
+        variant: "destructive",
+      });
     }
   };
 

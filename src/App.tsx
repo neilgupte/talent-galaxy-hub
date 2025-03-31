@@ -9,7 +9,7 @@ import { QueryProvider } from './providers/QueryProvider';
 import Index from './pages/Index'; 
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
-import JobsPage from './pages/JobDetails';
+import JobsPage from './pages/JobsPage'; // Updated import
 import JobDetailsPage from './pages/JobDetails';
 import PostJobPage from './pages/NotFound'; // Temporary placeholder
 import PricingPage from './pages/PricingPage';
@@ -28,9 +28,9 @@ import JobApplicationSuccess from './pages/JobApplicationSuccess';
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <NotificationProvider>
-          <QueryProvider>
+      <QueryProvider>
+        <AuthProvider>
+          <NotificationProvider>
             <ThemeProvider defaultTheme="light" storageKey="talenthub-theme">
               <div className="min-h-screen flex flex-col">
                 <Navbar />
@@ -71,9 +71,9 @@ function App() {
               </div>
               <Toaster />
             </ThemeProvider>
-          </QueryProvider>
-        </NotificationProvider>
-      </AuthProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </QueryProvider>
     </BrowserRouter>
   );
 }
