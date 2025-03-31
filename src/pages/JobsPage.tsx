@@ -4,8 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import JobCard from '@/components/jobs/JobCard';
 import JobSearch from '@/components/jobs/JobSearch';
+import { Job, JobEmploymentType, JobOnsiteType, JobLevel } from '@/types';
 
 // Jobs per page for pagination
 const JOBS_PER_PAGE = 20;
@@ -149,11 +151,11 @@ const JobsPage = () => {
                   location: job.location,
                   salaryMin: job.salary_range ? parseInt(job.salary_range.split('-')[0]) : undefined,
                   salaryMax: job.salary_range ? parseInt(job.salary_range.split('-')[1]) : undefined,
-                  employmentType: job.employment_type,
-                  onsiteType: job.onsite_type,
-                  jobLevel: job.job_level,
+                  employmentType: job.employment_type as JobEmploymentType,
+                  onsiteType: job.onsite_type as JobOnsiteType,
+                  jobLevel: job.job_level as JobLevel,
                   requirements: job.requirements ? job.requirements.split(',') : [],
-                  status: job.status,
+                  status: job.status as 'draft' | 'active' | 'expired' | 'closed',
                   isHighPriority: job.is_high_priority,
                   isBoosted: job.is_boosted,
                   endDate: job.end_date,
@@ -189,7 +191,8 @@ const JobsPage = () => {
             <PaginationItem>
               <PaginationPrevious 
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
+                aria-disabled={currentPage === 1}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
             
@@ -198,7 +201,8 @@ const JobsPage = () => {
             <PaginationItem>
               <PaginationNext 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
+                aria-disabled={currentPage === totalPages}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
               />
             </PaginationItem>
           </PaginationContent>
