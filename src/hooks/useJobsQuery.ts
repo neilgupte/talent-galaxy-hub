@@ -98,7 +98,7 @@ export const useJobsQuery = ({
         query = query.range(from, to);
         
         const { data, error, count } = await query;
-        console.log('JOB DATA:', data);
+        console.log('🔥 Supabase returned:', data, 'Count:', count);
         
         if (error) {
           console.error('Error fetching jobs:', error);
