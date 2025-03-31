@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -22,13 +21,12 @@ import {
   User 
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Job } from '@/types';
+import { Job, JobEmploymentType, JobOnsiteType, JobLevel } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import JobCard from '@/components/jobs/JobCard';
 
-// Function to fetch job details from Supabase
 const fetchJobDetails = async (id: string): Promise<Job> => {
   try {
     console.log('Fetching job details for ID:', id);
@@ -49,20 +47,19 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
 
     console.log('Fetched job details:', data);
     
-    // Map database job to model
     return {
       id: data.id,
       companyId: data.company_id,
       title: data.title,
       description: data.description || '',
       location: data.location || '',
-      salaryMin: data.salary_min || 0,
-      salaryMax: data.salary_max || 0,
-      employmentType: data.employment_type || 'full_time',
-      onsiteType: data.onsite_type || 'onsite',
-      jobLevel: data.job_level || 'entry',
+      salaryMin: data.salary_min || parseInt(data.salary_range?.split('-')[0]) || 0,
+      salaryMax: data.salary_max || parseInt(data.salary_range?.split('-')[1]) || 0,
+      employmentType: (data.employment_type || 'full_time') as JobEmploymentType,
+      onsiteType: (data.onsite_type || 'onsite') as JobOnsiteType,
+      jobLevel: (data.job_level || 'entry') as JobLevel,
       requirements: data.requirements ? (typeof data.requirements === 'string' ? data.requirements.split(',').map((item: string) => item.trim()) : data.requirements) : [],
-      status: data.status || 'active',
+      status: (data.status || 'active') as 'draft' | 'active' | 'expired' | 'closed',
       isHighPriority: data.is_high_priority || false,
       isBoosted: data.is_boosted || false,
       endDate: data.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -86,43 +83,37 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
   }
 };
 
-// Function to fetch similar jobs
 const fetchSimilarJobs = async (currentJobId: string, jobTitle: string, jobLocation: string): Promise<Job[]> => {
   try {
     console.log('Fetching similar jobs for:', { jobTitle, jobLocation });
     
-    // Extract keywords from job title
     const keywords = jobTitle.split(' ').filter(word => word.length > 3);
     
-    // Create a query to find jobs with similar titles or in the same location
     let query = supabase
       .from('jobs')
       .select('*, companies(*)')
       .eq('status', 'active')
-      .neq('id', currentJobId) // Exclude current job
+      .neq('id', currentJobId)
       .limit(4);
     
-    // If we have location, prioritize same location
     if (jobLocation) {
       query = query.or(`location.ilike.%${jobLocation}%`);
     }
     
-    // Add title keywords to search
     if (keywords.length > 0) {
       const titleSearch = keywords.map(keyword => `title.ilike.%${keyword}%`).join(',');
       query = query.or(titleSearch);
     }
     
-    const { data, error } = await query;
+    const { data: jobsData, error } = await query;
     
     if (error) {
       console.error('Error fetching similar jobs:', error);
       return [];
     }
     
-    if (!data || data.length === 0) {
+    if (!jobsData || jobsData.length === 0) {
       console.log('No similar jobs found, fetching recent jobs instead');
-      // Fall back to recent jobs if no similar jobs found
       const { data: recentJobs, error: recentError } = await supabase
         .from('jobs')
         .select('*, companies(*)')
@@ -136,46 +127,55 @@ const fetchSimilarJobs = async (currentJobId: string, jobTitle: string, jobLocat
         return [];
       }
       
-      data = recentJobs || [];
+      if (!recentJobs || recentJobs.length === 0) {
+        return [];
+      }
+      
+      const similarJobs = recentJobs.map(job => mapDatabaseJobToModel(job));
+      console.log(`Found ${similarJobs.length} recent jobs`);
+      return similarJobs;
     }
     
-    console.log(`Found ${data.length} similar/recent jobs`);
+    console.log(`Found ${jobsData.length} similar jobs`);
     
-    // Map database jobs to model
-    return data.map(job => ({
-      id: job.id,
-      companyId: job.company_id,
-      title: job.title,
-      description: job.description || '',
-      location: job.location || '',
-      salaryMin: job.salary_min || 0,
-      salaryMax: job.salary_max || 0,
-      employmentType: job.employment_type || 'full_time',
-      onsiteType: job.onsite_type || 'onsite',
-      jobLevel: job.job_level || 'entry',
-      requirements: job.requirements ? (typeof job.requirements === 'string' ? job.requirements.split(',').map((item: string) => item.trim()) : job.requirements) : [],
-      status: job.status || 'active',
-      isHighPriority: job.is_high_priority || false,
-      isBoosted: job.is_boosted || false,
-      endDate: job.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      createdAt: job.created_at,
-      updatedAt: job.updated_at || job.created_at,
-      country: job.country || '',
-      city: job.city || '',
-      currency: job.currency || 'USD',
-      company: job.companies ? {
-        id: job.companies.id,
-        name: job.companies.name,
-        industry: job.companies.industry || '',
-        description: job.companies.description || '',
-        logoUrl: job.companies.logo_url || '/placeholder.svg',
-        planType: job.companies.plan_type || 'free'
-      } : undefined
-    }));
+    return jobsData.map(job => mapDatabaseJobToModel(job));
   } catch (error) {
     console.error('Failed to fetch similar jobs:', error);
     return [];
   }
+};
+
+const mapDatabaseJobToModel = (job: any): Job => {
+  return {
+    id: job.id,
+    companyId: job.company_id,
+    title: job.title,
+    description: job.description || '',
+    location: job.location || '',
+    salaryMin: job.salary_min || parseInt(job.salary_range?.split('-')[0]) || 0,
+    salaryMax: job.salary_max || parseInt(job.salary_range?.split('-')[1]) || 0,
+    employmentType: (job.employment_type || 'full_time') as JobEmploymentType,
+    onsiteType: (job.onsite_type || 'onsite') as JobOnsiteType,
+    jobLevel: (job.job_level || 'entry') as JobLevel,
+    requirements: job.requirements ? (typeof job.requirements === 'string' ? job.requirements.split(',').map((item: string) => item.trim()) : job.requirements) : [],
+    status: (job.status || 'active') as 'draft' | 'active' | 'expired' | 'closed',
+    isHighPriority: job.is_high_priority || false,
+    isBoosted: job.is_boosted || false,
+    endDate: job.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: job.created_at,
+    updatedAt: job.updated_at || job.created_at,
+    country: job.country || '',
+    city: job.city || '',
+    currency: job.currency || 'USD',
+    company: job.companies ? {
+      id: job.companies.id,
+      name: job.companies.name,
+      industry: job.companies.industry || '',
+      description: job.companies.description || '',
+      logoUrl: job.companies.logo_url || '/placeholder.svg',
+      planType: job.companies.plan_type || 'free'
+    } : undefined
+  };
 };
 
 const JobDetails: React.FC = () => {
@@ -191,7 +191,6 @@ const JobDetails: React.FC = () => {
     enabled: !!id
   });
   
-  // Fetch similar jobs once we have the job details
   const { data: similarJobs = [], isLoading: isSimilarJobsLoading } = useQuery({
     queryKey: ['similarJobs', id, job?.title, job?.location],
     queryFn: () => fetchSimilarJobs(id!, job!.title, job!.location),
@@ -275,7 +274,6 @@ const JobDetails: React.FC = () => {
   
   return (
     <div className="container mx-auto py-8 px-4">
-      {/* Back button */}
       <div className="mb-6">
         <Button variant="ghost" onClick={() => navigate(-1)} className="gap-1">
           <ChevronLeft className="h-4 w-4" />
@@ -283,7 +281,6 @@ const JobDetails: React.FC = () => {
         </Button>
       </div>
       
-      {/* Job header */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 justify-between">
           <div className="flex gap-4">
@@ -331,11 +328,8 @@ const JobDetails: React.FC = () => {
         </div>
       </div>
       
-      {/* Job details and actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Job info */}
           <Card>
             <CardContent className="p-6">
               <div className="prose dark:prose-invert max-w-none" 
@@ -344,7 +338,6 @@ const JobDetails: React.FC = () => {
             </CardContent>
           </Card>
           
-          {/* Company info */}
           <Card>
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">About {job.company?.name}</h2>
@@ -358,9 +351,7 @@ const JobDetails: React.FC = () => {
           </Card>
         </div>
         
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Apply card */}
           <Card className="sticky top-4">
             <CardContent className="p-6">
               <div className="space-y-6">
@@ -468,7 +459,6 @@ const JobDetails: React.FC = () => {
         </div>
       </div>
       
-      {/* Similar Jobs Section */}
       <div className="mt-12">
         <h2 className="text-2xl font-bold mb-6">Similar Jobs</h2>
         
