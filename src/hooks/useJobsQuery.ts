@@ -89,10 +89,21 @@ export const useJobsQuery = ({
           query = query.in('onsite_type', selectedFilters.onsiteTypes);
         }
         
+        // Add salary range filter
+        if (selectedFilters.salaryRange[0] > 0) {
+          const salaryMinStr = selectedFilters.salaryRange[0].toString();
+          query = query.gte('salary_range', `${salaryMinStr}-`);
+        }
+        
+        if (selectedFilters.salaryRange[1] < 250000) {
+          const salaryMaxStr = selectedFilters.salaryRange[1].toString();
+          query = query.lte('salary_range', `-${salaryMaxStr}`);
+        }
+        
         if (sortBy === 'date') {
           query = query.order('created_at', { ascending: false });
         } else if (sortBy === 'salary') {
-          query = query.order('salary_max', { ascending: false });
+          query = query.order('salary_range', { ascending: false });
         }
         
         query = query.range(from, to);
@@ -106,49 +117,17 @@ export const useJobsQuery = ({
           throw error;
         }
         
-        console.log(`Fetched ${data?.length || 0} jobs out of ${count || 0} total`);
-        
         let jobsData = data || [];
-        if (!jobsData || jobsData.length === 0) {
-          console.log('No real data found, generating mock data for testing');
-          jobsData = Array.from({ length: 25 }, (_, i) => ({
-            id: `mock-${i}`,
-            title: `Mock Job ${i + 1}`,
-            description: 'This is a mock job description for testing purposes.',
-            location: 'London, UK',
-            company_id: 'mock-company',
-            salary_min: 30000 + i * 1000,
-            salary_max: 60000 + i * 1500,
-            salary_range: `${30000 + i * 1000}-${60000 + i * 1500}`,
-            employment_type: i % 3 === 0 ? 'full_time' : i % 3 === 1 ? 'part_time' : 'contract',
-            onsite_type: i % 3 === 0 ? 'remote' : i % 3 === 1 ? 'onsite' : 'hybrid',
-            job_level: i % 3 === 0 ? 'entry' : i % 3 === 1 ? 'mid' : 'senior',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            status: 'active',
-            requirements: 'Experience with React, TypeScript, and modern web development',
-            is_high_priority: i % 5 === 0,
-            is_boosted: i % 7 === 0,
-            city: 'London',
-            country: 'UK',
-            currency: 'GBP',
-            companies: {
-              id: 'mock-company',
-              name: `Company ${i + 1}`,
-              logo_url: '/placeholder.svg',
-              industry: 'Technology',
-              description: 'A leading technology company',
-              plan_type: 'premium',
-              created_at: new Date().toISOString()
-            }
-          }));
-        }
-
-        console.log('🟢 Final job data:', jobsData.length, jobsData);
+        console.log(`Fetched ${jobsData.length} jobs out of ${count || 0} total`);
+        
+        // No mock data generation anymore - we only want to show real data
+        // We just need to properly process the data from Supabase
+        
+        const mappedJobs = jobsData.map(job => mapDatabaseJobToModel(job));
+        console.log('🟢 Final job data:', mappedJobs.length, mappedJobs);
 
         return {
-          jobs: jobsData.map(job => mapDatabaseJobToModel(job)),
+          jobs: mappedJobs,
           totalCount: count || jobsData.length || 0,
         };
       } catch (err) {
@@ -156,6 +135,6 @@ export const useJobsQuery = ({
         throw err;
       }
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 30, // Reduce stale time to 30 seconds while debugging
   });
 };

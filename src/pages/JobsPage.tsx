@@ -6,6 +6,7 @@ import { useJobsQuery, JobFilters as JobFiltersType } from '@/hooks/useJobsQuery
 import JobFiltersComponent from '@/components/jobs/JobFilters';
 import JobSearchBar from '@/components/jobs/JobSearchBar';
 import JobsPageContent from '@/components/jobs/JobsPageContent';
+import { Button } from '@/components/ui/button';
 
 const JOBS_PER_PAGE = 20;
 
@@ -40,13 +41,19 @@ const JobsPage = () => {
     }, { replace: true });
   }, [searchQuery, currentPage, navigate, location.pathname]);
   
-  const { data, isLoading, error } = useJobsQuery({
+  const { data, isLoading, error, refetch } = useJobsQuery({
     searchQuery,
     currentPage,
     selectedFilters,
     sortBy,
     jobsPerPage: JOBS_PER_PAGE
   });
+  
+  // Add automatic refetch when page loads
+  useEffect(() => {
+    // Refetch on component mount
+    refetch();
+  }, [refetch]);
   
   const totalPages = data ? Math.ceil(data.totalCount / JOBS_PER_PAGE) : 0;
   
@@ -67,7 +74,11 @@ const JobsPage = () => {
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo(0, 0);
   };
+  
+  console.log('Rendering JobsPage, data:', data?.jobs?.length, 'items, page:', currentPage);
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -83,6 +94,20 @@ const JobsPage = () => {
             filters={selectedFilters}
             onChange={handleFilterChange}
           />
+          
+          {/* Debug button for development */}
+          <div className="mt-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                console.log('Manual refetch triggered');
+                refetch();
+              }}
+            >
+              Refresh Jobs
+            </Button>
+          </div>
         </div>
         
         <div className="flex-1">
