@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +13,7 @@ import { JobAlert } from '@/types';
 import AlertsList from './AlertsList';
 import CreateAlertForm from './CreateAlertForm';
 import { getSuggestedAlerts } from '@/utils/alertUtils';
+import { JobAlertTable } from '@/integrations/supabase/schema';
 
 const AlertManager = () => {
   const { authState } = useAuth();
@@ -39,7 +39,21 @@ const AlertManager = () => {
         throw error;
       }
       
-      return data as JobAlert[];
+      return (data || []).map((alert: JobAlertTable): JobAlert => ({
+        id: alert.id,
+        userId: alert.user_id,
+        keywords: alert.keywords,
+        location: alert.location,
+        employmentTypes: alert.employment_types as any,
+        jobLevels: alert.job_levels as any,
+        salaryMin: alert.salary_min,
+        salaryMax: alert.salary_max,
+        frequency: alert.frequency as any,
+        isActive: alert.is_active,
+        createdAt: alert.created_at,
+        lastTriggeredAt: alert.last_triggered_at,
+        nextScheduledAt: alert.next_scheduled_at
+      }));
     },
     enabled: !!authState.user?.id,
   });
@@ -49,8 +63,15 @@ const AlertManager = () => {
       if (!authState.user?.id) throw new Error('User not authenticated');
       
       const newAlert = {
-        ...alertData,
         user_id: authState.user.id,
+        keywords: alertData.keywords,
+        location: alertData.location,
+        employmentTypes: alertData.employmentTypes,
+        jobLevels: alertData.jobLevels,
+        salaryMin: alertData.salaryMin,
+        salaryMax: alertData.salaryMax,
+        frequency: alertData.frequency,
+        is_active: alertData.isActive,
       };
       
       const { data, error } = await supabase
@@ -75,9 +96,20 @@ const AlertManager = () => {
   
   const updateAlertMutation = useMutation({
     mutationFn: async ({ id, ...updateData }: Partial<JobAlert> & { id: string }) => {
+      const dbUpdateData: Partial<JobAlertTable> = {
+        keywords: updateData.keywords,
+        location: updateData.location,
+        employment_types: updateData.employmentTypes as any,
+        job_levels: updateData.jobLevels as any,
+        salary_min: updateData.salaryMin,
+        salary_max: updateData.salaryMax,
+        frequency: updateData.frequency as any,
+        is_active: updateData.isActive
+      };
+      
       const { data, error } = await supabase
         .from('job_alerts')
-        .update(updateData)
+        .update(dbUpdateData)
         .eq('id', id)
         .select()
         .single();
@@ -115,7 +147,6 @@ const AlertManager = () => {
     },
   });
   
-  // Fetch user data to generate suggestions
   const { data: applications } = useQuery({
     queryKey: ['user-applications', authState.user?.id],
     queryFn: async () => {
@@ -133,7 +164,6 @@ const AlertManager = () => {
     enabled: !!authState.user?.id,
   });
   
-  // Generate suggested alerts based on user activity
   useEffect(() => {
     const generateSuggestions = async () => {
       if (authState.profile && applications) {
@@ -145,7 +175,6 @@ const AlertManager = () => {
     generateSuggestions();
   }, [authState.profile, applications]);
   
-  // Filter alerts based on active tab
   const filteredAlerts = alerts?.filter(alert => {
     if (activeTab === 'active') return alert.isActive;
     return !alert.isActive;

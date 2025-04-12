@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { Resend } from "npm:resend@4.0.0";
@@ -22,8 +21,8 @@ type JobAlert = {
   user_id: string;
   keywords: string[];
   location: string | null;
-  employment_type: string[] | null;
-  job_level: string[] | null;
+  employment_types: string[] | null;
+  job_levels: string[] | null;
   salary_min: number | null;
   salary_max: number | null;
   frequency: "daily_am" | "daily_pm" | "weekly" | "instant";
