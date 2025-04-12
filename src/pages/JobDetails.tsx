@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -472,9 +471,6 @@ const JobDetails: React.FC = () => {
                       })}</span>
                     </div>
                   </div>
-                  
-                  {/* Action buttons moved to the top section, so we can remove them from here */}
-                  
                 </div>
                 
                 <div className="space-y-3 pt-4 border-t">
