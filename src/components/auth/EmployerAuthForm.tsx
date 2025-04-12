@@ -73,8 +73,8 @@ const EmployerAuthForm = () => {
         description: "Welcome to your employer portal! Setting up your account...",
       });
       
-      // Redirect to employer dashboard after registration
-      navigate('/employer/auth?newRegistration=true', { replace: true });
+      // Directly navigate to employer dashboard after registration instead of redirecting to auth page again
+      navigate('/dashboard/employer', { replace: true });
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -89,11 +89,11 @@ const EmployerAuthForm = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setError(null);
     try {
       console.log("EmployerAuthForm: Attempting Google login");
-      await continueWithGoogle();
+      return continueWithGoogle();
     } catch (err) {
       console.error("Google login error:", err);
       setError(err instanceof Error ? err.message : 'Google login failed');
@@ -106,11 +106,11 @@ const EmployerAuthForm = () => {
     }
   };
 
-  const handleLinkedInLogin = async () => {
+  const handleLinkedInLogin = () => {
     setError(null);
     try {
       console.log("EmployerAuthForm: Attempting LinkedIn login");
-      await continueWithLinkedIn();
+      return continueWithLinkedIn();
     } catch (err) {
       console.error("LinkedIn login error:", err);
       setError(err instanceof Error ? err.message : 'LinkedIn login failed');
@@ -153,14 +153,8 @@ const EmployerAuthForm = () => {
           <div className="px-6 pb-6">
             <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
             <SocialLogin
-              onGoogleLogin={() => {
-                console.log("EmployerAuthForm: Attempting Google login");
-                return continueWithGoogle();
-              }}
-              onLinkedInLogin={() => {
-                console.log("EmployerAuthForm: Attempting LinkedIn login");
-                return continueWithLinkedIn();
-              }}
+              onGoogleLogin={handleGoogleLogin}
+              onLinkedInLogin={handleLinkedInLogin}
             />
             <div className="text-center mt-4 text-sm">
               <a href="/auth" className="text-primary hover:underline">
@@ -187,14 +181,8 @@ const EmployerAuthForm = () => {
           <div className="px-6 pb-6">
             <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
             <SocialLogin
-              onGoogleLogin={() => {
-                console.log("EmployerAuthForm: Attempting Google login");
-                return continueWithGoogle();
-              }}
-              onLinkedInLogin={() => {
-                console.log("EmployerAuthForm: Attempting LinkedIn login");
-                return continueWithLinkedIn();
-              }}
+              onGoogleLogin={handleGoogleLogin}
+              onLinkedInLogin={handleLinkedInLogin}
             />
             <div className="text-center mt-4 text-sm">
               <a href="/auth" className="text-primary hover:underline">
