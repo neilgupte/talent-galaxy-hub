@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,8 @@ import {
   MapPin, 
   Share2, 
   Sparkles, 
-  User 
+  User,
+  ArrowRight
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Job, JobEmploymentType, JobOnsiteType, JobLevel } from '@/types';
@@ -27,6 +28,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import JobCard from '@/components/jobs/JobCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const fetchJobDetails = async (id: string): Promise<Job> => {
   try {
@@ -69,12 +71,14 @@ const fetchSimilarJobs = async (currentJobId: string, jobTitle: string, jobLocat
       .limit(4);
     
     if (jobLocation) {
-      query = query.or(`location.ilike.%${jobLocation}%`);
+      // Parse location to avoid SQL injection
+      const sanitizedLocation = jobLocation.split(',')[0].trim(); // Get just the city part
+      query = query.or(`location.ilike.%${sanitizedLocation}%`);
     }
     
     if (keywords.length > 0) {
-      const titleSearch = keywords.map(keyword => `title.ilike.%${keyword}%`).join(',');
-      query = query.or(titleSearch);
+      const titleConditions = keywords.map(keyword => `title.ilike.%${keyword}%`);
+      query = query.or(titleConditions.join(','));
     }
     
     const { data: jobsData, error } = await query;
@@ -194,6 +198,13 @@ const JobDetails: React.FC = () => {
   const { toast } = useToast();
   const { authState } = useAuth();
   const { isAuthenticated, user } = authState;
+  const jobDescriptionRef = useRef<HTMLDivElement>(null);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
+  const [showBottomButtons, setShowBottomButtons] = useState(false);
+  const isMobile = useIsMobile();
+  
+  // Show floating button on mobile (unless we've scrolled to the bottom)
+  const [showFloatingButton, setShowFloatingButton] = useState(isMobile);
   
   const { data: job, isLoading, error } = useQuery({
     queryKey: ['job', id],
@@ -206,6 +217,28 @@ const JobDetails: React.FC = () => {
     queryFn: () => fetchSimilarJobs(id!, job!.title, job!.location),
     enabled: !!id && !!job,
   });
+
+  // Detect when user scrolls to bottom of page
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleScroll = () => {
+      if (!mainContainerRef.current) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      // Check if we're near the bottom of the page
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
+        setShowBottomButtons(true);
+        setShowFloatingButton(false);
+      } else {
+        setShowBottomButtons(false);
+        setShowFloatingButton(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
   
   const handleSaveJob = () => {
     toast({
@@ -281,9 +314,13 @@ const JobDetails: React.FC = () => {
     if (!min && max) return `Up to £${max.toLocaleString()}`;
     return `£${min?.toLocaleString()} - £${max?.toLocaleString()}`;
   };
+
+  // Display only 3 similar jobs for the preview section
+  const previewSimilarJobs = similarJobs.slice(0, 3);
+  const hasMoreSimilarJobs = similarJobs.length > 3;
   
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4" ref={mainContainerRef}>
       <div className="mb-6">
         <Button variant="ghost" onClick={() => navigate(-1)} className="gap-1">
           <ChevronLeft className="h-4 w-4" />
@@ -334,6 +371,46 @@ const JobDetails: React.FC = () => {
                 Priority
               </Badge>
             )}
+
+            {/* Action buttons moved to the top section */}
+            <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-2 w-full md:w-auto">
+              {job.hasApplied ? (
+                <Button
+                  onClick={handleViewApplication}
+                  className="border-primary text-primary bg-white hover:bg-primary/10 hover:text-primary dark:bg-transparent"
+                  variant="outline"
+                >
+                  View Application
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleApply} 
+                  className="w-full sm:w-auto"
+                >
+                  Apply Now
+                </Button>
+              )}
+              
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  className="flex-1 sm:flex-none"
+                  onClick={handleSaveJob}
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  Save
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="flex-1 sm:flex-none"
+                  onClick={handleShareJob}
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -341,10 +418,31 @@ const JobDetails: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-6" ref={jobDescriptionRef}>
               <div className="prose dark:prose-invert max-w-none" 
                 dangerouslySetInnerHTML={{ __html: job.description }} 
               />
+
+              {/* Add Apply Now button at the bottom of the job description */}
+              <div className="mt-8 flex justify-center">
+                {job.hasApplied ? (
+                  <Button
+                    onClick={handleViewApplication}
+                    className="border-primary text-primary bg-white hover:bg-primary/10 hover:text-primary dark:bg-transparent"
+                    variant="outline"
+                    size="lg"
+                  >
+                    View Your Application
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleApply} 
+                    size="lg"
+                  >
+                    Apply Now
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
           
@@ -375,44 +473,8 @@ const JobDetails: React.FC = () => {
                     </div>
                   </div>
                   
-                  {job.hasApplied ? (
-                    <Button
-                      onClick={handleViewApplication}
-                      className="w-full border-primary text-primary bg-white hover:bg-primary/10 hover:text-primary dark:bg-transparent"
-                      variant="outline"
-                      size="lg"
-                    >
-                      View Application
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleApply} 
-                      className="w-full"
-                      size="lg"
-                    >
-                      Apply Now
-                    </Button>
-                  )}
+                  {/* Action buttons moved to the top section, so we can remove them from here */}
                   
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={handleSaveJob}
-                    >
-                      <Heart className="h-4 w-4 mr-2" />
-                      Save
-                    </Button>
-                    
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={handleShareJob}
-                    >
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share
-                    </Button>
-                  </div>
                 </div>
                 
                 <div className="space-y-3 pt-4 border-t">
@@ -470,15 +532,25 @@ const JobDetails: React.FC = () => {
       </div>
       
       <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6">Similar Jobs</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Similar Jobs</h2>
+          
+          {hasMoreSimilarJobs && (
+            <Button variant="outline" asChild className="flex items-center gap-1">
+              <Link to={`/search-results?related=${job.id}`}>
+                See More <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
+        </div>
         
         {isSimilarJobsLoading ? (
           <div className="flex justify-center py-8">
             <p>Loading similar jobs...</p>
           </div>
-        ) : similarJobs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {similarJobs.map(similarJob => (
+        ) : previewSimilarJobs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {previewSimilarJobs.map(similarJob => (
               <JobCard key={similarJob.id} job={similarJob} />
             ))}
           </div>
@@ -488,6 +560,57 @@ const JobDetails: React.FC = () => {
           </div>
         )}
       </div>
+      
+      {/* Mobile floating Apply Now button */}
+      {isMobile && showFloatingButton && !job.hasApplied && (
+        <div className="fixed bottom-6 right-6 left-6 z-50 flex justify-center">
+          <Button 
+            onClick={handleApply}
+            className="flex-1 max-w-xs shadow-lg"
+            size="lg"
+          >
+            Apply Now
+          </Button>
+        </div>
+      )}
+      
+      {/* Bottom buttons that appear at the end of the page on mobile */}
+      {isMobile && showBottomButtons && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 p-4 border-t border-gray-200 dark:border-gray-800 flex gap-2">
+          {job.hasApplied ? (
+            <Button
+              onClick={handleViewApplication}
+              className="flex-1"
+              variant="outline"
+            >
+              View Application
+            </Button>
+          ) : (
+            <Button
+              onClick={handleApply}
+              className="flex-1"
+            >
+              Apply Now
+            </Button>
+          )}
+          
+          <Button
+            variant="outline"
+            className="flex-none"
+            onClick={handleSaveJob}
+          >
+            <Heart className="h-4 w-4" />
+          </Button>
+          
+          <Button
+            variant="outline"
+            className="flex-none"
+            onClick={handleShareJob}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
