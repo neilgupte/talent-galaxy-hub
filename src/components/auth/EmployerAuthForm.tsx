@@ -45,7 +45,16 @@ const EmployerAuthForm = () => {
         description: "Welcome back to your employer portal!",
       });
       
-      // Navigation will be handled by the parent component's useEffect
+      // After successful login, explicitly navigate to employer dashboard
+      // This ensures we don't rely only on the parent component's useEffect
+      if (authState.user?.role === 'employer') {
+        navigate('/dashboard/employer', { replace: true });
+      } else if (authState.user?.role === 'job_seeker') {
+        navigate('/dashboard/job-seeker', { replace: true });
+      } else {
+        // If we don't have role info yet, navigate based on redirectTo
+        navigate(redirectTo, { replace: true });
+      }
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');

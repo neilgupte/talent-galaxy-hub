@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRole, AuthState } from '@/types';
@@ -205,6 +204,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       console.log("AuthContext: Login successful", data.user?.id);
+      
+      // After successful login, fetch the user data to get the role
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user?.id)
+        .single();
+      
+      if (userError) {
+        console.error("Error fetching user role:", userError);
+      } else {
+        console.log("User role determined:", userData.role);
+      }
+      
       toast({
         title: "Login successful",
         description: "Welcome back!",
