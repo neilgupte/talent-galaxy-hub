@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import { UserRole } from '@/types';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { User } from 'lucide-react';
-import LoginForm from './LoginForm';
-import RegisterForm from './RegisterForm';
+import { Building, BriefcaseIcon } from 'lucide-react';
+import EmployerLoginForm from './EmployerLoginForm';
+import EmployerRegisterForm from './EmployerRegisterForm';
 import SocialLogin from './SocialLogin';
 
-const AuthForm = () => {
+const EmployerAuthForm = () => {
   const { login, register, continueWithGoogle, continueWithLinkedIn, authState } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,7 +19,7 @@ const AuthForm = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('login');
 
-  // Check URL parameters for mode and role
+  // Check URL parameters for mode
   useEffect(() => {
     const mode = searchParams.get('mode');
     if (mode === 'signup' || mode === 'register') {
@@ -30,37 +29,23 @@ const AuthForm = () => {
     }
   }, [searchParams]);
 
-  // If user is already authenticated, redirect to appropriate dashboard
-  useEffect(() => {
-    if (authState.isAuthenticated && !authState.isLoading) {
-      console.log("AuthForm: User is already authenticated, redirecting");
-      if (authState.user?.role === 'job_seeker') {
-        navigate('/dashboard/job-seeker', { replace: true });
-      } else if (authState.user?.role === 'employer') {
-        navigate('/dashboard/employer', { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
-    }
-  }, [authState, navigate]);
-
   // Get redirect path from location state
-  const redirectTo = location.state?.redirectTo || '/';
+  const redirectTo = location.state?.redirectTo || '/dashboard/employer';
 
   const handleLogin = async (email: string, password: string) => {
     setError(null);
     setIsLoading(true);
     
     try {
-      console.log("AuthForm: Attempting login");
+      console.log("EmployerAuthForm: Attempting login");
       await login(email, password);
       
       toast({
         title: "Login successful",
-        description: "Welcome back!",
+        description: "Welcome back to your employer portal!",
       });
       
-      // Navigation will be handled by the useEffect above once auth state updates
+      // Navigation will be handled by the useEffect in the AuthContext
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -75,13 +60,13 @@ const AuthForm = () => {
     }
   };
 
-  const handleRegister = async (name: string, email: string, password: string, role: UserRole) => {
+  const handleRegister = async (companyName: string, name: string, email: string, password: string) => {
     setError(null);
     setIsLoading(true);
     
     try {
-      console.log("AuthForm: Attempting registration");
-      await register(name, email, password, role);
+      console.log("EmployerAuthForm: Attempting registration");
+      await register(name, email, password, 'employer');
       
       // No need for a toast as the AuthContext will handle this
       // The user will be automatically logged in and redirected
@@ -103,7 +88,7 @@ const AuthForm = () => {
   const handleGoogleLogin = async () => {
     setError(null);
     try {
-      console.log("AuthForm: Attempting Google login");
+      console.log("EmployerAuthForm: Attempting Google login");
       await continueWithGoogle();
     } catch (err) {
       console.error("Google login error:", err);
@@ -120,7 +105,7 @@ const AuthForm = () => {
   const handleLinkedInLogin = async () => {
     setError(null);
     try {
-      console.log("AuthForm: Attempting LinkedIn login");
+      console.log("EmployerAuthForm: Attempting LinkedIn login");
       await continueWithLinkedIn();
     } catch (err) {
       console.error("LinkedIn login error:", err);
@@ -138,24 +123,24 @@ const AuthForm = () => {
     <Card className="w-full max-w-md mx-auto border-primary/20">
       <div className="flex justify-center pt-6">
         <div className="p-2 rounded-full bg-primary/10">
-          <User className="h-8 w-8 text-primary" />
+          <Building className="h-8 w-8 text-primary" />
         </div>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mt-4">
-          <TabsTrigger value="login">Job Seeker Sign In</TabsTrigger>
-          <TabsTrigger value="register">Create Account</TabsTrigger>
+          <TabsTrigger value="login">Employer Sign In</TabsTrigger>
+          <TabsTrigger value="register">Create Employer Account</TabsTrigger>
         </TabsList>
         
         <TabsContent value="login" className="m-0">
           <CardHeader>
-            <CardTitle>Job Seeker Sign In</CardTitle>
+            <CardTitle>Employer Sign In</CardTitle>
             <CardDescription>
-              Access your account to find new job opportunities
+              Access your employer dashboard to manage job postings and applications
             </CardDescription>
           </CardHeader>
           
-          <LoginForm 
+          <EmployerLoginForm 
             onSubmit={handleLogin}
             isLoading={isLoading}
             error={error}
@@ -168,8 +153,8 @@ const AuthForm = () => {
               onLinkedInLogin={handleLinkedInLogin}
             />
             <div className="text-center mt-4 text-sm">
-              <a href="/employer/auth" className="text-primary hover:underline">
-                Are you an employer? Sign in to your employer account
+              <a href="/auth" className="text-primary hover:underline">
+                Looking for a job? Sign in as a job seeker
               </a>
             </div>
           </div>
@@ -177,13 +162,13 @@ const AuthForm = () => {
         
         <TabsContent value="register" className="m-0">
           <CardHeader>
-            <CardTitle>Create Job Seeker Account</CardTitle>
+            <CardTitle>Create Employer Account</CardTitle>
             <CardDescription>
-              Join TalentHub to find your dream job
+              Join TalentHub to post jobs and find the best candidates
             </CardDescription>
           </CardHeader>
           
-          <RegisterForm
+          <EmployerRegisterForm
             onSubmit={handleRegister}
             isLoading={isLoading}
             error={error}
@@ -196,8 +181,8 @@ const AuthForm = () => {
               onLinkedInLogin={handleLinkedInLogin}
             />
             <div className="text-center mt-4 text-sm">
-              <a href="/employer/auth" className="text-primary hover:underline">
-                Are you an employer? Create an employer account
+              <a href="/auth" className="text-primary hover:underline">
+                Looking for a job? Sign up as a job seeker
               </a>
             </div>
           </div>
@@ -207,4 +192,4 @@ const AuthForm = () => {
   );
 };
 
-export default AuthForm;
+export default EmployerAuthForm;

@@ -8,11 +8,12 @@ import { NotificationProvider } from '@/context/NotificationContext';
 import { QueryProvider } from './providers/QueryProvider';
 import Index from './pages/Index'; 
 import AuthPage from './pages/AuthPage';
+import EmployerAuthPage from './pages/EmployerAuthPage';
 import AuthCallback from './pages/AuthCallback';
 import JobsPage from './pages/JobsPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import JobDetailsPage from './pages/JobDetails';
-import PostJobPage from './pages/PostJobPage'; // Changed to proper import
+import PostJobPage from './pages/PostJobPage'; 
 import PricingPage from './pages/PricingPage';
 import EmployerDashboard from './components/dashboard/EmployerDashboard';
 import JobSeekerDashboard from './components/dashboard/JobSeekerDashboard';
@@ -43,6 +44,7 @@ function App() {
                     
                     {/* Auth Routes */}
                     <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/employer/auth" element={<EmployerAuthPage />} />
                     <Route path="/auth/callback" element={<AuthCallback />} />
 
                     {/* Job Routes */}
