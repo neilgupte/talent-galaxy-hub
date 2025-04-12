@@ -69,7 +69,6 @@ const JobsPageContent: React.FC<JobsPageContentProps> = ({
         totalJobs={totalCount}
         sortBy={sortBy}
         onSortChange={onSortChange}
-        searchQuery={searchQuery}
       />
       
       <JobList jobs={jobs || []} />

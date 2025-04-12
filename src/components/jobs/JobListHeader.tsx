@@ -18,7 +18,7 @@ const JobListHeader: React.FC<JobListHeaderProps> = ({
   return (
     <div className="mb-4 flex justify-between items-center">
       <div className="text-sm text-muted-foreground">
-        {totalJobs} {totalJobs === 1 ? 'job' : 'jobs'} found
+        {totalJobs} {totalJobs === 1 ? 'job' : 'jobs'} 
         {searchQuery && <span> for "{searchQuery}"</span>}
       </div>
       <div className="flex items-center gap-2">

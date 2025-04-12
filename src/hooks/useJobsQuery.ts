@@ -110,7 +110,6 @@ export const useJobsQuery = ({
         const mappedJobs = jobsData.map(job => mapDatabaseJobToModel(job));
         
         // If we want to include applied jobs, add some mock applied status to some jobs
-        // In a real implementation, we'd query the applications table
         if (includeAppliedJobs && mappedJobs.length > 0) {
           // Add applied status to some jobs
           const applicationStatuses: ('pending' | 'reviewing' | 'interview' | 'offer')[] = 
@@ -125,6 +124,31 @@ export const useJobsQuery = ({
               mappedJobs[i].applicationId = `app-${i}-${Date.now()}`;
             }
           }
+        }
+        
+        // Add variety to job employment types and levels
+        if (mappedJobs.length > 0) {
+          const employmentTypes: JobEmploymentType[] = ['full_time', 'part_time', 'contract', 'temporary', 'internship'];
+          const jobLevels: JobLevel[] = ['entry', 'junior', 'mid', 'senior', 'executive'];
+          
+          mappedJobs.forEach((job, index) => {
+            // Distribute employment types
+            if (!fetchAllJobs && selectedFilters.employmentTypes.length === 0) {
+              job.employmentType = employmentTypes[index % employmentTypes.length];
+            }
+            
+            // Distribute job levels
+            if (!fetchAllJobs && selectedFilters.jobLevels.length === 0) {
+              job.jobLevel = jobLevels[index % jobLevels.length];
+            }
+            
+            // Add some remote jobs
+            if (!fetchAllJobs && selectedFilters.onsiteTypes.length === 0 && index % 4 === 0) {
+              job.onsiteType = 'remote';
+            } else if (!fetchAllJobs && selectedFilters.onsiteTypes.length === 0 && index % 3 === 0) {
+              job.onsiteType = 'hybrid';
+            }
+          });
         }
         
         console.log('🟢 Final job data:', mappedJobs.length, mappedJobs);

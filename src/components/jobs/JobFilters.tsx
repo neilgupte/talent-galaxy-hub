@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -10,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { X, SlidersHorizontal } from 'lucide-react';
+import { X, SlidersHorizontal, RefreshCw } from 'lucide-react';
 
 interface JobFiltersProps {
   filters: {
@@ -86,7 +85,19 @@ const JobFilters: React.FC<JobFiltersProps> = ({ filters, onChange }) => {
   const FiltersContent = () => (
     <div className="border rounded-lg p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Filters</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold">Filters</h3>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={clearAllFilters}
+            className="h-7 text-xs"
+          >
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Reset
+          </Button>
+        </div>
+        
         {hasActiveFilters && (
           <Button variant="ghost" className="h-auto p-0 text-sm" onClick={clearAllFilters}>
             Clear All
@@ -100,8 +111,8 @@ const JobFilters: React.FC<JobFiltersProps> = ({ filters, onChange }) => {
           <AccordionContent>
             <div className="space-y-4 py-2">
               <div className="flex justify-between text-sm">
-                <span>${filters.salaryRange[0].toLocaleString()}</span>
-                <span>${filters.salaryRange[1].toLocaleString()}</span>
+                <span>£{filters.salaryRange[0].toLocaleString()}</span>
+                <span>£{filters.salaryRange[1].toLocaleString()}</span>
               </div>
               <Slider
                 max={250000}
