@@ -82,12 +82,9 @@ const AuthForm = () => {
       console.log("AuthForm: Attempting registration");
       await register(name, email, password, role);
       
-      toast({
-        title: "Registration successful",
-        description: "Welcome to TalentHub! Please check your email to confirm your account.",
-      });
+      // No need for a toast as the AuthContext will handle this
+      // The user will be automatically logged in and redirected
       
-      // Redirect will be handled by the auth state change in AuthContext
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : 'Registration failed');

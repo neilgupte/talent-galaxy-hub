@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRole, AuthState } from '@/types';
@@ -222,7 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (name: string, email: string, password: string, role: UserRole): Promise<void> => {
     try {
       console.log("AuthContext: Register attempt", { email, role });
-      // Configure registration with options
+      // Configure registration with no email verification
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -231,7 +232,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name,
             role
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          // Remove email redirect to disable verification
+          emailRedirectTo: undefined,
         }
       });
 
@@ -248,8 +250,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("AuthContext: Registration successful", data.user?.id);
       toast({
         title: "Registration successful",
-        description: "Please check your email to confirm your account.",
+        description: "Your account has been created! You can now sign in.",
       });
+      
+      // Auto-login after registration
+      if (data.user) {
+        await login(email, password);
+      }
     } catch (error: any) {
       console.error("Registration failed:", error);
       toast({
