@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import EmployerAuthForm from '@/components/auth/EmployerAuthForm';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth/useAuth';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 const EmployerAuthPage = () => {

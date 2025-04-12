@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth/useAuth';
 import AlertManager from '@/components/alerts/AlertManager';
 
 const AlertSettingsPage = () => {

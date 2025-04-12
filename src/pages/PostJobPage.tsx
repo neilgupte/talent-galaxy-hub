@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import JobPostFormWrapper from '@/components/jobs/JobPostFormWrapper';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';

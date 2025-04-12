@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import AuthForm from '@/components/auth/AuthForm';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth/useAuth';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 const AuthPage = () => {
