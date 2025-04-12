@@ -1,12 +1,15 @@
 
 import React from 'react';
-import { 
-  Pagination, 
-  PaginationContent, 
-  PaginationItem, 
-  PaginationLink, 
-  PaginationNext, 
-  PaginationPrevious 
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
 } from '@/components/ui/pagination';
 
 interface JobsPaginationProps {
@@ -15,112 +18,81 @@ interface JobsPaginationProps {
   onPageChange: (page: number) => void;
 }
 
-const JobsPagination: React.FC<JobsPaginationProps> = ({ 
-  currentPage, 
-  totalPages, 
-  onPageChange 
+const JobsPagination: React.FC<JobsPaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
 }) => {
-  
-  const handlePageChange = (page: number) => {
-    onPageChange(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  
-  const renderPaginationItems = () => {
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-        <PaginationItem key={page}>
-          <PaginationLink 
-            isActive={currentPage === page}
-            onClick={() => handlePageChange(page)}
-          >
-            {page}
-          </PaginationLink>
-        </PaginationItem>
-      ));
-    } else {
-      const items = [];
-      
-      items.push(
-        <PaginationItem key="first">
-          <PaginationLink 
-            isActive={currentPage === 1}
-            onClick={() => handlePageChange(1)}
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-      );
-      
-      if (currentPage > 3) {
-        items.push(
-          <PaginationItem key="ellipsis1">
-            <span className="flex h-9 w-9 items-center justify-center">...</span>
-          </PaginationItem>
-        );
-      }
-      
-      const startPage = Math.max(2, currentPage - 1);
-      const endPage = Math.min(totalPages - 1, currentPage + 1);
-      
-      for (let i = startPage; i <= endPage; i++) {
-        items.push(
-          <PaginationItem key={i}>
-            <PaginationLink 
-              isActive={currentPage === i}
-              onClick={() => handlePageChange(i)}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-      
-      if (currentPage < totalPages - 2) {
-        items.push(
-          <PaginationItem key="ellipsis2">
-            <span className="flex h-9 w-9 items-center justify-center">...</span>
-          </PaginationItem>
-        );
-      }
-      
-      items.push(
-        <PaginationItem key="last">
-          <PaginationLink 
-            isActive={currentPage === totalPages}
-            onClick={() => handlePageChange(totalPages)}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-      
-      return items;
-    }
-  };
-
   if (totalPages <= 1) {
     return null;
   }
-
+  
+  // Generate page numbers array for rendering
+  const getPageNumbers = () => {
+    const pages = [];
+    
+    // Always show first page
+    pages.push(1);
+    
+    // Add ellipsis if there are more than 5 pages and we're not within the first 3 pages
+    if (totalPages > 5 && currentPage > 3) {
+      pages.push(-1); // Use -1 as a marker for ellipsis
+    }
+    
+    // Add pages before and after current page
+    const startPage = Math.max(2, currentPage - 1);
+    const endPage = Math.min(totalPages - 1, currentPage + 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    // Add ellipsis if there are more than 5 pages and we're not within the last 3 pages
+    if (totalPages > 5 && currentPage < totalPages - 2) {
+      pages.push(-2); // Use -2 as another marker for ellipsis
+    }
+    
+    // Always show last page if it's not the first page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+  
+  const pageNumbers = getPageNumbers();
+  
   return (
-    <Pagination className="my-8">
+    <Pagination className="mt-6">
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious 
-            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-            aria-disabled={currentPage === 1}
-            className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+          <PaginationPrevious
+            onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
           />
         </PaginationItem>
         
-        {renderPaginationItems()}
+        {pageNumbers.map((page, index) => (
+          page < 0 ? (
+            <PaginationItem key={`ellipsis-${index}`}>
+              <PaginationEllipsis />
+            </PaginationItem>
+          ) : (
+            <PaginationItem key={page}>
+              <PaginationLink 
+                isActive={page === currentPage} 
+                onClick={() => onPageChange(page)}
+              >
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          )
+        ))}
         
         <PaginationItem>
-          <PaginationNext 
-            onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
-            aria-disabled={currentPage === totalPages}
-            className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+          <PaginationNext
+            onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
+            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
           />
         </PaginationItem>
       </PaginationContent>
