@@ -1,3 +1,4 @@
+
 export type UserRole = 'job_seeker' | 'employer' | 'admin';
 
 export type JobEmploymentType = 'full_time' | 'part_time' | 'contract' | 'temporary' | 'internship' | 'job_share';
@@ -76,6 +77,14 @@ export interface Company {
   logoUrl?: string;
   planType: string;
   jobsPosted?: number;
+  // Add the missing properties
+  website?: string;
+  logo?: string;
+  size?: string;
+  founded?: string;
+  location?: string;
+  phone?: string;
+  email?: string;
 }
 
 export interface Job {
