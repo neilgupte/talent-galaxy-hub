@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,14 +31,6 @@ const EmployerAuthForm = () => {
   // Get redirect path from location state
   const redirectTo = location.state?.redirectTo || '/dashboard/employer';
 
-  // Redirect to appropriate page after successful authentication
-  useEffect(() => {
-    if (authState.isAuthenticated && authState.user?.role === 'employer' && !authState.isLoading) {
-      console.log("EmployerAuthForm: User authenticated, redirecting to", redirectTo);
-      navigate(redirectTo, { replace: true });
-    }
-  }, [authState.isAuthenticated, authState.user, authState.isLoading, navigate, redirectTo]);
-
   const handleLogin = async (email: string, password: string) => {
     setError(null);
     setIsLoading(true);
@@ -53,7 +44,7 @@ const EmployerAuthForm = () => {
         description: "Welcome back to your employer portal!",
       });
       
-      // Navigation will be handled by the useEffect above
+      // Navigation will be handled by the parent component's useEffect
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -81,7 +72,8 @@ const EmployerAuthForm = () => {
         description: "Welcome to your employer portal! Setting up your account...",
       });
       
-      // Navigation will be handled by the useEffect above
+      // Redirect to employer dashboard after registration
+      navigate('/employer/auth?newRegistration=true', { replace: true });
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -160,8 +152,14 @@ const EmployerAuthForm = () => {
           <div className="px-6 pb-6">
             <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
             <SocialLogin
-              onGoogleLogin={handleGoogleLogin}
-              onLinkedInLogin={handleLinkedInLogin}
+              onGoogleLogin={() => {
+                console.log("EmployerAuthForm: Attempting Google login");
+                continueWithGoogle();
+              }}
+              onLinkedInLogin={() => {
+                console.log("EmployerAuthForm: Attempting LinkedIn login");
+                continueWithLinkedIn();
+              }}
             />
             <div className="text-center mt-4 text-sm">
               <a href="/auth" className="text-primary hover:underline">
@@ -188,8 +186,14 @@ const EmployerAuthForm = () => {
           <div className="px-6 pb-6">
             <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
             <SocialLogin
-              onGoogleLogin={handleGoogleLogin}
-              onLinkedInLogin={handleLinkedInLogin}
+              onGoogleLogin={() => {
+                console.log("EmployerAuthForm: Attempting Google login");
+                continueWithGoogle();
+              }}
+              onLinkedInLogin={() => {
+                console.log("EmployerAuthForm: Attempting LinkedIn login");
+                continueWithLinkedIn();
+              }}
             />
             <div className="text-center mt-4 text-sm">
               <a href="/auth" className="text-primary hover:underline">

@@ -15,21 +15,25 @@ const EmployerAuthPage = () => {
     location.state?.redirectTo || 
     searchParams.get('redirectTo') || 
     '/dashboard/employer';
+    
+  // If coming from registration, redirect to employer dashboard
+  const isNewRegistration = searchParams.get('newRegistration') === 'true';
+  const effectiveRedirect = isNewRegistration ? '/dashboard/employer' : redirectTo;
 
   // Redirect if already authenticated as employer
   useEffect(() => {
     if (authState.isAuthenticated && !authState.isLoading) {
       console.log("EmployerAuthPage: User is already authenticated, checking role", authState.user?.role);
       if (authState.user?.role === 'employer') {
-        console.log("EmployerAuthPage: Redirecting to", redirectTo);
-        navigate(redirectTo, { replace: true });
+        console.log("EmployerAuthPage: Redirecting to", effectiveRedirect);
+        navigate(effectiveRedirect, { replace: true });
       } else if (authState.user?.role === 'job_seeker') {
         // Redirect job seekers to regular dashboard
         console.log("EmployerAuthPage: User is a job seeker, redirecting to job seeker dashboard");
         navigate('/dashboard/job-seeker', { replace: true });
       }
     }
-  }, [authState, navigate, redirectTo]);
+  }, [authState, navigate, effectiveRedirect]);
 
   return (
     <div className="container mx-auto px-4 py-12 flex flex-col items-center">

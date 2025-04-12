@@ -14,11 +14,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, BookmarkCheck, FileText, X, Search } from "lucide-react";
+import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, BookmarkCheck, FileText, Search } from "lucide-react";
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Separator } from "@/components/ui/separator";
 import SearchBox from "@/components/jobs/SearchBox";
-import CountrySwitcher from "@/components/layout/CountrySwitcher";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -57,9 +56,6 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          {/* Add Country Switcher */}
-          <CountrySwitcher currentCountry="UK" />
-          
           {isAuthenticated ? (
             <>
               <NotificationCenter 
@@ -128,12 +124,20 @@ const Navbar = () => {
                         </DropdownMenuItem>
                       </>
                     ) : (
-                      <DropdownMenuItem asChild>
-                        <Link to="/dashboard/employer">
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          <span>Dashboard</span>
-                        </Link>
-                      </DropdownMenuItem>
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard/employer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/jobs/post">
+                            <Briefcase className="mr-2 h-4 w-4" />
+                            <span>Post a Job</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
                     )}
                     <DropdownMenuItem asChild>
                       <Link to="/notifications">
@@ -152,15 +156,19 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Button variant="ghost" asChild className="text-gray-700">
-                <Link to="/auth?mode=login">Log in</Link>
-              </Button>
-              <Button asChild className="bg-blue-600 hover:bg-blue-700">
-                <Link to="/auth?mode=signup">Sign up</Link>
-              </Button>
-              <Button asChild className="bg-white border border-gray-300 text-gray-800 hover:bg-gray-50">
-                <Link to="/auth?mode=signup&role=employer">Post a Job</Link>
-              </Button>
+              <div className="flex gap-2 items-center">
+                <div>
+                  <Button variant="ghost" asChild className="text-gray-700">
+                    <Link to="/auth">Sign In - Job Seeker</Link>
+                  </Button>
+                </div>
+                <Separator orientation="vertical" className="h-6" />
+                <div>
+                  <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                    <Link to="/employer/auth">Employer/Post a Job</Link>
+                  </Button>
+                </div>
+              </div>
             </>
           )}
         </div>

@@ -30,20 +30,6 @@ const AuthForm = () => {
     }
   }, [searchParams]);
 
-  // If user is already authenticated, redirect to appropriate dashboard
-  useEffect(() => {
-    if (authState.isAuthenticated && !authState.isLoading) {
-      console.log("AuthForm: User is already authenticated, redirecting");
-      if (authState.user?.role === 'job_seeker') {
-        navigate('/dashboard/job-seeker', { replace: true });
-      } else if (authState.user?.role === 'employer') {
-        navigate('/dashboard/employer', { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
-    }
-  }, [authState, navigate]);
-
   // Get redirect path from location state
   const redirectTo = location.state?.redirectTo || '/';
 
@@ -60,7 +46,7 @@ const AuthForm = () => {
         description: "Welcome back!",
       });
       
-      // Navigation will be handled by the useEffect above once auth state updates
+      // Navigation will be handled by the AuthPage component
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -83,8 +69,13 @@ const AuthForm = () => {
       console.log("AuthForm: Attempting registration");
       await register(name, email, password, role);
       
-      // No need for a toast as the AuthContext will handle this
-      // The user will be automatically logged in and redirected
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created!",
+      });
+      
+      // For new registrations, redirect to profile page
+      navigate('/auth?newRegistration=true', { replace: true });
       
     } catch (err) {
       console.error("Registration error:", err);
@@ -164,8 +155,14 @@ const AuthForm = () => {
           <div className="px-6 pb-6">
             <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
             <SocialLogin
-              onGoogleLogin={handleGoogleLogin}
-              onLinkedInLogin={handleLinkedInLogin}
+              onGoogleLogin={() => {
+                console.log("AuthForm: Attempting Google login");
+                continueWithGoogle();
+              }}
+              onLinkedInLogin={() => {
+                console.log("AuthForm: Attempting LinkedIn login");
+                continueWithLinkedIn();
+              }}
             />
             <div className="text-center mt-4 text-sm">
               <a href="/employer/auth" className="text-primary hover:underline">
@@ -192,8 +189,14 @@ const AuthForm = () => {
           <div className="px-6 pb-6">
             <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
             <SocialLogin
-              onGoogleLogin={handleGoogleLogin}
-              onLinkedInLogin={handleLinkedInLogin}
+              onGoogleLogin={() => {
+                console.log("AuthForm: Attempting Google login");
+                continueWithGoogle();
+              }}
+              onLinkedInLogin={() => {
+                console.log("AuthForm: Attempting LinkedIn login");
+                continueWithLinkedIn();
+              }}
             />
             <div className="text-center mt-4 text-sm">
               <a href="/employer/auth" className="text-primary hover:underline">
