@@ -78,7 +78,7 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
 export const registerUser = async (name: string, email: string, password: string, role: UserRole) => {
   try {
     console.log("AuthUtils: Registering new user", { email, role });
-    // Configure registration with options
+    // Configure registration with no email verification
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -87,7 +87,8 @@ export const registerUser = async (name: string, email: string, password: string
           name,
           role
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // Remove email redirect to disable verification
+        emailRedirectTo: undefined, 
       }
     });
 
@@ -99,7 +100,7 @@ export const registerUser = async (name: string, email: string, password: string
     console.log("AuthUtils: Registration successful", data.user?.id);
     toast({
       title: "Registration successful",
-      description: "Please check your email to confirm your account.",
+      description: "Your account has been created! You can now sign in.",
     });
     
     return data;

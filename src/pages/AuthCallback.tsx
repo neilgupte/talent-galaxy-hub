@@ -46,7 +46,7 @@ const AuthCallback = () => {
           await refreshSession();
         } else {
           console.log("Auth callback: No tokens in URL hash, checking existing session");
-          // Standard email verification flow
+          // Standard auth flow
           const { data, error } = await supabase.auth.getSession();
           
           console.log("Auth callback: Session check result", data, error);
