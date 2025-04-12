@@ -1,200 +1,23 @@
 
-export type UserRole = 'job_seeker' | 'employer' | 'admin';
+// Main types file - re-exports all types from domain-specific files
 
-export type JobEmploymentType = 'full_time' | 'part_time' | 'contract' | 'temporary' | 'internship' | 'job_share';
+// Common types
+export * from './common-types';
 
-export type JobOnsiteType = 'onsite' | 'hybrid' | 'remote';
+// Auth related types
+export * from './auth-types';
 
-export type JobLevel = 'entry' | 'junior' | 'mid' | 'senior' | 'executive';
+// Profile related types
+export * from './profile-types';
 
-export type ApplicationStatus = 
-  | 'pending'
-  | 'reviewing' 
-  | 'interview' 
-  | 'offer' 
-  | 'rejected' 
-  | 'accepted'
-  | 'withdrawn';
+// Company related types
+export * from './company-types';
 
-export type QuestionType = 'text' | 'mcq' | 'yesno';
+// Job related types
+export * from './job-types';
 
-export type JobSeekerStatus = 'not_open' | 'employed_but_open' | 'actively_seeking';
+// Application related types
+export * from './application-types';
 
-export type ContactPreference = 'email' | 'phone' | 'both';
-
-export type AlertFrequency = 'daily_am' | 'daily_pm' | 'weekly' | 'instant';
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  phone?: string; // Added phone as optional property
-  createdAt: string;
-  companyName?: string; // Added companyName as optional property
-}
-
-export interface Profile {
-  userId: string;
-  headline: string;
-  bio: string;
-  location: string;
-  currentTitle: string;
-  skills: string[];
-  avatarUrl?: string;
-  phone?: string;
-  contactPreference?: ContactPreference;
-  jobSeekerStatus?: JobSeekerStatus;
-  cvs?: CV[];
-}
-
-export interface Experience {
-  id: string;
-  profileId: string;
-  title: string;
-  company: string;
-  startDate: string;
-  endDate?: string;
-  isCurrent?: boolean;
-  description: string;
-}
-
-export interface Education {
-  id: string;
-  profileId: string;
-  degree: string;
-  institution: string;
-  startYear: number;
-  endYear?: number;
-  isCurrent?: boolean;
-}
-
-export interface Company {
-  id: string;
-  name: string;
-  industry: string;
-  description: string;
-  logoUrl?: string;
-  planType: string;
-  jobsPosted?: number;
-  // Add the missing properties
-  website?: string;
-  logo?: string;
-  size?: string;
-  founded?: string;
-  location?: string;
-  phone?: string;
-  email?: string;
-}
-
-export interface Job {
-  id: string;
-  companyId: string;
-  title: string;
-  description: string;
-  location: string;
-  locations?: string[];
-  salaryMin?: number;
-  salaryMax?: number;
-  employmentType: JobEmploymentType;
-  onsiteType: JobOnsiteType;
-  jobLevel: JobLevel;
-  requirements: string[];
-  benefits?: string[]; // Added benefits as optional property
-  status: 'draft' | 'active' | 'expired' | 'closed';
-  isHighPriority: boolean;
-  isBoosted: boolean;
-  endDate: string;
-  createdAt: string;
-  updatedAt: string;
-  country?: string;
-  city?: string;
-  currency?: string;
-  acceptsInternationalApplications?: boolean;
-  visaSponsorshipAvailable?: boolean;
-  
-  // Joined fields
-  company?: Company;
-  questions?: JobQuestion[];
-  matchPercentage?: number; // Calculated field for job seekers
-  hasApplied?: boolean; // Flag if the current user has applied
-  applicationStatus?: ApplicationStatus; // Current status if applied
-  applicationId?: string; // Reference to the user's application for this job
-}
-
-export interface JobQuestion {
-  id: string;
-  jobId: string;
-  questionText: string;
-  type: QuestionType;
-  isRequired: boolean;
-  isKnockout: boolean;
-  idealAnswer?: string;
-  options?: string[]; // For MCQ questions
-}
-
-export interface Application {
-  id: string;
-  userId: string;
-  jobId: string;
-  appliedAt: string;
-  status: ApplicationStatus;
-  aiScore?: number;
-  feedbackText?: string;
-  appealMessage?: string;
-  
-  // Joined fields
-  job?: Job;
-  answers?: Answer[];
-}
-
-export interface Answer {
-  id: string;
-  applicationId: string;
-  questionId: string;
-  answerText: string;
-  aiScore?: number;
-}
-
-export interface CV {
-  id: string;
-  userId: string;
-  fileName: string;
-  fileUrl: string;
-  uploadDate: string;
-  isDefault?: boolean;
-}
-
-export interface JobAlert {
-  id: string;
-  userId: string;
-  keywords: string[];
-  location: string | null;
-  employmentTypes: JobEmploymentType[] | null;
-  jobLevels: JobLevel[] | null;
-  salaryMin: number | null;
-  salaryMax: number | null;
-  frequency: AlertFrequency;
-  isActive: boolean;
-  createdAt: string;
-  lastTriggeredAt: string | null;
-  nextScheduledAt: string | null;
-}
-
-export interface AuthState {
-  user: User | null;
-  profile: Profile | null;
-  company: Company | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
-
-export interface GeolocationInfo {
-  country: string;
-  city: string;
-  countryCode: string;
-  currency: {
-    code: string;
-    symbol: string;
-  };
-}
+// Alert related types
+export * from './alert-types';
