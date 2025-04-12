@@ -1,5 +1,6 @@
 
 import { Company } from './company-types';
+import { ApplicationStatus } from './application-types';
 
 export type JobEmploymentType = 'full_time' | 'part_time' | 'contract' | 'temporary' | 'internship' | 'job_share';
 

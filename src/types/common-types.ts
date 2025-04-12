@@ -7,6 +7,8 @@ export type ContactPreference = 'email' | 'phone' | 'both';
 
 export type AlertFrequency = 'daily_am' | 'daily_pm' | 'weekly' | 'instant';
 
+export type JobSeekerStatus = 'not_open' | 'employed_but_open' | 'actively_seeking';
+
 export interface GeolocationInfo {
   country: string;
   city: string;

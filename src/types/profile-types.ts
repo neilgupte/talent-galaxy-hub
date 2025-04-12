@@ -44,6 +44,3 @@ export interface Education {
   endYear?: number;
   isCurrent?: boolean;
 }
-
-// Add JobSeekerStatus type since it's referenced but not defined in common-types
-export type JobSeekerStatus = 'not_open' | 'employed_but_open' | 'actively_seeking';
