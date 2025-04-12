@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
+import { Button } from '@/components/ui/button';
 
 export function useJobCard() {
   const { toast } = useToast();
@@ -63,6 +64,3 @@ export function useJobCard() {
     handleHideJob
   };
 }
-
-// Add Button type to avoid TypeScript errors
-import { Button } from '@/components/ui/button';
