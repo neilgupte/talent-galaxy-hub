@@ -9,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { X, SlidersHorizontal, RefreshCw } from 'lucide-react';
+import { X, SlidersHorizontal } from 'lucide-react';
 
 interface JobFiltersProps {
   filters: {
@@ -85,21 +85,10 @@ const JobFilters: React.FC<JobFiltersProps> = ({ filters, onChange }) => {
   const FiltersContent = () => (
     <div className="border rounded-lg p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold">Filters</h3>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={clearAllFilters}
-            className="h-7 text-xs"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Reset
-          </Button>
-        </div>
+        <h3 className="font-semibold">Filters</h3>
         
         {hasActiveFilters && (
-          <Button variant="ghost" className="h-auto p-0 text-sm" onClick={clearAllFilters}>
+          <Button variant="outline" size="sm" onClick={clearAllFilters}>
             Clear All
           </Button>
         )}

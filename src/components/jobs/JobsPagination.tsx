@@ -16,14 +16,17 @@ interface JobsPaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  totalCount: number;
 }
 
 const JobsPagination: React.FC<JobsPaginationProps> = ({
   currentPage,
   totalPages,
   onPageChange,
+  totalCount,
 }) => {
-  if (totalPages <= 1) {
+  // Only show pagination when there are 21 or more jobs
+  if (totalPages <= 1 || totalCount < 21) {
     return null;
   }
   

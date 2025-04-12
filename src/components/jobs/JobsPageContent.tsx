@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -82,6 +81,7 @@ const JobsPageContent: React.FC<JobsPageContentProps> = ({
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={onPageChange}
+        totalCount={totalCount}
       />
     </>
   );
