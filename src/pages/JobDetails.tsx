@@ -20,7 +20,9 @@ import {
   Sparkles, 
   User,
   ArrowRight,
-  Check
+  Check,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Job, JobEmploymentType, JobOnsiteType, JobLevel } from '@/types';
@@ -31,6 +33,7 @@ import JobCard from '@/components/jobs/JobCard';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CountrySwitcher from '@/components/layout/CountrySwitcher';
 import { mapDatabaseJobToModel } from '@/utils/jobMappers';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const fetchJobDetails = async (id: string): Promise<Job> => {
   try {

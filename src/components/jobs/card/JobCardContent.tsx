@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Globe, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Globe, CheckCircle2 } from 'lucide-react';
 import { Job } from '@/types';
 import { Button } from '@/components/ui/button';
 
@@ -16,15 +16,6 @@ const JobCardContent: React.FC<JobCardContentProps> = ({
   formatSalary,
   displayLocation
 }) => {
-  const [showAllBenefits, setShowAllBenefits] = useState(false);
-  
-  // Display first 3 benefits only if not expanded
-  const visibleBenefits = showAllBenefits 
-    ? job.benefits || [] 
-    : (job.benefits || []).slice(0, 3);
-    
-  const hiddenBenefitsCount = job.benefits ? job.benefits.length - 3 : 0;
-  
   return (
     <div className="p-4 pt-0">
       <div className="space-y-2 mb-4">
@@ -68,44 +59,6 @@ const JobCardContent: React.FC<JobCardContentProps> = ({
         {job.description}
       </p>
 
-      {job.benefits && job.benefits.length > 0 && (
-        <div className="mt-3">
-          <div className="text-sm font-medium mb-1">Key Benefits:</div>
-          <ul className="text-sm text-muted-foreground space-y-1">
-            {visibleBenefits.map((benefit, i) => (
-              <li key={i} className="flex items-start">
-                <span className="mr-2">•</span>
-                <span>{benefit}</span>
-              </li>
-            ))}
-          </ul>
-          {hiddenBenefitsCount > 0 && (
-            <Button 
-              variant="link" 
-              size="sm" 
-              className="p-0 h-auto text-sm text-blue-500 flex items-center mt-1"
-              onClick={(e) => {
-                e.preventDefault(); // Prevent link navigation
-                e.stopPropagation(); // Prevent event bubbling
-                setShowAllBenefits(!showAllBenefits);
-              }}
-            >
-              {showAllBenefits ? (
-                <>
-                  <ChevronUp className="h-4 w-4 mr-1" />
-                  Show less
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="h-4 w-4 mr-1" />
-                  + {hiddenBenefitsCount} more benefits
-                </>
-              )}
-            </Button>
-          )}
-        </div>
-      )}
-      
       {job.hasApplied && (
         <div className="mt-3 flex items-center text-sm text-green-600 dark:text-green-400 font-medium">
           <CheckCircle2 className="h-4 w-4 mr-1" />
