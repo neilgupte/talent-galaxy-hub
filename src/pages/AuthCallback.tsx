@@ -5,6 +5,7 @@ import { useAuth } from '@/context/auth/useAuth';
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from '@/hooks/use-toast';
 
 const AuthCallback = () => {
   const { authState, refreshSession } = useAuth();
@@ -72,18 +73,28 @@ const AuthCallback = () => {
     if (!verifying && !error) {
       if (authState.isAuthenticated) {
         console.log("Authentication successful, redirecting based on role:", authState.user?.role);
-        // Redirect based on user role with a delay to ensure state is fully updated
-        setTimeout(() => {
-          if (authState.user?.role === 'job_seeker') {
-            navigate('/dashboard/job-seeker', { replace: true });
-          } else if (authState.user?.role === 'employer') {
-            navigate('/dashboard/employer', { replace: true });
-          } else {
-            navigate('/', { replace: true });
-          }
-        }, 300);
+
+        // Show welcome toast
+        toast({
+          title: "Authentication successful!",
+          description: "Welcome to TalentHub. Redirecting to your dashboard..."
+        });
+        
+        // Redirect based on user role using directly navigation
+        if (authState.user?.role === 'job_seeker') {
+          navigate('/dashboard/job-seeker', { replace: true });
+        } else if (authState.user?.role === 'employer') {
+          navigate('/dashboard/employer', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
       } else if (!authState.isLoading) {
         console.log("Authentication failed, redirecting to auth page");
+        toast({
+          title: "Authentication failed",
+          description: "Please try logging in again.",
+          variant: "destructive"
+        });
         // If authentication failed and not still loading
         navigate('/auth', { replace: true });
       }

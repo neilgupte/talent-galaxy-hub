@@ -71,7 +71,7 @@ const PostJobPage: React.FC = () => {
         description: "Fill out the form below to create your job posting.",
       });
     }
-  }, []);
+  }, [isEmployer]);
   
   return <JobPostFormWrapper />;
 };

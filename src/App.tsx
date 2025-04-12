@@ -27,6 +27,8 @@ import ViewApplicationPage from './pages/ViewApplicationPage';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import JobApplicationSuccess from './pages/JobApplicationSuccess';
+import CompanyProfilePage from './pages/CompanyProfilePage';
+import AccountUpgrade from './pages/AccountUpgrade';
 
 function App() {
   return (
@@ -69,8 +71,10 @@ function App() {
 
                     {/* Profile Routes */}
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/company/profile" element={<CompanyProfilePage />} />
                     <Route path="/profile/alerts" element={<AlertSettingsPage />} />
                     <Route path="/saved-jobs" element={<SavedJobsPage />} />
+                    <Route path="/account/upgrade" element={<AccountUpgrade />} />
                   </Routes>
                 </main>
                 <Footer />

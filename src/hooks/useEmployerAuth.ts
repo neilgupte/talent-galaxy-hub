@@ -26,11 +26,8 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
       
       console.log("useEmployerAuth: Login successful, navigating to employer dashboard");
       
-      // Force navigation with a slight delay to ensure auth state is updated
-      setTimeout(() => {
-        console.log("useEmployerAuth: Executing redirect to", redirectTo);
-        navigate(redirectTo, { replace: true });
-      }, 300); // Increased timeout for more reliable state updates
+      // Force immediate navigation to employer dashboard
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -59,11 +56,8 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
       });
       
       console.log("useEmployerAuth: Registration successful, navigating to employer dashboard");
-      // Directly navigate to employer dashboard after registration with delay
-      setTimeout(() => {
-        console.log("useEmployerAuth: Executing redirect to", redirectTo);
-        navigate(redirectTo, { replace: true });
-      }, 300); // Increased timeout for more reliable state updates
+      // Directly navigate to employer dashboard after registration
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : 'Registration failed');
