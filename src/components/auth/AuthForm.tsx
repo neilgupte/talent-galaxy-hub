@@ -157,11 +157,11 @@ const AuthForm = () => {
             <SocialLogin
               onGoogleLogin={() => {
                 console.log("AuthForm: Attempting Google login");
-                continueWithGoogle();
+                return continueWithGoogle();
               }}
               onLinkedInLogin={() => {
                 console.log("AuthForm: Attempting LinkedIn login");
-                continueWithLinkedIn();
+                return continueWithLinkedIn();
               }}
             />
             <div className="text-center mt-4 text-sm">
@@ -191,11 +191,11 @@ const AuthForm = () => {
             <SocialLogin
               onGoogleLogin={() => {
                 console.log("AuthForm: Attempting Google login");
-                continueWithGoogle();
+                return continueWithGoogle();
               }}
               onLinkedInLogin={() => {
                 console.log("AuthForm: Attempting LinkedIn login");
-                continueWithLinkedIn();
+                return continueWithLinkedIn();
               }}
             />
             <div className="text-center mt-4 text-sm">

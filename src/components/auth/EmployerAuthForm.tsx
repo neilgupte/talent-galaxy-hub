@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -154,11 +155,11 @@ const EmployerAuthForm = () => {
             <SocialLogin
               onGoogleLogin={() => {
                 console.log("EmployerAuthForm: Attempting Google login");
-                continueWithGoogle();
+                return continueWithGoogle();
               }}
               onLinkedInLogin={() => {
                 console.log("EmployerAuthForm: Attempting LinkedIn login");
-                continueWithLinkedIn();
+                return continueWithLinkedIn();
               }}
             />
             <div className="text-center mt-4 text-sm">
@@ -188,11 +189,11 @@ const EmployerAuthForm = () => {
             <SocialLogin
               onGoogleLogin={() => {
                 console.log("EmployerAuthForm: Attempting Google login");
-                continueWithGoogle();
+                return continueWithGoogle();
               }}
               onLinkedInLogin={() => {
                 console.log("EmployerAuthForm: Attempting LinkedIn login");
-                continueWithLinkedIn();
+                return continueWithLinkedIn();
               }}
             />
             <div className="text-center mt-4 text-sm">
