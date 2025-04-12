@@ -4,6 +4,7 @@ import EmployerAuthForm from '@/components/auth/EmployerAuthForm';
 import { useAuth } from '@/context/auth/useAuth';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { Spinner } from '@/components/ui/spinner';
 
 const EmployerAuthPage = () => {
   const { authState } = useAuth();
@@ -23,15 +24,18 @@ const EmployerAuthPage = () => {
       console.log("EmployerAuthPage: User authenticated, redirecting based on role:", authState.user?.role);
       
       if (authState.user?.role === 'employer') {
-        console.log("EmployerAuthPage: Redirecting to employer dashboard");
-        toast({ title: "Welcome back!", description: "Redirecting to your dashboard..." });
-        navigate('/dashboard/employer', { replace: true });
+        console.log("EmployerAuthPage: Redirecting to employer dashboard or custom redirect:", redirectTo);
+        toast({ 
+          title: "Welcome back!", 
+          description: "You're now signed in to your employer account." 
+        });
+        navigate(redirectTo, { replace: true });
       } else if (authState.user?.role === 'job_seeker') {
         console.log("EmployerAuthPage: User is a job seeker, redirecting to job seeker dashboard");
         navigate('/dashboard/job-seeker', { replace: true });
       }
     }
-  }, [authState.isAuthenticated, authState.isLoading, authState.user, navigate]);
+  }, [authState.isAuthenticated, authState.isLoading, authState.user, navigate, redirectTo]);
 
   return (
     <div className="container mx-auto px-4 py-12 flex flex-col items-center">
@@ -42,7 +46,14 @@ const EmployerAuthPage = () => {
         </p>
       </div>
       
-      <EmployerAuthForm />
+      {authState.isLoading ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-8">
+          <Spinner size="lg" />
+          <p>Checking authentication status...</p>
+        </div>
+      ) : (
+        <EmployerAuthForm />
+      )}
     </div>
   );
 };

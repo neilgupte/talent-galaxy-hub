@@ -15,7 +15,7 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
     setIsLoading(true);
     
     try {
-      console.log("useEmployerAuth: Attempting login");
+      console.log("useEmployerAuth: Attempting login with redirect to:", redirectTo);
       // Login first
       await login(email, password);
       
@@ -24,7 +24,7 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
         description: "Welcome back to your employer portal!",
       });
       
-      console.log("useEmployerAuth: Login successful, navigating to employer dashboard");
+      console.log("useEmployerAuth: Login successful, navigating to:", redirectTo);
       
       // Force immediate navigation to employer dashboard
       navigate(redirectTo, { replace: true });
@@ -55,7 +55,7 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
         description: "Welcome to your employer portal! Setting up your account...",
       });
       
-      console.log("useEmployerAuth: Registration successful, navigating to employer dashboard");
+      console.log("useEmployerAuth: Registration successful, navigating to:", redirectTo);
       // Directly navigate to employer dashboard after registration
       navigate(redirectTo, { replace: true });
     } catch (err) {

@@ -1,14 +1,16 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import JobPostFormWrapper from '@/components/jobs/JobPostFormWrapper';
 import { useAuth } from '@/context/auth/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { Spinner } from '@/components/ui/spinner';
 
 const PostJobPage: React.FC = () => {
   const { authState } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   
   // Check if user is authenticated and is an employer
   const isEmployer = authState.isAuthenticated && authState.user?.role === 'employer';
@@ -18,15 +20,24 @@ const PostJobPage: React.FC = () => {
     console.log("PostJobPage: Auth state", {
       isAuthenticated: authState.isAuthenticated,
       userRole: authState.user?.role,
-      isEmployer
+      isEmployer,
+      isLoading: authState.isLoading
     });
+    
+    // Set local loading state based on auth loading
+    if (!authState.isLoading) {
+      setIsLoading(false);
+    }
   }, [authState, isEmployer]);
   
-  if (authState.isLoading) {
+  if (isLoading || authState.isLoading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl font-bold mb-6">Post a Job</h1>
-        <p className="mb-8">Loading...</p>
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Spinner size="lg" />
+          <p>Loading...</p>
+        </div>
       </div>
     );
   }

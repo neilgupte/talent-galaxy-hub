@@ -11,29 +11,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Building, Users, Globe, MapPin, Phone, Mail, Image, Link } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 
 const CompanyProfilePage = () => {
   const { authState, updateCompany } = useAuth();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   
   // Company profile form state
   const [formData, setFormData] = useState({
-    name: authState.company?.name || '',
-    description: authState.company?.description || '',
-    website: authState.company?.website || '',
-    logo: authState.company?.logo || '',
-    industry: authState.company?.industry || '',
-    size: authState.company?.size || '',
-    founded: authState.company?.founded || '',
-    location: authState.company?.location || '',
-    phone: authState.company?.phone || '',
-    email: authState.company?.email || ''
+    name: '',
+    description: '',
+    website: '',
+    logo: '',
+    industry: '',
+    size: '',
+    founded: '',
+    location: '',
+    phone: '',
+    email: ''
   });
   
   // Update form if company data changes
   useEffect(() => {
+    console.log("CompanyProfilePage: Company data updated", authState.company);
+    
     if (authState.company) {
       setFormData({
         name: authState.company.name || '',
@@ -48,14 +53,19 @@ const CompanyProfilePage = () => {
         email: authState.company.email || ''
       });
     }
-  }, [authState.company]);
+    
+    if (!authState.isLoading) {
+      setIsLoading(false);
+    }
+  }, [authState.company, authState.isLoading]);
   
   // Check if user is authenticated and is an employer
   useEffect(() => {
     console.log("CompanyProfilePage: Auth state", {
       isAuthenticated: authState.isAuthenticated,
       userRole: authState.user?.role,
-      hasCompany: !!authState.company
+      hasCompany: !!authState.company,
+      isLoading: authState.isLoading
     });
     
     if (authState.isAuthenticated && authState.user?.role !== 'employer') {
@@ -73,7 +83,7 @@ const CompanyProfilePage = () => {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSaving(true);
     
     try {
       await updateCompany(formData);
@@ -91,15 +101,18 @@ const CompanyProfilePage = () => {
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
   
-  if (authState.isLoading) {
+  if (isLoading || authState.isLoading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold mb-6">Company Profile</h1>
-        <p>Loading...</p>
+      <div className="container mx-auto px-4 py-16">
+        <div className="flex flex-col items-center justify-center gap-6">
+          <h1 className="text-3xl font-bold">Company Profile</h1>
+          <Spinner size="lg" />
+          <p className="text-muted-foreground">Loading your company profile...</p>
+        </div>
       </div>
     );
   }
@@ -109,13 +122,71 @@ const CompanyProfilePage = () => {
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl font-bold mb-6">Company Profile</h1>
         <p className="mb-8">You need to be logged in as an employer to access this page.</p>
-        <Button onClick={() => navigate('/employer/auth')}>
+        <Button onClick={() => navigate('/employer/auth', { 
+          state: { redirectTo: '/company/profile' }
+        })}>
           Sign In as Employer
         </Button>
       </div>
     );
   }
   
+  if (authState.user?.role !== 'employer') {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold mb-6">Company Profile</h1>
+        <p className="mb-8">This page is only available to employer accounts.</p>
+        <Button onClick={() => navigate('/dashboard/job-seeker')}>
+          Go to Job Seeker Dashboard
+        </Button>
+      </div>
+    );
+  }
+  
+  if (!authState.company) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold mb-6">Company Profile</h1>
+        <div className="max-w-md mx-auto bg-muted p-6 rounded-lg">
+          <p className="mb-8">You don't have a company profile yet. Let's create one!</p>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Company Name*</Label>
+                <Input 
+                  id="name" 
+                  name="name" 
+                  value={formData.name} 
+                  onChange={handleInputChange}
+                  placeholder="Enter your company name"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="description">Company Description*</Label>
+                <Textarea 
+                  id="description" 
+                  name="description" 
+                  value={formData.description} 
+                  onChange={handleInputChange}
+                  placeholder="Tell us about your company"
+                  required
+                  rows={4}
+                />
+              </div>
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={isSaving}>
+              {isSaving ? <><Spinner size="sm" className="mr-2" /> Creating Profile...</> : 'Create Company Profile'}
+            </Button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+  
+  // If we get here, we have a valid company profile to edit
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8">
@@ -358,8 +429,8 @@ const CompanyProfilePage = () => {
                     <Button type="button" variant="outline" onClick={() => navigate('/dashboard/employer')}>
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading ? 'Saving...' : 'Save Profile'}
+                    <Button type="submit" disabled={isSaving}>
+                      {isSaving ? <><Spinner size="sm" className="mr-2" /> Saving...</> : 'Save Profile'}
                     </Button>
                   </div>
                 </div>
