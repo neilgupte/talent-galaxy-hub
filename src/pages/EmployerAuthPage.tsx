@@ -18,20 +18,30 @@ const EmployerAuthPage = () => {
     
   // Redirect if already authenticated as employer
   useEffect(() => {
-    if (authState.isAuthenticated && !authState.isLoading) {
-      console.log("EmployerAuthPage: User is already authenticated, checking role", authState.user?.role);
-      if (authState.user?.role === 'employer') {
-        console.log("EmployerAuthPage: Redirecting to employer dashboard");
-        // Use timeout to ensure state is fully updated before navigation
-        setTimeout(() => {
+    const checkAuthAndRedirect = () => {
+      if (authState.isAuthenticated && !authState.isLoading) {
+        console.log("EmployerAuthPage: User is already authenticated, checking role", authState.user?.role);
+        if (authState.user?.role === 'employer') {
+          console.log("EmployerAuthPage: Redirecting to employer dashboard");
+          // Use timeout to ensure state is fully updated before navigation
           navigate('/dashboard/employer', { replace: true });
-        }, 100);
-      } else if (authState.user?.role === 'job_seeker') {
-        // Redirect job seekers to regular dashboard
-        console.log("EmployerAuthPage: User is a job seeker, redirecting to job seeker dashboard");
-        navigate('/dashboard/job-seeker', { replace: true });
+        } else if (authState.user?.role === 'job_seeker') {
+          // Redirect job seekers to regular dashboard
+          console.log("EmployerAuthPage: User is a job seeker, redirecting to job seeker dashboard");
+          navigate('/dashboard/job-seeker', { replace: true });
+        }
       }
-    }
+    };
+
+    // Initial check
+    checkAuthAndRedirect();
+    
+    // Set up interval for periodic checks (helps with race conditions)
+    const intervalId = setInterval(checkAuthAndRedirect, 1000);
+    
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [authState.isAuthenticated, authState.isLoading, authState.user, navigate]);
 
   return (

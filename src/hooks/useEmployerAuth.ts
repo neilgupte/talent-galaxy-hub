@@ -16,6 +16,7 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
     
     try {
       console.log("useEmployerAuth: Attempting login");
+      // Login first
       await login(email, password);
       
       toast({
@@ -24,8 +25,12 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
       });
       
       console.log("useEmployerAuth: Login successful, navigating to employer dashboard");
-      // Force immediate navigation to employer dashboard
-      navigate('/dashboard/employer', { replace: true });
+      
+      // Force navigation with a slight delay to ensure auth state is updated
+      setTimeout(() => {
+        console.log("useEmployerAuth: Executing redirect to", redirectTo);
+        navigate(redirectTo, { replace: true });
+      }, 300); // Increased timeout for more reliable state updates
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -54,8 +59,11 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
       });
       
       console.log("useEmployerAuth: Registration successful, navigating to employer dashboard");
-      // Directly navigate to employer dashboard after registration
-      navigate('/dashboard/employer', { replace: true });
+      // Directly navigate to employer dashboard after registration with delay
+      setTimeout(() => {
+        console.log("useEmployerAuth: Executing redirect to", redirectTo);
+        navigate(redirectTo, { replace: true });
+      }, 300); // Increased timeout for more reliable state updates
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -70,7 +78,7 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
     }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setError(null);
     try {
       console.log("useEmployerAuth: Attempting Google login");
@@ -87,7 +95,7 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
     }
   };
 
-  const handleLinkedInLogin = () => {
+  const handleLinkedInLogin = async () => {
     setError(null);
     try {
       console.log("useEmployerAuth: Attempting LinkedIn login");

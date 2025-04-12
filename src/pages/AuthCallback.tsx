@@ -72,14 +72,16 @@ const AuthCallback = () => {
     if (!verifying && !error) {
       if (authState.isAuthenticated) {
         console.log("Authentication successful, redirecting based on role:", authState.user?.role);
-        // Redirect based on user role
-        if (authState.user?.role === 'job_seeker') {
-          navigate('/dashboard/job-seeker', { replace: true });
-        } else if (authState.user?.role === 'employer') {
-          navigate('/dashboard/employer', { replace: true });
-        } else {
-          navigate('/', { replace: true });
-        }
+        // Redirect based on user role with a delay to ensure state is fully updated
+        setTimeout(() => {
+          if (authState.user?.role === 'job_seeker') {
+            navigate('/dashboard/job-seeker', { replace: true });
+          } else if (authState.user?.role === 'employer') {
+            navigate('/dashboard/employer', { replace: true });
+          } else {
+            navigate('/', { replace: true });
+          }
+        }, 300);
       } else if (!authState.isLoading) {
         console.log("Authentication failed, redirecting to auth page");
         // If authentication failed and not still loading
