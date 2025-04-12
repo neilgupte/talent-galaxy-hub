@@ -235,7 +235,7 @@ const JobBulkUpload: React.FC<JobBulkUploadProps> = ({ onClose, onSuccess }) => 
           </div>
         ) : (
           <div className="space-y-6">
-            <Alert variant={validationResults.valid ? "default" : "warning"} className="border-l-4">
+            <Alert variant={validationResults.valid ? "default" : "destructive"} className="border-l-4">
               <div className="flex items-start gap-3">
                 {validationResults.valid ? (
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
