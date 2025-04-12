@@ -20,6 +20,7 @@ const JobsPage = () => {
   const initialTitle = queryParams.get('title') || '';
   const initialLocation = queryParams.get('location') || '';
   const initialPage = parseInt(queryParams.get('page') || '1', 10);
+  const countryCode = 'UK'; // Fixed to UK for now, could come from a country selector
   
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
@@ -47,7 +48,8 @@ const JobsPage = () => {
     currentPage,
     selectedFilters,
     sortBy,
-    jobsPerPage: JOBS_PER_PAGE
+    jobsPerPage: JOBS_PER_PAGE,
+    countryCode
   });
   
   // Add automatic refetch when page loads
@@ -113,6 +115,14 @@ const JobsPage = () => {
             >
               Refresh Jobs
             </Button>
+          </div>
+          
+          {/* Current country indicator */}
+          <div className="mt-4 p-3 bg-muted rounded-md">
+            <p className="text-sm font-medium flex items-center">
+              <span className="mr-2">🇬🇧</span> 
+              <span>Showing jobs in UK</span>
+            </p>
           </div>
         </div>
         

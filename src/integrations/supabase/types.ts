@@ -380,6 +380,7 @@ export type Database = {
       }
       jobs: {
         Row: {
+          accepts_international_applications: boolean | null
           city: string | null
           company_id: string
           country: string | null
@@ -393,14 +394,17 @@ export type Database = {
           is_high_priority: boolean | null
           job_level: string | null
           location: string
+          locations: string[] | null
           onsite_type: string
           requirements: string | null
           salary_range: string | null
           status: string
           title: string
           updated_at: string
+          visa_sponsorship_available: boolean | null
         }
         Insert: {
+          accepts_international_applications?: boolean | null
           city?: string | null
           company_id: string
           country?: string | null
@@ -414,14 +418,17 @@ export type Database = {
           is_high_priority?: boolean | null
           job_level?: string | null
           location: string
+          locations?: string[] | null
           onsite_type: string
           requirements?: string | null
           salary_range?: string | null
           status: string
           title: string
           updated_at?: string
+          visa_sponsorship_available?: boolean | null
         }
         Update: {
+          accepts_international_applications?: boolean | null
           city?: string | null
           company_id?: string
           country?: string | null
@@ -435,12 +442,14 @@ export type Database = {
           is_high_priority?: boolean | null
           job_level?: string | null
           location?: string
+          locations?: string[] | null
           onsite_type?: string
           requirements?: string | null
           salary_range?: string | null
           status?: string
           title?: string
           updated_at?: string
+          visa_sponsorship_available?: boolean | null
         }
         Relationships: [
           {

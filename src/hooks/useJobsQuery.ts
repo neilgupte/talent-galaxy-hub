@@ -20,6 +20,7 @@ interface UseJobsQueryProps {
   sortBy: 'date' | 'salary';
   jobsPerPage: number;
   fetchAllJobs?: boolean; // Parameter to fetch all jobs without filters
+  countryCode?: string; // New parameter for country filtering
 }
 
 export const useJobsQuery = ({
@@ -28,12 +29,13 @@ export const useJobsQuery = ({
   selectedFilters,
   sortBy,
   jobsPerPage,
-  fetchAllJobs = false
+  fetchAllJobs = false,
+  countryCode = 'UK' // Default to UK for geo-targeting
 }: UseJobsQueryProps) => {
   return useQuery({
-    queryKey: ['jobs', currentPage, searchQuery, selectedFilters, sortBy, fetchAllJobs],
+    queryKey: ['jobs', currentPage, searchQuery, selectedFilters, sortBy, fetchAllJobs, countryCode],
     queryFn: async () => {
-      console.log('Fetching jobs, page:', currentPage, 'query:', searchQuery, 'fetchAllJobs:', fetchAllJobs);
+      console.log('Fetching jobs, page:', currentPage, 'query:', searchQuery, 'fetchAllJobs:', fetchAllJobs, 'country:', countryCode);
       
       try {
         let query = supabase
@@ -50,6 +52,12 @@ export const useJobsQuery = ({
           const to = from + jobsPerPage - 1;
           
           query = query.eq('status', 'active'); 
+          
+          // Apply country filter for geo-targeting
+          // Either the country matches or the locations array contains the country
+          if (countryCode) {
+            query = query.or(`country.eq.${countryCode},locations.cs.{"${countryCode}"}`);
+          }
           
           if (searchQuery) {
             query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,location.ilike.%${searchQuery}%`);

@@ -25,6 +25,7 @@ import {
   CheckCircle2, 
   Clock, 
   ExternalLink,
+  Globe,
   Heart, 
   MapPin, 
   MoreVertical, 
@@ -101,6 +102,11 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
     return null;
   }
 
+  // Get display location
+  const displayLocation = job.locations && job.locations.length > 1
+    ? `${job.locations[0]} + ${job.locations.length - 1} more`
+    : job.location;
+
   return (
     <Card className="overflow-hidden transition-all hover:shadow-md">
       <Link to={`/jobs/${job.id}`} className="block">
@@ -115,7 +121,7 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
             
             <div>
               <CardTitle className="text-lg">{job.title}</CardTitle>
-              <CardDescription className="flex items-center mt-1">
+              <CardDescription className="flex items-center mt-1 font-medium">
                 <Building className="h-3 w-3 mr-1" />
                 {job.company?.name}
               </CardDescription>
@@ -169,7 +175,7 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
           <div className="space-y-2 mb-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="h-3 w-3" />
-              <span>{job.location}</span>
+              <span>{displayLocation}</span>
               
               {job.onsiteType === 'remote' && (
                 <>
@@ -182,6 +188,14 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
                 <>
                   <span className="inline-block h-1 w-1 rounded-full bg-gray-400"></span>
                   <span>Hybrid</span>
+                </>
+              )}
+              
+              {job.country && job.country !== 'UK' && (
+                <>
+                  <span className="inline-block h-1 w-1 rounded-full bg-gray-400"></span>
+                  <Globe className="h-3 w-3 ml-1" />
+                  <span>{job.country}</span>
                 </>
               )}
             </div>
@@ -224,6 +238,13 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
               Posted {new Date(job.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
             </span>
           </div>
+          
+          {job.acceptsInternationalApplications && (
+            <div className="flex items-center text-xs">
+              <Globe className="h-3 w-3 mr-1 text-blue-500" />
+              <span className="text-blue-500">International Applications</span>
+            </div>
+          )}
           
           {job.hasApplied ? (
             <Button 

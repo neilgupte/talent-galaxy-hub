@@ -18,6 +18,7 @@ import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, BookmarkCheck
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Separator } from "@/components/ui/separator";
 import SearchBox from "@/components/jobs/SearchBox";
+import CountrySwitcher from "@/components/layout/CountrySwitcher";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -56,6 +57,9 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Add Country Switcher */}
+          <CountrySwitcher currentCountry="UK" />
+          
           {isAuthenticated ? (
             <>
               <NotificationCenter 

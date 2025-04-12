@@ -149,6 +149,14 @@ const mapDatabaseJobToModel = (job: any): Job => {
     }
   }
   
+  // Map locations array or set to single location if not available
+  let locations: string[] = [];
+  if (job.locations && Array.isArray(job.locations) && job.locations.length > 0) {
+    locations = job.locations;
+  } else if (job.location) {
+    locations = [job.location];
+  }
+  
   // Handle requirements properly
   let requirements: string[] = [];
   if (job.requirements) {
@@ -165,6 +173,7 @@ const mapDatabaseJobToModel = (job: any): Job => {
     title: job.title,
     description: job.description || '',
     location: job.location || '',
+    locations: locations,
     salaryMin: salaryMin,
     salaryMax: salaryMax,
     employmentType: (job.employment_type || 'full_time') as JobEmploymentType,
@@ -180,6 +189,8 @@ const mapDatabaseJobToModel = (job: any): Job => {
     country: job.country || '',
     city: job.city || '',
     currency: job.currency || 'USD',
+    acceptsInternationalApplications: job.accepts_international_applications || false,
+    visaSponsorshipAvailable: job.visa_sponsorship_available || false,
     company: job.companies ? {
       id: job.companies.id,
       name: job.companies.name,
@@ -507,6 +518,48 @@ const JobDetails: React.FC = () => {
                       })}</p>
                     </div>
                   </div>
+                  
+                  {/* New section for international applications */}
+                  {(job.acceptsInternationalApplications !== undefined || 
+                    job.visaSponsorshipAvailable !== undefined) && (
+                    <div className="flex gap-2">
+                      <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <h3 className="font-medium">International Applications</h3>
+                        <div className="text-muted-foreground">
+                          <p>
+                            Accepts International: {' '}
+                            <span className={job.acceptsInternationalApplications ? 'text-green-500' : 'text-red-500'}>
+                              {job.acceptsInternationalApplications ? 'Yes' : 'No'}
+                            </span>
+                          </p>
+                          {job.acceptsInternationalApplications && (
+                            <p>
+                              Visa Sponsorship: {' '}
+                              <span className={job.visaSponsorshipAvailable ? 'text-green-500' : 'text-red-500'}>
+                                {job.visaSponsorshipAvailable ? 'Available' : 'Not Available'}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Multiple locations display */}
+                  {job.locations && job.locations.length > 1 && (
+                    <div className="flex gap-2">
+                      <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <h3 className="font-medium">Multiple Locations</h3>
+                        <ul className="text-muted-foreground list-disc pl-4">
+                          {job.locations.map((loc, index) => (
+                            <li key={index}>{loc}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 {job.requirements && job.requirements.length > 0 && (

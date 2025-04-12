@@ -84,6 +84,7 @@ export interface Job {
   title: string;
   description: string;
   location: string;
+  locations?: string[];
   salaryMin?: number;
   salaryMax?: number;
   employmentType: JobEmploymentType;
@@ -99,6 +100,8 @@ export interface Job {
   country?: string;
   city?: string;
   currency?: string;
+  acceptsInternationalApplications?: boolean;
+  visaSponsorshipAvailable?: boolean;
   
   // Joined fields
   company?: Company;
