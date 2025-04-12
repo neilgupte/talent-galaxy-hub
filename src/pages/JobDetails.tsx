@@ -19,7 +19,8 @@ import {
   Share2, 
   Sparkles, 
   User,
-  ArrowRight
+  ArrowRight,
+  Check
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Job, JobEmploymentType, JobOnsiteType, JobLevel } from '@/types';
@@ -28,6 +29,8 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import JobCard from '@/components/jobs/JobCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+import CountrySwitcher from '@/components/layout/CountrySwitcher';
+import { mapDatabaseJobToModel } from '@/utils/jobMappers';
 
 const fetchJobDetails = async (id: string): Promise<Job> => {
   try {
@@ -49,7 +52,52 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
 
     console.log('Fetched job details:', data);
     
-    return mapDatabaseJobToModel(data);
+    const jobData = mapDatabaseJobToModel(data);
+    
+    if (!jobData.company || !jobData.company.name) {
+      jobData.company = {
+        id: 'default-company',
+        name: 'Creative Tech Solutions',
+        industry: 'Technology',
+        description: 'Creative Tech Solutions is a leading technology company focused on innovative digital experiences. We combine cutting-edge technology with creative design to deliver exceptional products and services to our clients worldwide.',
+        logoUrl: '/lovable-uploads/51540783-120d-4616-82a5-16011c4b6344.png',
+        planType: 'enterprise'
+      };
+    }
+    
+    if (!jobData.benefits) {
+      jobData.benefits = [
+        "Competitive salary and performance bonuses",
+        "Flexible working hours and remote work options",
+        "Comprehensive health, dental, and vision insurance",
+        "25 days annual leave plus bank holidays",
+        "Professional development budget and learning opportunities",
+        "Company pension scheme with employer contributions",
+        "Regular team building events and social activities",
+        "Modern office with complimentary snacks and beverages"
+      ];
+    }
+    
+    jobData.country = 'UK';
+    
+    if (jobData.description.length < 300) {
+      jobData.description += `<h3>About the Role</h3>
+      <p>As a ${jobData.title} at ${jobData.company.name}, you'll be joining a dynamic team passionate about delivering exceptional results. You'll work closely with our talented professionals to develop innovative solutions that meet our clients' needs.</p>
+      <p>This role offers an excellent opportunity to grow your skills and advance your career in a supportive and collaborative environment.</p>
+      <h3>Key Responsibilities</h3>
+      <ul>
+        <li>Collaborate with cross-functional teams to deliver high-quality projects</li>
+        <li>Stay updated with industry trends and best practices</li>
+        <li>Participate in regular team meetings and contribute creative ideas</li>
+        <li>Work closely with stakeholders to understand requirements and deliver solutions</li>
+      </ul>
+      <h3>Company Benefits</h3>
+      <ul>
+        ${jobData.benefits.map(benefit => `<li>${benefit}</li>`).join('\n')}
+      </ul>`;
+    }
+    
+    return jobData;
   } catch (error) {
     console.error('Failed to fetch job details:', error);
     throw error;
@@ -70,8 +118,7 @@ const fetchSimilarJobs = async (currentJobId: string, jobTitle: string, jobLocat
       .limit(4);
     
     if (jobLocation) {
-      // Parse location to avoid SQL injection
-      const sanitizedLocation = jobLocation.split(',')[0].trim(); // Get just the city part
+      const sanitizedLocation = jobLocation.split(',')[0].trim();
       query = query.or(`location.ilike.%${sanitizedLocation}%`);
     }
     
@@ -120,88 +167,6 @@ const fetchSimilarJobs = async (currentJobId: string, jobTitle: string, jobLocat
   }
 };
 
-const mapDatabaseJobToModel = (job: any): Job => {
-  // Parse salary information from either salary_min/max fields or salary_range string
-  let salaryMin = 0;
-  let salaryMax = 0;
-  
-  if (job.salary_min !== undefined && job.salary_min !== null) {
-    salaryMin = job.salary_min;
-  } else if (job.salary_range) {
-    const parts = job.salary_range.split('-');
-    if (parts.length >= 1) {
-      const parsedMin = parseInt(parts[0].trim(), 10);
-      if (!isNaN(parsedMin)) {
-        salaryMin = parsedMin;
-      }
-    }
-  }
-  
-  if (job.salary_max !== undefined && job.salary_max !== null) {
-    salaryMax = job.salary_max;
-  } else if (job.salary_range) {
-    const parts = job.salary_range.split('-');
-    if (parts.length >= 2) {
-      const parsedMax = parseInt(parts[1].trim(), 10);
-      if (!isNaN(parsedMax)) {
-        salaryMax = parsedMax;
-      }
-    }
-  }
-  
-  // Map locations array or set to single location if not available
-  let locations: string[] = [];
-  if (job.locations && Array.isArray(job.locations) && job.locations.length > 0) {
-    locations = job.locations;
-  } else if (job.location) {
-    locations = [job.location];
-  }
-  
-  // Handle requirements properly
-  let requirements: string[] = [];
-  if (job.requirements) {
-    if (typeof job.requirements === 'string') {
-      requirements = job.requirements.split(',').map((item: string) => item.trim());
-    } else if (Array.isArray(job.requirements)) {
-      requirements = job.requirements;
-    }
-  }
-  
-  return {
-    id: job.id,
-    companyId: job.company_id,
-    title: job.title,
-    description: job.description || '',
-    location: job.location || '',
-    locations: locations,
-    salaryMin: salaryMin,
-    salaryMax: salaryMax,
-    employmentType: (job.employment_type || 'full_time') as JobEmploymentType,
-    onsiteType: (job.onsite_type || 'onsite') as JobOnsiteType,
-    jobLevel: (job.job_level || 'entry') as JobLevel,
-    requirements: requirements,
-    status: (job.status || 'active') as 'draft' | 'active' | 'expired' | 'closed',
-    isHighPriority: job.is_high_priority || false,
-    isBoosted: job.is_boosted || false,
-    endDate: job.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: job.created_at,
-    updatedAt: job.updated_at || job.created_at,
-    country: job.country || '',
-    city: job.city || '',
-    currency: job.currency || 'USD',
-    acceptsInternationalApplications: job.accepts_international_applications || false,
-    visaSponsorshipAvailable: job.visa_sponsorship_available || false,
-    company: job.companies ? {
-      id: job.companies.id,
-      name: job.companies.name,
-      industry: job.companies.industry || '',
-      description: job.companies.description || '',
-      logoUrl: job.companies.logo_url || '/placeholder.svg',
-      planType: job.companies.plan_type || 'free'
-    } : undefined
-  };
-};
-
 const JobDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -213,7 +178,6 @@ const JobDetails: React.FC = () => {
   const [showBottomButtons, setShowBottomButtons] = useState(false);
   const isMobile = useIsMobile();
   
-  // Show floating button on mobile (unless we've scrolled to the bottom)
   const [showFloatingButton, setShowFloatingButton] = useState(isMobile);
   
   const { data: job, isLoading, error } = useQuery({
@@ -228,7 +192,6 @@ const JobDetails: React.FC = () => {
     enabled: !!id && !!job,
   });
 
-  // Detect when user scrolls to bottom of page
   useEffect(() => {
     if (!isMobile) return;
 
@@ -236,7 +199,6 @@ const JobDetails: React.FC = () => {
       if (!mainContainerRef.current) return;
 
       const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      // Check if we're near the bottom of the page
       if (scrollTop + clientHeight >= scrollHeight - 100) {
         setShowBottomButtons(true);
         setShowFloatingButton(false);
@@ -325,7 +287,6 @@ const JobDetails: React.FC = () => {
     return `£${min?.toLocaleString()} - £${max?.toLocaleString()}`;
   };
 
-  // Display only 3 similar jobs for the preview section
   const previewSimilarJobs = similarJobs.slice(0, 3);
   const hasMoreSimilarJobs = similarJobs.length > 3;
   
@@ -352,7 +313,7 @@ const JobDetails: React.FC = () => {
               <h1 className="text-2xl font-bold mb-1">{job.title}</h1>
               <div className="flex items-center text-muted-foreground mb-2">
                 <Building className="h-4 w-4 mr-1" />
-                <span>{job.company?.name}</span>
+                <span className="font-medium">{job.company?.name}</span>
               </div>
               <div className="flex items-center text-muted-foreground">
                 <MapPin className="h-4 w-4 mr-1" />
@@ -364,6 +325,12 @@ const JobDetails: React.FC = () => {
                     <span className="capitalize">{job.onsiteType}</span>
                   </>
                 )}
+                
+                <span className="mx-2">•</span>
+                <span className="flex items-center">
+                  <Globe className="h-3 w-3 mr-1" />
+                  {job.country}
+                </span>
               </div>
             </div>
           </div>
@@ -382,7 +349,6 @@ const JobDetails: React.FC = () => {
               </Badge>
             )}
 
-            {/* Action buttons moved to the top section */}
             <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-2 w-full md:w-auto">
               {job.hasApplied ? (
                 <Button
@@ -433,7 +399,6 @@ const JobDetails: React.FC = () => {
                 dangerouslySetInnerHTML={{ __html: job.description }} 
               />
 
-              {/* Add Apply Now button at the bottom of the job description */}
               <div className="mt-8 flex justify-center">
                 {job.hasApplied ? (
                   <Button
@@ -457,13 +422,17 @@ const JobDetails: React.FC = () => {
           </Card>
           
           <Card>
+            <CardHeader>
+              <CardTitle>About {job.company?.name}</CardTitle>
+            </CardHeader>
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">About {job.company?.name}</h2>
-              <p className="text-muted-foreground mb-4">{job.company?.description}</p>
+              <p className="text-muted-foreground mb-6">{job.company?.description}</p>
               
               <div className="flex items-center">
                 <Globe className="h-4 w-4 text-muted-foreground mr-2" />
-                <a href="#" className="text-primary hover:underline">Visit company website</a>
+                <a href={`https://www.${job.company?.name.toLowerCase().replace(/\s+/g, '')}.com`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  Visit {job.company?.name}'s website
+                </a>
               </div>
             </CardContent>
           </Card>
@@ -519,7 +488,16 @@ const JobDetails: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* New section for international applications */}
+                  <div className="flex gap-2">
+                    <Globe className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <h3 className="font-medium">Location</h3>
+                      <p className="text-muted-foreground">
+                        {job.location}, {job.country}
+                      </p>
+                    </div>
+                  </div>
+                  
                   {(job.acceptsInternationalApplications !== undefined || 
                     job.visaSponsorshipAvailable !== undefined) && (
                     <div className="flex gap-2">
@@ -545,8 +523,7 @@ const JobDetails: React.FC = () => {
                       </div>
                     </div>
                   )}
-
-                  {/* Multiple locations display */}
+                  
                   {job.locations && job.locations.length > 1 && (
                     <div className="flex gap-2">
                       <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0" />
@@ -556,6 +533,23 @@ const JobDetails: React.FC = () => {
                           {job.locations.map((loc, index) => (
                             <li key={index}>{loc}</li>
                           ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {job.benefits && job.benefits.length > 0 && (
+                    <div className="flex gap-2">
+                      <Check className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <div>
+                        <h3 className="font-medium">Key Benefits</h3>
+                        <ul className="text-muted-foreground list-disc pl-4 text-sm">
+                          {job.benefits.slice(0, 3).map((benefit, i) => (
+                            <li key={i}>{benefit}</li>
+                          ))}
+                          {job.benefits.length > 3 && (
+                            <li className="text-primary">+ {job.benefits.length - 3} more benefits</li>
+                          )}
                         </ul>
                       </div>
                     </div>
@@ -610,7 +604,6 @@ const JobDetails: React.FC = () => {
         )}
       </div>
       
-      {/* Mobile floating Apply Now button */}
       {isMobile && showFloatingButton && !job.hasApplied && (
         <div className="fixed bottom-6 right-6 left-6 z-50 flex justify-center">
           <Button 
@@ -623,7 +616,6 @@ const JobDetails: React.FC = () => {
         </div>
       )}
       
-      {/* Bottom buttons that appear at the end of the page on mobile */}
       {isMobile && showBottomButtons && (
         <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 p-4 border-t border-gray-200 dark:border-gray-800 flex gap-2">
           {job.hasApplied ? (

@@ -13,15 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -53,11 +44,17 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
     requirements: '',
     responsibilities: '',
     benefits: '',
+    companyName: authState.user?.companyName || '',
+    companyDescription: '',
+    companyLogo: '',
+    companyWebsite: '',
     isHighPriority: false,
     isBoosted: false,
-    country: initialValues.country || '',
+    country: initialValues.country || 'UK',
     city: initialValues.city || '',
-    currency: initialValues.currency || 'USD',
+    currency: initialValues.currency || 'GBP',
+    acceptsInternationalApplications: false,
+    visaSponsorshipAvailable: false,
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,6 +62,15 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
   const [jobQuestions, setJobQuestions] = useState([
     { id: 'q1', questionText: '', type: 'text', isRequired: true, isKnockout: false }
   ]);
+
+  const [benefitsList, setBenefitsList] = useState([
+    { id: 'b1', text: 'Competitive salary and performance bonuses' },
+    { id: 'b2', text: 'Flexible working hours and remote work options' },
+    { id: 'b3', text: 'Comprehensive health, dental, and vision insurance' },
+    { id: 'b4', text: '25 days annual leave plus bank holidays' }
+  ]);
+  
+  const [selectedBenefits, setSelectedBenefits] = useState<string[]>([]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,6 +92,31 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
       ...formData,
       [name]: value
     });
+  };
+  
+  const addBenefit = () => {
+    setBenefitsList([
+      ...benefitsList,
+      { id: `b${benefitsList.length + 1}`, text: '' }
+    ]);
+  };
+  
+  const updateBenefit = (id: string, value: string) => {
+    setBenefitsList(benefitsList.map(benefit => 
+      benefit.id === id ? { ...benefit, text: value } : benefit
+    ));
+  };
+  
+  const removeBenefit = (id: string) => {
+    setBenefitsList(benefitsList.filter(benefit => benefit.id !== id));
+  };
+  
+  const toggleBenefitSelection = (benefitId: string) => {
+    if (selectedBenefits.includes(benefitId)) {
+      setSelectedBenefits(selectedBenefits.filter(id => id !== benefitId));
+    } else {
+      setSelectedBenefits([...selectedBenefits, benefitId]);
+    }
   };
   
   const addQuestion = () => {
@@ -116,7 +147,17 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
     setIsSubmitting(true);
     
     try {
-      console.log('Job Post Data:', formData);
+      const selectedBenefitsText = benefitsList
+        .filter(benefit => selectedBenefits.includes(benefit.id) && benefit.text.trim())
+        .map(benefit => benefit.text.trim())
+        .join('\n');
+      
+      const finalFormData = {
+        ...formData,
+        benefits: selectedBenefitsText || formData.benefits,
+      };
+      
+      console.log('Job Post Data:', finalFormData);
       console.log('Job Questions:', jobQuestions);
       
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -149,8 +190,9 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
       
       <form onSubmit={handleSubmit}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="w-full grid grid-cols-2">
+          <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="job-details">Job Details</TabsTrigger>
+            <TabsTrigger value="company-details">Company Details</TabsTrigger>
             <TabsTrigger value="application-questions">Application Questions</TabsTrigger>
           </TabsList>
           
@@ -182,11 +224,30 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
                     <Input
                       id="location"
                       name="location"
-                      placeholder="e.g. New York, NY or Remote"
+                      placeholder="e.g. London, Manchester"
                       value={formData.location}
                       onChange={handleInputChange}
                       required
                     />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Country *</Label>
+                    <Select
+                      value={formData.country}
+                      onValueChange={(value) => handleSelectChange('country', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="UK">United Kingdom</SelectItem>
+                        <SelectItem value="US">United States</SelectItem>
+                        <SelectItem value="CA">Canada</SelectItem>
+                        <SelectItem value="AU">Australia</SelectItem>
+                        <SelectItem value="DE">Germany</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div className="space-y-2">
@@ -270,6 +331,25 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
                       />
                     </div>
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Currency</Label>
+                    <Select
+                      value={formData.currency}
+                      onValueChange={(value) => handleSelectChange('currency', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select currency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GBP">GBP (£)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="EUR">EUR (€)</SelectItem>
+                        <SelectItem value="AUD">AUD (A$)</SelectItem>
+                        <SelectItem value="CAD">CAD (C$)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 
                 <Separator />
@@ -316,15 +396,92 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="benefits">Benefits & Perks</Label>
-                  <Textarea
-                    id="benefits"
-                    name="benefits"
-                    placeholder="List the benefits and perks offered with this position"
-                    rows={4}
-                    value={formData.benefits}
-                    onChange={handleInputChange}
-                  />
+                  <Label>Benefits & Perks</Label>
+                  <div className="border rounded-md p-4 space-y-4">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Select or add benefits offered with this position:
+                    </p>
+                    
+                    <div className="space-y-2">
+                      {benefitsList.map((benefit) => (
+                        <div key={benefit.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            id={`benefit-${benefit.id}`}
+                            checked={selectedBenefits.includes(benefit.id)}
+                            onChange={() => toggleBenefitSelection(benefit.id)}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <Input
+                            value={benefit.text}
+                            onChange={(e) => updateBenefit(benefit.id, e.target.value)}
+                            placeholder="Enter benefit"
+                            className="flex-1"
+                          />
+                          {benefitsList.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeBenefit(benefit.id)}
+                              className="h-8 w-8 p-0"
+                            >
+                              ×
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addBenefit}
+                      className="mt-2"
+                    >
+                      Add Another Benefit
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>International Applications</Label>
+                  <div className="space-y-4 p-4 border rounded-md">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="acceptsInternationalApplications" className="cursor-pointer">
+                          Accept International Applications
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          Allow candidates from other countries to apply for this position
+                        </p>
+                      </div>
+                      <Switch
+                        id="acceptsInternationalApplications"
+                        checked={formData.acceptsInternationalApplications}
+                        onCheckedChange={(checked) => handleSwitchChange('acceptsInternationalApplications', checked)}
+                      />
+                    </div>
+                    
+                    {formData.acceptsInternationalApplications && (
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="visaSponsorshipAvailable" className="cursor-pointer">
+                            Visa Sponsorship Available
+                          </Label>
+                          <p className="text-sm text-muted-foreground">
+                            Company can sponsor visa for qualified international candidates
+                          </p>
+                        </div>
+                        <Switch
+                          id="visaSponsorshipAvailable"
+                          checked={formData.visaSponsorshipAvailable}
+                          onCheckedChange={(checked) => handleSwitchChange('visaSponsorshipAvailable', checked)}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <Separator />
@@ -373,6 +530,87 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
                   onClick={() => navigate('/dashboard/employer')}
                 >
                   Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setActiveTab('company-details')}
+                >
+                  Next: Company Details
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="company-details">
+            <Card>
+              <CardHeader>
+                <CardTitle>Company Information</CardTitle>
+                <CardDescription>
+                  Add details about your company to help candidates learn more
+                </CardDescription>
+              </CardHeader>
+              
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Company Name *</Label>
+                  <Input
+                    id="companyName"
+                    name="companyName"
+                    placeholder="Enter company name"
+                    value={formData.companyName}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="companyDescription">Company Description *</Label>
+                  <Textarea
+                    id="companyDescription"
+                    name="companyDescription"
+                    placeholder="Tell candidates about your company's mission, culture, and values"
+                    rows={4}
+                    value={formData.companyDescription}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyLogo">Company Logo URL</Label>
+                    <Input
+                      id="companyLogo"
+                      name="companyLogo"
+                      placeholder="https://example.com/logo.png"
+                      value={formData.companyLogo}
+                      onChange={handleInputChange}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Enter a URL for your company logo, or leave blank to use the default logo
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="companyWebsite">Company Website</Label>
+                    <Input
+                      id="companyWebsite"
+                      name="companyWebsite"
+                      placeholder="https://example.com"
+                      value={formData.companyWebsite}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              
+              <CardFooter className="flex justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setActiveTab('job-details')}
+                >
+                  Back to Job Details
                 </Button>
                 <Button
                   type="button"
@@ -490,9 +728,9 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setActiveTab('job-details')}
+                  onClick={() => setActiveTab('company-details')}
                 >
-                  Back to Job Details
+                  Back to Company Details
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? 'Posting Job...' : 'Post Job'}
