@@ -158,13 +158,13 @@ const Navbar = () => {
             <>
               <div className="flex gap-2 items-center">
                 <div>
-                  <Button variant="ghost" asChild className="text-gray-700">
-                    <Link to="/auth">Sign In - Job Seeker</Link>
+                  <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Link to="/auth">Job Seeker</Link>
                   </Button>
                 </div>
                 <Separator orientation="vertical" className="h-6" />
                 <div>
-                  <Button asChild className="bg-blue-600 hover:bg-blue-700">
+                  <Button variant="outline" asChild className="border-blue-600 text-blue-600 hover:bg-blue-50">
                     <Link to="/employer/auth">Employer/Post a Job</Link>
                   </Button>
                 </div>
