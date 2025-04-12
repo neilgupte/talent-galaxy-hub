@@ -1,1 +1,5 @@
+
 project_id = "bdnnxjxgxbhhycfadjuk"
+
+[functions.process-job-alerts]
+verify_jwt = false

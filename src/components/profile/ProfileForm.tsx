@@ -11,6 +11,7 @@ import ProfileHeader from './ProfileHeader';
 import BasicInfoSection from './BasicInfoSection';
 import ResumeUploadSection from './ResumeUploadSection';
 import SkillsSection from './SkillsSection';
+import JobAlertsSection from './JobAlertsSection';
 
 const ProfileForm = () => {
   const { authState, updateProfile } = useAuth();
@@ -149,6 +150,8 @@ const ProfileForm = () => {
           skills={formData.skills || []}
           onSkillsChange={handleSkillsChange}
         />
+        
+        <JobAlertsSection />
         
         <div className="flex justify-end gap-4 mb-12">
           <Button variant="outline" type="button" onClick={() => navigate(-1)}>

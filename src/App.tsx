@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "./components/ui/theme-provider"
@@ -17,6 +18,7 @@ import EmployerDashboard from './components/dashboard/EmployerDashboard';
 import JobSeekerDashboard from './components/dashboard/JobSeekerDashboard';
 import ProfilePage from './pages/ProfilePage'; // Updated import
 import SavedJobsPage from './pages/SavedJobsPage';
+import AlertSettingsPage from './pages/AlertSettingsPage';
 import ApplicationsPage from './pages/NotFound'; // Temporary placeholder
 import ApplicationDetails from './pages/ApplicationDetails';
 import JobApplicationForm from './components/applications/JobApplicationForm';
@@ -65,6 +67,7 @@ function App() {
 
                     {/* Profile Routes */}
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/profile/alerts" element={<AlertSettingsPage />} />
                     <Route path="/saved-jobs" element={<SavedJobsPage />} />
                   </Routes>
                 </main>

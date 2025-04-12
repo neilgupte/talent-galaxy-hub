@@ -22,6 +22,8 @@ export type JobSeekerStatus = 'not_open' | 'employed_but_open' | 'actively_seeki
 
 export type ContactPreference = 'email' | 'phone' | 'both';
 
+export type AlertFrequency = 'daily_am' | 'daily_pm' | 'weekly' | 'instant';
+
 export interface User {
   id: string;
   name: string;
@@ -148,6 +150,22 @@ export interface CV {
   fileUrl: string;
   uploadDate: string;
   isDefault?: boolean;
+}
+
+export interface JobAlert {
+  id: string;
+  userId: string;
+  keywords: string[];
+  location: string | null;
+  employmentTypes: JobEmploymentType[] | null;
+  jobLevels: JobLevel[] | null;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  frequency: AlertFrequency;
+  isActive: boolean;
+  createdAt: string;
+  lastTriggeredAt: string | null;
+  nextScheduledAt: string | null;
 }
 
 export interface AuthState {

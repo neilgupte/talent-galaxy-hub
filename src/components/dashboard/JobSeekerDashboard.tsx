@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { 
   Card, 
   CardContent, 
@@ -12,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Link } from 'react-router-dom';
 import { 
   BarChart3, 
   Briefcase, 
@@ -24,7 +22,8 @@ import {
   Search, 
   Award,
   BookOpen,
-  FileArchive
+  FileArchive,
+  Bell
 } from 'lucide-react';
 import MyCVsTab from './MyCVsTab';
 
@@ -185,7 +184,7 @@ const JobSeekerDashboard = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full sm:w-auto grid grid-cols-5 sm:inline-flex">
+        <TabsList className="w-full sm:w-auto grid grid-cols-6 sm:inline-flex">
           <TabsTrigger value="overview" className="gap-1 sm:gap-2">
             <BarChart3 className="h-4 w-4" />
             <span className="hidden sm:inline">Overview</span>
@@ -197,6 +196,10 @@ const JobSeekerDashboard = () => {
           <TabsTrigger value="saved" className="gap-1 sm:gap-2">
             <Heart className="h-4 w-4" />
             <span className="hidden sm:inline">Saved Jobs</span>
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="gap-1 sm:gap-2">
+            <Bell className="h-4 w-4" />
+            <span className="hidden sm:inline">Alerts</span>
           </TabsTrigger>
           <TabsTrigger value="cvs" className="gap-1 sm:gap-2">
             <FileArchive className="h-4 w-4" />
@@ -210,7 +213,6 @@ const JobSeekerDashboard = () => {
         
         <TabsContent value="overview">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Profile Progress */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center">
@@ -233,7 +235,6 @@ const JobSeekerDashboard = () => {
               </CardContent>
             </Card>
             
-            {/* Job Search Stats */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center">
@@ -267,7 +268,6 @@ const JobSeekerDashboard = () => {
               </CardContent>
             </Card>
             
-            {/* Recent Activity */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center">
@@ -310,7 +310,6 @@ const JobSeekerDashboard = () => {
             </Card>
           </div>
           
-          {/* Recent Applications */}
           <Card className="mt-6">
             <CardHeader className="pb-2">
               <CardTitle>Recent Applications</CardTitle>
@@ -501,6 +500,53 @@ const JobSeekerDashboard = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="alerts">
+          <Card>
+            <CardHeader>
+              <CardTitle>Job Alerts</CardTitle>
+              <CardDescription>
+                Get notified when new jobs matching your criteria are posted
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="font-medium">Stay updated on new opportunities</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Create customized job alerts based on your preferences
+                    </p>
+                  </div>
+                  <Button asChild>
+                    <Link to="/profile/alerts">
+                      Manage Your Alerts
+                    </Link>
+                  </Button>
+                </div>
+                
+                <div className="border rounded-lg p-4">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-medium flex items-center">
+                        <Bell className="h-4 w-4 mr-2 text-primary" />
+                        Create Your First Alert
+                      </h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Get email notifications about new jobs that match your skills and preferences
+                      </p>
+                    </div>
+                    <Button asChild>
+                      <Link to="/profile/alerts">
+                        Set Up Alerts
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
