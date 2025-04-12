@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,16 +44,10 @@ const EmployerAuthForm = () => {
         description: "Welcome back to your employer portal!",
       });
       
-      // After successful login, explicitly navigate to employer dashboard
-      // This ensures we don't rely only on the parent component's useEffect
-      if (authState.user?.role === 'employer') {
-        navigate('/dashboard/employer', { replace: true });
-      } else if (authState.user?.role === 'job_seeker') {
-        navigate('/dashboard/job-seeker', { replace: true });
-      } else {
-        // If we don't have role info yet, navigate based on redirectTo
-        navigate(redirectTo, { replace: true });
-      }
+      console.log("EmployerAuthForm: Login successful, navigating to employer dashboard");
+      // Force navigation to employer dashboard regardless of role
+      // This is specific to the employer auth form
+      navigate('/dashboard/employer', { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -82,7 +75,8 @@ const EmployerAuthForm = () => {
         description: "Welcome to your employer portal! Setting up your account...",
       });
       
-      // Directly navigate to employer dashboard after registration instead of redirecting to auth page again
+      console.log("EmployerAuthForm: Registration successful, navigating to employer dashboard");
+      // Directly navigate to employer dashboard after registration
       navigate('/dashboard/employer', { replace: true });
     } catch (err) {
       console.error("Registration error:", err);
