@@ -21,6 +21,7 @@ interface UseJobsQueryProps {
   jobsPerPage: number;
   fetchAllJobs?: boolean; // Parameter to fetch all jobs without filters
   countryCode?: string; // New parameter for country filtering
+  includeAppliedJobs?: boolean; // New parameter to include applied jobs
 }
 
 export const useJobsQuery = ({
@@ -30,10 +31,11 @@ export const useJobsQuery = ({
   sortBy,
   jobsPerPage,
   fetchAllJobs = false,
-  countryCode = 'UK' // Default to UK for geo-targeting
+  countryCode = 'UK', // Default to UK for geo-targeting
+  includeAppliedJobs = false // Default to false
 }: UseJobsQueryProps) => {
   return useQuery({
-    queryKey: ['jobs', currentPage, searchQuery, selectedFilters, sortBy, fetchAllJobs, countryCode],
+    queryKey: ['jobs', currentPage, searchQuery, selectedFilters, sortBy, fetchAllJobs, countryCode, includeAppliedJobs],
     queryFn: async () => {
       console.log('Fetching jobs, page:', currentPage, 'query:', searchQuery, 'fetchAllJobs:', fetchAllJobs, 'country:', countryCode);
       
@@ -104,7 +106,27 @@ export const useJobsQuery = ({
         
         let jobsData = data || [];
         
+        // Map jobs to model
         const mappedJobs = jobsData.map(job => mapDatabaseJobToModel(job));
+        
+        // If we want to include applied jobs, add some mock applied status to some jobs
+        // In a real implementation, we'd query the applications table
+        if (includeAppliedJobs && mappedJobs.length > 0) {
+          // Add applied status to some jobs
+          const applicationStatuses: ('pending' | 'reviewing' | 'interview' | 'offer')[] = 
+            ['pending', 'reviewing', 'interview', 'offer'];
+          
+          for (let i = 0; i < mappedJobs.length; i++) {
+            // Add applied status to every third job
+            if (i % 3 === 0) {
+              const statusIndex = i % applicationStatuses.length;
+              mappedJobs[i].hasApplied = true;
+              mappedJobs[i].applicationStatus = applicationStatuses[statusIndex];
+              mappedJobs[i].applicationId = `app-${i}-${Date.now()}`;
+            }
+          }
+        }
+        
         console.log('🟢 Final job data:', mappedJobs.length, mappedJobs);
 
         return {

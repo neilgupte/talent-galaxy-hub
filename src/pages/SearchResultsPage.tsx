@@ -40,7 +40,8 @@ const SearchResultsPage = () => {
     selectedFilters,
     sortBy,
     jobsPerPage: JOBS_PER_PAGE,
-    countryCode
+    countryCode,
+    includeAppliedJobs: true // Add this to fetch applied jobs
   });
   
   // Add automatic refetch when page loads
@@ -60,6 +61,7 @@ const SearchResultsPage = () => {
       <SearchPageTitle 
         searchQuery={searchQuery}
         correctedQuery={correctedQuery}
+        totalCount={data?.totalCount || 0}
       />
       
       <SpellingCorrectionSuggestion
@@ -100,6 +102,7 @@ const SearchResultsPage = () => {
             sortBy={sortBy}
             onSortChange={handleSortChange}
             onPageChange={handlePageChange}
+            searchQuery={searchQuery}
           />
         </div>
       </div>

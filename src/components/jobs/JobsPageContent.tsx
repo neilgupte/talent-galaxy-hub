@@ -17,6 +17,7 @@ interface JobsPageContentProps {
   sortBy: 'date' | 'salary';
   onSortChange: (sortValue: 'date' | 'salary') => void;
   onPageChange: (page: number) => void;
+  searchQuery?: string;
 }
 
 const JobsPageContent: React.FC<JobsPageContentProps> = ({
@@ -28,7 +29,8 @@ const JobsPageContent: React.FC<JobsPageContentProps> = ({
   totalPages,
   sortBy,
   onSortChange,
-  onPageChange
+  onPageChange,
+  searchQuery
 }) => {
   if (isLoading) {
     return (
@@ -67,6 +69,7 @@ const JobsPageContent: React.FC<JobsPageContentProps> = ({
         totalJobs={totalCount}
         sortBy={sortBy}
         onSortChange={onSortChange}
+        searchQuery={searchQuery}
       />
       
       <JobList jobs={jobs || []} />

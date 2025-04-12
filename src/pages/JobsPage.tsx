@@ -49,7 +49,8 @@ const JobsPage = () => {
     selectedFilters,
     sortBy,
     jobsPerPage: JOBS_PER_PAGE,
-    countryCode
+    countryCode,
+    includeAppliedJobs: true // Add this to fetch applied jobs
   });
   
   // Add automatic refetch when page loads
@@ -89,7 +90,12 @@ const JobsPage = () => {
   
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Browse Jobs</h1>
+      <h1 className="text-3xl font-bold mb-8">
+        {searchQuery ? 
+          `${data?.totalCount || 0} ${data?.totalCount === 1 ? 'job' : 'jobs'} found for "${searchQuery}"` : 
+          'Browse Jobs'
+        }
+      </h1>
       
       <div className="mb-8">
         <JobSearchBar onSearch={handleSearch} initialQuery={searchQuery} />
@@ -137,6 +143,7 @@ const JobsPage = () => {
             sortBy={sortBy}
             onSortChange={handleSortChange}
             onPageChange={handlePageChange}
+            searchQuery={searchQuery}
           />
         </div>
       </div>

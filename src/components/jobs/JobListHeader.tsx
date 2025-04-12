@@ -6,13 +6,20 @@ interface JobListHeaderProps {
   totalJobs: number;
   sortBy: 'date' | 'salary';
   onSortChange: (value: 'date' | 'salary') => void;
+  searchQuery?: string;
 }
 
-const JobListHeader: React.FC<JobListHeaderProps> = ({ totalJobs, sortBy, onSortChange }) => {
+const JobListHeader: React.FC<JobListHeaderProps> = ({ 
+  totalJobs, 
+  sortBy, 
+  onSortChange,
+  searchQuery 
+}) => {
   return (
     <div className="mb-4 flex justify-between items-center">
       <div className="text-sm text-muted-foreground">
         {totalJobs} {totalJobs === 1 ? 'job' : 'jobs'} found
+        {searchQuery && <span> for "{searchQuery}"</span>}
       </div>
       <div className="flex items-center gap-2">
         <span className="text-sm">Sort by:</span>

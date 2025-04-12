@@ -67,10 +67,10 @@ const JobCardContent: React.FC<JobCardContentProps> = ({
       </p>
       
       {job.hasApplied && (
-        <div className="mt-3 flex items-center text-sm text-green-600 dark:text-green-400">
+        <div className="mt-3 flex items-center text-sm text-green-600 dark:text-green-400 font-medium">
           <CheckCircle2 className="h-4 w-4 mr-1" />
           <span>
-            Applied {job.applicationStatus && `• ${job.applicationStatus.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}`}
+            Applied {job.applicationStatus && `• ${job.applicationStatus.charAt(0).toUpperCase() + job.applicationStatus.slice(1)}`}
           </span>
         </div>
       )}
