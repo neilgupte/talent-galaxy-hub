@@ -17,7 +17,11 @@ const PostJobPage: React.FC = () => {
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-3xl font-bold mb-6">Post a Job</h1>
         <p className="mb-8">You need to be logged in to post a job.</p>
-        <Button onClick={() => navigate('/auth')}>Sign In</Button>
+        <Button onClick={() => navigate('/employer/auth', { 
+          state: { redirectTo: '/jobs/post' }
+        })}>
+          Sign In as Employer
+        </Button>
       </div>
     );
   }

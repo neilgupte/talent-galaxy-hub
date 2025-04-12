@@ -2,24 +2,34 @@
 import React, { useEffect } from 'react';
 import EmployerAuthForm from '@/components/auth/EmployerAuthForm';
 import { useAuth } from '@/context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 const EmployerAuthPage = () => {
   const { authState } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+
+  // Get redirect path from query parameters or location state
+  const redirectTo = 
+    location.state?.redirectTo || 
+    searchParams.get('redirectTo') || 
+    '/dashboard/employer';
 
   // Redirect if already authenticated as employer
   useEffect(() => {
     if (authState.isAuthenticated && !authState.isLoading) {
-      console.log("EmployerAuthPage: User is already authenticated, checking role");
+      console.log("EmployerAuthPage: User is already authenticated, checking role", authState.user?.role);
       if (authState.user?.role === 'employer') {
-        navigate('/dashboard/employer', { replace: true });
+        console.log("EmployerAuthPage: Redirecting to", redirectTo);
+        navigate(redirectTo, { replace: true });
       } else if (authState.user?.role === 'job_seeker') {
         // Redirect job seekers to regular dashboard
+        console.log("EmployerAuthPage: User is a job seeker, redirecting to job seeker dashboard");
         navigate('/dashboard/job-seeker', { replace: true });
       }
     }
-  }, [authState, navigate]);
+  }, [authState, navigate, redirectTo]);
 
   return (
     <div className="container mx-auto px-4 py-12 flex flex-col items-center">

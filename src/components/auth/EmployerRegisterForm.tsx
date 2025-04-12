@@ -23,6 +23,7 @@ const EmployerRegisterForm = ({ onSubmit, isLoading, error }: EmployerRegisterFo
   // Password validation state
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Password validation
   useEffect(() => {
@@ -33,12 +34,14 @@ const EmployerRegisterForm = ({ onSubmit, isLoading, error }: EmployerRegisterFo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormSubmitted(true);
     
     // Validation
     if (passwordErrors.length > 0) {
       return;
     }
     
+    console.log("EmployerRegisterForm: Submitting form with company:", companyName);
     await onSubmit(companyName, name, email, password);
   };
 
@@ -127,7 +130,7 @@ const EmployerRegisterForm = ({ onSubmit, isLoading, error }: EmployerRegisterFo
         <Button 
           type="submit" 
           className="w-full" 
-          disabled={isLoading || passwordErrors.length > 0}
+          disabled={isLoading || (formSubmitted && passwordErrors.length > 0)}
         >
           {isLoading ? 'Creating Account...' : 'Create Employer Account'}
         </Button>

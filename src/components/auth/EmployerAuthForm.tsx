@@ -32,6 +32,14 @@ const EmployerAuthForm = () => {
   // Get redirect path from location state
   const redirectTo = location.state?.redirectTo || '/dashboard/employer';
 
+  // Redirect to appropriate page after successful authentication
+  useEffect(() => {
+    if (authState.isAuthenticated && authState.user?.role === 'employer' && !authState.isLoading) {
+      console.log("EmployerAuthForm: User authenticated, redirecting to", redirectTo);
+      navigate(redirectTo, { replace: true });
+    }
+  }, [authState.isAuthenticated, authState.user, authState.isLoading, navigate, redirectTo]);
+
   const handleLogin = async (email: string, password: string) => {
     setError(null);
     setIsLoading(true);
@@ -45,7 +53,7 @@ const EmployerAuthForm = () => {
         description: "Welcome back to your employer portal!",
       });
       
-      // Navigation will be handled by the useEffect in the AuthContext
+      // Navigation will be handled by the useEffect above
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -65,12 +73,15 @@ const EmployerAuthForm = () => {
     setIsLoading(true);
     
     try {
-      console.log("EmployerAuthForm: Attempting registration");
+      console.log("EmployerAuthForm: Attempting registration with company:", companyName);
       await register(name, email, password, 'employer');
       
-      // No need for a toast as the AuthContext will handle this
-      // The user will be automatically logged in and redirected
+      toast({
+        title: "Registration successful",
+        description: "Welcome to your employer portal! Setting up your account...",
+      });
       
+      // Navigation will be handled by the useEffect above
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : 'Registration failed');
