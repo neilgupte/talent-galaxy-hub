@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
@@ -44,7 +45,7 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
     requirements: '',
     responsibilities: '',
     benefits: '',
-    companyName: authState.user?.companyName || '',
+    companyName: authState.company?.name || '',
     companyDescription: '',
     companyLogo: '',
     companyWebsite: '',

@@ -1,4 +1,3 @@
-
 export type UserRole = 'job_seeker' | 'employer' | 'admin';
 
 export type JobEmploymentType = 'full_time' | 'part_time' | 'contract' | 'temporary' | 'internship' | 'job_share';
@@ -31,6 +30,7 @@ export interface User {
   role: UserRole;
   phone?: string; // Added phone as optional property
   createdAt: string;
+  companyName?: string; // Added companyName as optional property
 }
 
 export interface Profile {
@@ -91,6 +91,7 @@ export interface Job {
   onsiteType: JobOnsiteType;
   jobLevel: JobLevel;
   requirements: string[];
+  benefits?: string[]; // Added benefits as optional property
   status: 'draft' | 'active' | 'expired' | 'closed';
   isHighPriority: boolean;
   isBoosted: boolean;
