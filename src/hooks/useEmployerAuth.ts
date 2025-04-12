@@ -24,7 +24,7 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
       });
       
       console.log("useEmployerAuth: Login successful, navigating to employer dashboard");
-      // Force navigation to employer dashboard regardless of role
+      // Force immediate navigation to employer dashboard
       navigate('/dashboard/employer', { replace: true });
     } catch (err) {
       console.error("Login error:", err);

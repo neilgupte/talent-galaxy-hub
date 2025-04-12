@@ -22,7 +22,10 @@ const EmployerAuthPage = () => {
       console.log("EmployerAuthPage: User is already authenticated, checking role", authState.user?.role);
       if (authState.user?.role === 'employer') {
         console.log("EmployerAuthPage: Redirecting to employer dashboard");
-        navigate('/dashboard/employer', { replace: true });
+        // Use timeout to ensure state is fully updated before navigation
+        setTimeout(() => {
+          navigate('/dashboard/employer', { replace: true });
+        }, 100);
       } else if (authState.user?.role === 'job_seeker') {
         // Redirect job seekers to regular dashboard
         console.log("EmployerAuthPage: User is a job seeker, redirecting to job seeker dashboard");
