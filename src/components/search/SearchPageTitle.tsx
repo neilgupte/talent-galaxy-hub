@@ -19,7 +19,7 @@ const SearchPageTitle: React.FC<SearchPageTitleProps> = ({
   return (
     <div className="mb-6">
       <h1 className="text-3xl font-bold mb-2">
-        {totalCount} {totalCount === 1 ? 'job' : 'jobs'} found for "{searchQuery}"
+        {totalCount !== undefined ? totalCount : 0} {totalCount === 1 ? 'job' : 'jobs'} found for "{searchQuery}"
       </h1>
       {correctedQuery && (
         <p className="text-muted-foreground">
