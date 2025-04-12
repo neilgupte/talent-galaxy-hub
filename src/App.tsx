@@ -12,11 +12,11 @@ import AuthCallback from './pages/AuthCallback';
 import JobsPage from './pages/JobsPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import JobDetailsPage from './pages/JobDetails';
-import PostJobPage from './pages/NotFound'; // Temporary placeholder
+import PostJobPage from './pages/PostJobPage'; // Changed to proper import
 import PricingPage from './pages/PricingPage';
 import EmployerDashboard from './components/dashboard/EmployerDashboard';
 import JobSeekerDashboard from './components/dashboard/JobSeekerDashboard';
-import ProfilePage from './pages/ProfilePage'; // Updated import
+import ProfilePage from './pages/ProfilePage';
 import SavedJobsPage from './pages/SavedJobsPage';
 import AlertSettingsPage from './pages/AlertSettingsPage';
 import ApplicationsPage from './pages/NotFound'; // Temporary placeholder
