@@ -1,22 +1,31 @@
+
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
-import { Building, BriefcaseIcon } from 'lucide-react';
+import { useSearchParams, useLocation } from 'react-router-dom';
+import { Building } from 'lucide-react';
 import EmployerLoginForm from './EmployerLoginForm';
 import EmployerRegisterForm from './EmployerRegisterForm';
-import SocialLogin from './SocialLogin';
+import EmployerAuthFooter from './EmployerAuthFooter';
+import { useEmployerAuth } from '@/hooks/useEmployerAuth';
 
-const EmployerAuthForm = () => {
-  const { login, register, continueWithGoogle, continueWithLinkedIn, authState } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+const EmployerAuthForm: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>('login');
+  
+  // Get redirect path from location state
+  const redirectTo = location.state?.redirectTo || '/dashboard/employer';
+  
+  // Authentication hook
+  const { 
+    isLoading, 
+    error, 
+    handleLogin, 
+    handleRegister, 
+    handleGoogleLogin, 
+    handleLinkedInLogin 
+  } = useEmployerAuth(redirectTo);
 
   // Check URL parameters for mode
   useEffect(() => {
@@ -27,104 +36,6 @@ const EmployerAuthForm = () => {
       setActiveTab('login');
     }
   }, [searchParams]);
-
-  // Get redirect path from location state
-  const redirectTo = location.state?.redirectTo || '/dashboard/employer';
-
-  const handleLogin = async (email: string, password: string) => {
-    setError(null);
-    setIsLoading(true);
-    
-    try {
-      console.log("EmployerAuthForm: Attempting login");
-      await login(email, password);
-      
-      toast({
-        title: "Login successful",
-        description: "Welcome back to your employer portal!",
-      });
-      
-      console.log("EmployerAuthForm: Login successful, navigating to employer dashboard");
-      // Force navigation to employer dashboard regardless of role
-      // This is specific to the employer auth form
-      navigate('/dashboard/employer', { replace: true });
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(err instanceof Error ? err.message : 'Login failed');
-      
-      toast({
-        title: "Login failed",
-        description: err instanceof Error ? err.message : "An error occurred during login",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRegister = async (companyName: string, name: string, email: string, password: string) => {
-    setError(null);
-    setIsLoading(true);
-    
-    try {
-      console.log("EmployerAuthForm: Attempting registration with company:", companyName);
-      await register(name, email, password, 'employer');
-      
-      toast({
-        title: "Registration successful",
-        description: "Welcome to your employer portal! Setting up your account...",
-      });
-      
-      console.log("EmployerAuthForm: Registration successful, navigating to employer dashboard");
-      // Directly navigate to employer dashboard after registration
-      navigate('/dashboard/employer', { replace: true });
-    } catch (err) {
-      console.error("Registration error:", err);
-      setError(err instanceof Error ? err.message : 'Registration failed');
-      
-      toast({
-        title: "Registration failed",
-        description: err instanceof Error ? err.message : "An error occurred during registration",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = () => {
-    setError(null);
-    try {
-      console.log("EmployerAuthForm: Attempting Google login");
-      return continueWithGoogle();
-    } catch (err) {
-      console.error("Google login error:", err);
-      setError(err instanceof Error ? err.message : 'Google login failed');
-      
-      toast({
-        title: "Google login failed",
-        description: err instanceof Error ? err.message : "An error occurred",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleLinkedInLogin = () => {
-    setError(null);
-    try {
-      console.log("EmployerAuthForm: Attempting LinkedIn login");
-      return continueWithLinkedIn();
-    } catch (err) {
-      console.error("LinkedIn login error:", err);
-      setError(err instanceof Error ? err.message : 'LinkedIn login failed');
-      
-      toast({
-        title: "LinkedIn login failed",
-        description: err instanceof Error ? err.message : "An error occurred",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <Card className="w-full max-w-md mx-auto border-primary/20">
@@ -153,18 +64,11 @@ const EmployerAuthForm = () => {
             error={error}
           />
           
-          <div className="px-6 pb-6">
-            <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
-            <SocialLogin
-              onGoogleLogin={handleGoogleLogin}
-              onLinkedInLogin={handleLinkedInLogin}
-            />
-            <div className="text-center mt-4 text-sm">
-              <a href="/auth" className="text-primary hover:underline">
-                Looking for a job? Sign in as a job seeker
-              </a>
-            </div>
-          </div>
+          <EmployerAuthFooter
+            activeTab={activeTab} 
+            onGoogleLogin={handleGoogleLogin}
+            onLinkedInLogin={handleLinkedInLogin}
+          />
         </TabsContent>
         
         <TabsContent value="register" className="m-0">
@@ -181,18 +85,11 @@ const EmployerAuthForm = () => {
             error={error}
           />
           
-          <div className="px-6 pb-6">
-            <p className="text-center text-sm text-muted-foreground mb-2">Or continue with</p>
-            <SocialLogin
-              onGoogleLogin={handleGoogleLogin}
-              onLinkedInLogin={handleLinkedInLogin}
-            />
-            <div className="text-center mt-4 text-sm">
-              <a href="/auth" className="text-primary hover:underline">
-                Looking for a job? Sign up as a job seeker
-              </a>
-            </div>
-          </div>
+          <EmployerAuthFooter
+            activeTab={activeTab}
+            onGoogleLogin={handleGoogleLogin}
+            onLinkedInLogin={handleLinkedInLogin}
+          />
         </TabsContent>
       </Tabs>
     </Card>
