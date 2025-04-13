@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth/useAuth";
@@ -9,6 +10,7 @@ import { LogOut, Settings, User, LayoutDashboard, Bell, Briefcase, BookmarkCheck
 import NotificationCenter from "@/components/notifications/NotificationCenter";
 import { Separator } from "@/components/ui/separator";
 import SearchBox from "@/components/jobs/SearchBox";
+
 const Navbar = () => {
   const {
     authState,
@@ -26,9 +28,11 @@ const Navbar = () => {
     deleteNotification
   } = useNotifications();
   const navigate = useNavigate();
+  
   const handleLogout = async () => {
     await logout();
   };
+  
   const handleSearch = (query: string, parsedQuery?: {
     title: string;
     location: string;
@@ -37,6 +41,7 @@ const Navbar = () => {
       navigate(`/search-results?q=${encodeURIComponent(query)}`);
     }
   };
+  
   return <header className="w-full border-b bg-white py-3">
       <div className="container mx-auto flex items-center justify-between px-4">
         <div className="flex items-center">
@@ -115,6 +120,12 @@ const Navbar = () => {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
+                          <Link to="/company/profile">
+                            <User className="mr-2 h-4 w-4" />
+                            <span>Company Profile</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
                           <Link to="/jobs/post">
                             <Briefcase className="mr-2 h-4 w-4" />
                             <span>Post a Job</span>
@@ -154,4 +165,5 @@ const Navbar = () => {
       </div>
     </header>;
 };
+
 export default Navbar;

@@ -65,7 +65,9 @@ const PostJobPage: React.FC = () => {
           <Button onClick={() => navigate('/dashboard/job-seeker')}>
             Back to Dashboard
           </Button>
-          <Button onClick={() => navigate('/employer/auth')} variant="outline">
+          <Button onClick={() => navigate('/employer/auth', { 
+            state: { redirectTo: '/jobs/post' }
+          })} variant="outline">
             Sign In as Employer
           </Button>
         </div>
