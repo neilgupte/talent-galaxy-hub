@@ -1,3 +1,4 @@
+
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Profile, Company, UserRole } from "@/types";
@@ -45,7 +46,7 @@ export const mapDatabaseCompanyToModel = (companyData: any): Company | null => {
     location: companyData.location || '',
     phone: companyData.phone || '',
     email: companyData.email || '',
-    hasWebsite: companyData.has_website,
+    hasWebsite: companyData.has_website !== undefined ? companyData.has_website : true,
     companyType: companyData.company_type || 'Company'
   };
 };

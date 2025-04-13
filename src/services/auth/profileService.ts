@@ -64,7 +64,6 @@ export const updateCompanyInfo = async (company: Partial<Company>): Promise<bool
     const dbCompany: any = {
       name: company.name,
       industry: company.industry,
-      description: company.description,
       logo_url: company.logoUrl || company.logo,
       website: company.website,
       size: company.size,
@@ -73,6 +72,8 @@ export const updateCompanyInfo = async (company: Partial<Company>): Promise<bool
       phone: company.phone,
       email: company.email,
       recruiter_type: company.recruiterType,
+      has_website: company.hasWebsite,
+      company_type: company.companyType,
       plan_type: company.planType || 'free'
     };
     

@@ -3,7 +3,7 @@ export interface Company {
   id: string;
   name: string;
   industry: string;
-  description: string;
+  description?: string;
   logoUrl?: string;
   planType: string;
   jobsPosted?: number;
