@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -339,7 +338,8 @@ function generateDiverseJobs(
               industry: getIndustryForCompany(companyName),
               description: `${companyName} is a leading provider of innovative solutions in the ${getIndustryForCompany(companyName)} industry.`,
               logoUrl: '/lovable-uploads/51540783-120d-4616-82a5-16011c4b6344.png',
-              planType: Math.random() > 0.7 ? 'premium' : 'standard'
+              planType: Math.random() > 0.7 ? 'premium' : 'standard' as 'free' | 'standard' | 'premium',
+              recruiterType: Math.random() > 0.3 ? 'internal' : 'agency' // 70% internal, 30% agency recruiters
             },
             matchPercentage: 50 + Math.floor(Math.random() * 50)
           };
@@ -506,7 +506,8 @@ function generateDiverseJobs(
                   industry: getIndustryForCompany(companyName),
                   description: `${companyName} is a leading provider in the ${getIndustryForCompany(companyName)} industry.`,
                   logoUrl: '/lovable-uploads/51540783-120d-4616-82a5-16011c4b6344.png',
-                  planType: 'premium'
+                  planType: 'premium',
+                  recruiterType: 'internal'
                 },
                 matchPercentage: 85 + Math.floor(Math.random() * 15)
               };

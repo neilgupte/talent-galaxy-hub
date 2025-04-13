@@ -52,7 +52,8 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
       industry: 'Software Development',
       description: 'Leading software development company focused on creating innovative solutions.',
       logoUrl: '/placeholder.svg',
-      planType: 'premium'
+      planType: 'premium',
+      recruiterType: 'internal'
     },
     matchPercentage: 92,
     hasApplied: false,

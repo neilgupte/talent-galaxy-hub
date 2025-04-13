@@ -104,14 +104,16 @@ export const mapDatabaseJobToModel = (job: any): Job => {
       industry: job.companies.industry || 'Technology',
       description: job.companies.description || 'A leading technology company focused on innovative digital experiences.',
       logoUrl: job.companies.logo_url || '/lovable-uploads/51540783-120d-4616-82a5-16011c4b6344.png', // Use the uploaded logo
-      planType: job.companies.plan_type || 'free'
+      planType: job.companies.plan_type || 'free',
+      recruiterType: job.companies.recruiter_type || 'internal' // Add default recruiterType
     } : {
       id: 'default-company',
       name: 'Creative Tech Solutions',
       industry: 'Technology',
       description: 'A leading technology company focused on innovative digital experiences.',
       logoUrl: '/lovable-uploads/51540783-120d-4616-82a5-16011c4b6344.png',
-      planType: 'free'
+      planType: 'free',
+      recruiterType: 'internal' // Add default recruiterType
     }
   };
 };

@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Profile, Company, UserRole } from "@/types";
@@ -38,7 +37,8 @@ export const mapDatabaseCompanyToModel = (companyData: any): Company | null => {
     industry: companyData.industry || '',
     description: companyData.description || '',
     logoUrl: companyData.logo_url,
-    planType: companyData.plan_type || 'free'
+    planType: companyData.plan_type || 'free',
+    recruiterType: companyData.recruiter_type || 'internal' // Add default recruiterType
   };
 };
 

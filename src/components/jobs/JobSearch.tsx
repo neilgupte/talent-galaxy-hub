@@ -49,7 +49,8 @@ const MOCK_JOBS: Job[] = [
       industry: 'Software Development',
       description: 'Leading provider of innovative software solutions',
       logoUrl: '/placeholder.svg',
-      planType: 'premium'
+      planType: 'premium',
+      recruiterType: 'internal'
     },
     matchPercentage: 92
   },
@@ -77,7 +78,8 @@ const MOCK_JOBS: Job[] = [
       industry: 'Design',
       description: 'Award-winning design agency',
       logoUrl: '/placeholder.svg',
-      planType: 'standard'
+      planType: 'standard',
+      recruiterType: 'internal'
     },
     matchPercentage: 80
   },
@@ -105,7 +107,8 @@ const MOCK_JOBS: Job[] = [
       industry: 'Technology',
       description: 'Global technology leader',
       logoUrl: '/placeholder.svg',
-      planType: 'premium'
+      planType: 'premium',
+      recruiterType: 'internal'
     },
     matchPercentage: 75
   },
@@ -133,7 +136,8 @@ const MOCK_JOBS: Job[] = [
       industry: 'Product Development',
       description: 'Creating innovative products',
       logoUrl: '/placeholder.svg',
-      planType: 'standard'
+      planType: 'standard',
+      recruiterType: 'internal'
     },
     matchPercentage: 65,
     hasApplied: true,

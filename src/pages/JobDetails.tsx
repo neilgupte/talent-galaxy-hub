@@ -64,7 +64,8 @@ const fetchJobDetails = async (id: string): Promise<Job> => {
         industry: 'Technology',
         description: 'Creative Tech Solutions is a leading technology company focused on innovative digital experiences. We combine cutting-edge technology with creative design to deliver exceptional products and services to our clients worldwide.',
         logoUrl: '/lovable-uploads/51540783-120d-4616-82a5-16011c4b6344.png',
-        planType: 'enterprise'
+        planType: 'enterprise',
+        recruiterType: 'internal'
       };
     }
     

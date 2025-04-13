@@ -77,7 +77,8 @@ const mapDatabaseJobToModel = (job: any): Job => {
       industry: job.companies.industry || '',
       description: job.companies.description || '',
       logoUrl: job.companies.logo_url || '/placeholder.svg',
-      planType: job.companies.plan_type || 'free'
+      planType: job.companies.plan_type || 'free',
+      recruiterType: job.companies.recruiter_type || 'internal' // Add recruiterType
     } : undefined,
     // Add a mock match percentage for UI display
     matchPercentage: Math.floor(70 + Math.random() * 25)

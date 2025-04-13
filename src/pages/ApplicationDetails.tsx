@@ -44,7 +44,8 @@ const fetchApplicationDetails = async (id: string): Promise<Application> => {
         industry: 'Software Development',
         description: 'Leading tech company focused on innovative solutions',
         logoUrl: '/placeholder.svg',
-        planType: 'premium'
+        planType: 'premium',
+        recruiterType: 'internal' // Add recruiterType
       }
     },
     answers: [
