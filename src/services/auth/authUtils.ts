@@ -38,7 +38,15 @@ export const mapDatabaseCompanyToModel = (companyData: any): Company | null => {
     description: companyData.description || '',
     logoUrl: companyData.logo_url,
     planType: companyData.plan_type || 'free',
-    recruiterType: companyData.recruiter_type || 'internal' // Add default recruiterType
+    recruiterType: companyData.recruiter_type || 'internal',
+    website: companyData.website || '',
+    size: companyData.size || '',
+    founded: companyData.founded || '',
+    location: companyData.location || '',
+    phone: companyData.phone || '',
+    email: companyData.email || '',
+    hasWebsite: companyData.has_website,
+    companyType: companyData.company_type || 'Company'
   };
 };
 

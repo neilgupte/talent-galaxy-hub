@@ -9,12 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { Building, Users, Globe, MapPin, Phone, Mail, Image, Link, AlertCircle } from 'lucide-react';
+import { Building, Users, Globe, MapPin, Phone, Mail, Image, Link, AlertCircle, Calendar, Building2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const CompanyProfilePage = () => {
   const { authState, updateCompany } = useAuth();
@@ -36,7 +38,9 @@ const CompanyProfilePage = () => {
     location: '',
     phone: '',
     email: '',
-    recruiterType: 'internal' as 'internal' | 'agency'
+    recruiterType: 'internal' as 'internal' | 'agency',
+    hasWebsite: true,
+    companyType: 'Company'
   });
   
   // Update form if company data changes
@@ -55,7 +59,9 @@ const CompanyProfilePage = () => {
         location: authState.company.location || '',
         phone: authState.company.phone || '',
         email: authState.company.email || '',
-        recruiterType: authState.company.recruiterType || 'internal'
+        recruiterType: authState.company.recruiterType || 'internal',
+        hasWebsite: authState.company.hasWebsite !== undefined ? authState.company.hasWebsite : true,
+        companyType: authState.company.companyType || 'Company'
       });
     }
     
@@ -90,6 +96,21 @@ const CompanyProfilePage = () => {
     setFormData(prev => ({
       ...prev,
       recruiterType: value
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleWebsiteStatusChange = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      hasWebsite: checked,
+      website: checked ? prev.website : ''
     }));
   };
   
@@ -210,19 +231,14 @@ const CompanyProfilePage = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="description">
-                  {formData.recruiterType === 'internal' ? 'Company Description*' : 'Agency Description*'}
-                </Label>
-                <Textarea 
-                  id="description" 
-                  name="description" 
-                  value={formData.description} 
+                <Label htmlFor="industry">Industry*</Label>
+                <Input 
+                  id="industry" 
+                  name="industry" 
+                  value={formData.industry} 
                   onChange={handleInputChange}
-                  placeholder={formData.recruiterType === 'internal' ? 
-                    "Tell us about your company" : 
-                    "Tell us about your recruitment agency"}
+                  placeholder="e.g. IT Services and IT Consulting"
                   required
-                  rows={4}
                 />
               </div>
             </div>
@@ -288,7 +304,7 @@ const CompanyProfilePage = () => {
                   Basic Information
                 </CardTitle>
                 <CardDescription>
-                  Add your company name and primary description
+                  Add your company name and primary information
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -331,20 +347,67 @@ const CompanyProfilePage = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="description">
-                    {formData.recruiterType === 'internal' ? 'Company Description *' : 'Agency Description *'}
+                  <Label htmlFor="industry" className="flex items-center">
+                    Industry <span className="text-red-500 ml-1">*</span>
                   </Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
+                  <Input
+                    id="industry"
+                    name="industry"
+                    value={formData.industry}
                     onChange={handleInputChange}
-                    placeholder={formData.recruiterType === 'internal' ? 
-                      "Tell potential candidates about your company, culture, and values" : 
-                      "Tell potential clients about your recruitment agency and services"}
-                    rows={6}
+                    placeholder="e.g. IT Services and IT Consulting"
                     required
                   />
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-base font-medium">Website URL</Label>
+                    <div className="flex items-center space-x-2 mt-2 mb-4">
+                      <Checkbox 
+                        id="has-website"
+                        checked={formData.hasWebsite}
+                        onCheckedChange={(checked) => handleWebsiteStatusChange(checked as boolean)} 
+                      />
+                      <Label htmlFor="has-website" className="cursor-pointer">
+                        My organization doesn't have a website
+                      </Label>
+                    </div>
+                  </div>
+                  
+                  {formData.hasWebsite && (
+                    <div className="space-y-2">
+                      <Input
+                        id="website"
+                        name="website"
+                        value={formData.website}
+                        onChange={handleInputChange}
+                        placeholder="Add your website homepage (www.example.com)"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="companyType" className="flex items-center">
+                    Company type <span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Select 
+                    value={formData.companyType} 
+                    onValueChange={(value) => handleSelectChange('companyType', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select company type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Company">Company</SelectItem>
+                      <SelectItem value="Self Employed">Self Employed</SelectItem>
+                      <SelectItem value="Partnership">Partnership</SelectItem>
+                      <SelectItem value="Nonprofit">Nonprofit</SelectItem>
+                      <SelectItem value="Government Agency">Government Agency</SelectItem>
+                      <SelectItem value="School/University">School/University</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
@@ -366,50 +429,66 @@ const CompanyProfilePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="industry">Industry</Label>
-                    <Input
-                      id="industry"
-                      name="industry"
-                      value={formData.industry}
-                      onChange={handleInputChange}
-                      placeholder="e.g. Technology, Healthcare, Finance"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="size">Company Size</Label>
-                    <Input
-                      id="size"
-                      name="size"
-                      value={formData.size}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 1-10, 11-50, 51-200, 201-500, 500+"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="founded">Founded Year</Label>
-                    <Input
-                      id="founded"
-                      name="founded"
-                      value={formData.founded}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 2010"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Headquarters Location</Label>
-                    <Input
-                      id="location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleInputChange}
-                      placeholder="e.g. London, UK"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="size" className="flex items-center">
+                    Company Size <span className="text-red-500 ml-1">*</span>
+                  </Label>
+                  <Select 
+                    value={formData.size} 
+                    onValueChange={(value) => handleSelectChange('size', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select company size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0-1 employees">0-1 employees</SelectItem>
+                      <SelectItem value="2-10 employees">2-10 employees</SelectItem>
+                      <SelectItem value="11-50 employees">11-50 employees</SelectItem>
+                      <SelectItem value="51-200 employees">51-200 employees</SelectItem>
+                      <SelectItem value="201-500 employees">201-500 employees</SelectItem>
+                      <SelectItem value="501-1000 employees">501-1000 employees</SelectItem>
+                      <SelectItem value="1001+ employees">1001+ employees</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="founded">Year Founded</Label>
+                  <Input
+                    id="founded"
+                    name="founded"
+                    value={formData.founded}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 2010"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="location">Headquarters Location</Label>
+                  <Input
+                    id="location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    placeholder="e.g. London, UK"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">
+                    Company Description
+                  </Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Tell potential candidates about your company, culture, and values"
+                    rows={6}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Briefly describe your company, its mission, and what makes it a great place to work
+                  </p>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
@@ -441,17 +520,6 @@ const CompanyProfilePage = () => {
                     placeholder="https://example.com/logo.png"
                   />
                   <p className="text-sm text-muted-foreground">Enter a direct link to your company logo image</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="website">Company Website</Label>
-                  <Input
-                    id="website"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleInputChange}
-                    placeholder="https://example.com"
-                  />
                 </div>
                 
                 <div className="bg-muted p-4 rounded-md">
@@ -506,7 +574,7 @@ const CompanyProfilePage = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="+44 (0) 20 7123 4567"
                   />
                 </div>
               </CardContent>
@@ -562,6 +630,20 @@ const CompanyProfilePage = () => {
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         <span>{formData.location}</span>
+                      </div>
+                    )}
+                    
+                    {formData.companyType && (
+                      <div className="flex items-center gap-1">
+                        <Building2 className="h-3 w-3" />
+                        <span>{formData.companyType}</span>
+                      </div>
+                    )}
+
+                    {formData.size && (
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        <span>{formData.size}</span>
                       </div>
                     )}
                     

@@ -15,4 +15,6 @@ export interface Company {
   phone?: string;
   email?: string;
   recruiterType: 'internal' | 'agency';
+  hasWebsite?: boolean;
+  companyType?: string;
 }
