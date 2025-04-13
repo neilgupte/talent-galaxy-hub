@@ -1,4 +1,3 @@
-
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserRole } from "@/types";
@@ -42,47 +41,99 @@ export const loginWithEmailPassword = async (email: string, password: string) =>
 };
 
 // Registration function
-export const registerUser = async (name: string, email: string, password: string, role: UserRole) => {
+export const registerUser = async (
+  name: string,
+  email: string,
+  password: string,
+  role: UserRole,
+  additionalMetadata?: Record<string, any>
+) => {
   try {
-    console.log("AuthUtils: Registering new user", { email, role });
-    // Configure registration with no email verification
-    const { data, error } = await supabase.auth.signUp({
+    console.log("AuthMethods: Registering user", { email, role });
+    
+    // Step 1: Actual signup with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           name,
-          role
+          role,
+          ...additionalMetadata
         },
-        // Remove email redirect to disable verification
-        emailRedirectTo: undefined, 
+        emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     });
 
-    if (error) {
-      console.error("AuthUtils: Registration error", error);
-      toast({
-        title: "Registration failed",
-        description: error.message || "An error occurred",
-        variant: "destructive"
-      });
-      throw error;
+    if (authError) {
+      console.error("Auth registration error:", authError);
+      throw authError;
     }
 
-    console.log("AuthUtils: Registration successful", data.user?.id);
-    toast({
-      title: "Registration successful",
-      description: "Your account has been created! You can now sign in.",
-    });
-    
-    return { data, error: null };
-  } catch (error: any) {
-    console.error("AuthUtils: Registration failed", error);
-    toast({
-      title: "Registration failed",
-      description: error.message || "An error occurred",
-      variant: "destructive"
-    });
+    if (!authData.user) {
+      throw new Error("Registration failed: No user returned");
+    }
+
+    console.log("AuthMethods: Auth registration successful, creating user record");
+
+    // Step 2: Create a record in our users table
+    const { error: dbError } = await supabase
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        name,
+        email,
+        role,
+        company_name: additionalMetadata?.companyName || null,
+      });
+
+    if (dbError) {
+      console.error("Database user creation error:", dbError);
+      throw dbError;
+    }
+
+    // Step 3: If this is an employer, create company and link it
+    if (role === 'employer' && additionalMetadata?.companyName) {
+      console.log("AuthMethods: Creating company for employer", additionalMetadata.companyName);
+      
+      // Create company
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .insert({
+          name: additionalMetadata.companyName,
+          description: '',
+          industry: '',
+          plan_type: 'free',
+          recruiter_type: additionalMetadata.recruiterType || 'internal'
+        })
+        .select('id')
+        .single();
+
+      if (companyError) {
+        console.error("Company creation error:", companyError);
+        throw companyError;
+      }
+
+      // Link user to company
+      const { error: linkError } = await supabase
+        .from('company_users')
+        .insert({
+          user_id: authData.user.id,
+          company_id: companyData.id,
+          role: 'admin'
+        });
+
+      if (linkError) {
+        console.error("Company-user link error:", linkError);
+        throw linkError;
+      }
+      
+      console.log("AuthMethods: Company created and linked to user successfully");
+    }
+
+    return { data: authData, error: null };
+  } catch (error) {
+    console.error("Registration process error:", error);
     return { data: null, error };
   }
 };
