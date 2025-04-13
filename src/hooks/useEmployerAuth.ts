@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
-import { useAuth } from '@/context/auth/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
-  const { login, register, continueWithGoogle, continueWithLinkedIn } = useAuth();
+  const { login, register, continueWithGoogle, continueWithLinkedIn, resetPassword } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

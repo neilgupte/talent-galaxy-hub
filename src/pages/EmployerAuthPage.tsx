@@ -1,10 +1,10 @@
 
 import React, { useEffect } from 'react';
 import EmployerAuthForm from '@/components/auth/EmployerAuthForm';
-import { useAuth } from '@/context/auth/useAuth';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from '@/context/AuthContext';
 
 const EmployerAuthPage = () => {
   const { authState } = useAuth();

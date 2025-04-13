@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { CardContent } from '@/components/ui/card';
-import { useAuth } from '@/context/auth/useAuth';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EmployerLoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -15,7 +15,6 @@ interface EmployerLoginFormProps {
 }
 
 const EmployerLoginForm = ({ onSubmit, isLoading, error }: EmployerLoginFormProps) => {
-  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +51,14 @@ const EmployerLoginForm = ({ onSubmit, isLoading, error }: EmployerLoginFormProp
     
     try {
       setIsResettingPassword(true);
-      await resetPassword(email);
+      
+      // Use supabase directly for password reset
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      
+      if (error) throw error;
+      
       toast({
         title: "Password reset email sent",
         description: "Please check your email for instructions to reset your password"
