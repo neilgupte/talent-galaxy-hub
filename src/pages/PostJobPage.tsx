@@ -27,6 +27,14 @@ const PostJobPage: React.FC = () => {
     // Set local loading state based on auth loading
     if (!authState.isLoading) {
       setIsLoading(false);
+      
+      // Show welcome toast when component mounts for employers
+      if (isEmployer) {
+        toast({
+          title: "Ready to post a job!",
+          description: "Fill out the form below to create your job posting.",
+        });
+      }
     }
   }, [authState, isEmployer]);
   
@@ -76,16 +84,6 @@ const PostJobPage: React.FC = () => {
   }
 
   // If we get here, user is authenticated as an employer
-  useEffect(() => {
-    // Show welcome toast when component mounts for employers
-    if (isEmployer) {
-      toast({
-        title: "Ready to post a job!",
-        description: "Fill out the form below to create your job posting.",
-      });
-    }
-  }, [isEmployer]);
-  
   return <JobPostFormWrapper />;
 };
 
