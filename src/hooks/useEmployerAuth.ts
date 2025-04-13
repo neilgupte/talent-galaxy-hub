@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth/useAuth';
 
 export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
   const { login, register, continueWithGoogle, continueWithLinkedIn, resetPassword } = useAuth();
