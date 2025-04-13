@@ -5,8 +5,9 @@ import JobPostForm from './JobPostForm';
 import JobBulkUpload from './JobBulkUpload';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LoaderCircle, Upload } from 'lucide-react';
+import { LoaderCircle, Upload, FileUp, Clock, CheckCircle, LineChart } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface JobPostInitialValues {
   country?: string;
@@ -85,11 +86,75 @@ const JobPostFormWrapper = () => {
         </TabsContent>
         
         <TabsContent value="bulk">
-          <div className="max-w-4xl mx-auto">
-            <JobBulkUpload 
-              onClose={() => setActiveTab("single")} 
-              onSuccess={handleBulkUploadSuccess}
-            />
+          <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
+            <div>
+              <JobBulkUpload 
+                onClose={() => setActiveTab("single")} 
+                onSuccess={handleBulkUploadSuccess}
+              />
+            </div>
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>How to Use Bulk Upload</CardTitle>
+                  <CardDescription>
+                    Save time by uploading multiple jobs at once
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium flex items-center mb-2">
+                      <FileUp className="h-5 w-5 mr-2 text-primary" />
+                      Benefits of Bulk Upload
+                    </h3>
+                    <ul className="list-disc pl-6 space-y-2 text-sm">
+                      <li><span className="font-medium">Save Time:</span> Upload dozens of job listings in seconds</li>
+                      <li><span className="font-medium">Stay Organized:</span> Maintain consistent job information across listings</li>
+                      <li><span className="font-medium">Reduce Errors:</span> Our system validates your data before publishing</li>
+                      <li><span className="font-medium">Batch Processing:</span> Make updates to multiple listings at once</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium flex items-center mb-2">
+                      <Clock className="h-5 w-5 mr-2 text-primary" />
+                      Simple 4-Step Process
+                    </h3>
+                    <ol className="list-decimal pl-6 space-y-3 text-sm">
+                      <li>
+                        <p className="font-medium">Download the template</p>
+                        <p className="text-muted-foreground">Choose between CSV or Excel format based on your preference</p>
+                      </li>
+                      <li>
+                        <p className="font-medium">Fill in your job details</p>
+                        <p className="text-muted-foreground">Add job titles, descriptions, salaries and requirements</p>
+                      </li>
+                      <li>
+                        <p className="font-medium">Upload and validate</p>
+                        <p className="text-muted-foreground">Our system checks for any formatting errors before posting</p>
+                      </li>
+                      <li>
+                        <p className="font-medium">Publish your jobs</p>
+                        <p className="text-muted-foreground">With one click, all valid jobs will be posted to our platform</p>
+                      </li>
+                    </ol>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium flex items-center mb-2">
+                      <LineChart className="h-5 w-5 mr-2 text-primary" />
+                      Tips for Success
+                    </h3>
+                    <ul className="list-disc pl-6 space-y-2 text-sm">
+                      <li>Follow the template structure exactly</li>
+                      <li>Ensure all required fields are completed</li>
+                      <li>Use common industry keywords in your descriptions for better visibility</li>
+                      <li>Check your data for errors before uploading</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
       </Tabs>

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { FileUp, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { FileUp, AlertCircle, CheckCircle2, X, Download } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from "@/components/ui/use-toast";
 import { Spinner } from '@/components/ui/spinner';
@@ -135,6 +135,45 @@ const JobBulkUpload: React.FC<JobBulkUploadProps> = ({ onClose, onSuccess }) => 
     setValidationResults(null);
     setUploadProgress(0);
   };
+
+  const downloadTemplate = (fileType: 'csv' | 'excel') => {
+    // Generate template content based on file type
+    let content = '';
+    let fileName = '';
+    let mimeType = '';
+    
+    if (fileType === 'csv') {
+      content = 'Job Title,Description,Location,Employment Type,Experience Level,Salary Min,Salary Max,Currency,Remote,Skills\n' +
+                'Software Engineer,Full-stack developer with React and Node.js,"San Francisco, CA",Full Time,Mid-Level,80000,120000,USD,Yes,"JavaScript,React,Node.js"\n' +
+                'Marketing Manager,Digital marketing expert,"New York, NY",Full Time,Senior,70000,100000,USD,No,"SEO,Content Marketing,Social Media"\n';
+      fileName = 'job_upload_template.csv';
+      mimeType = 'text/csv';
+    } else {
+      // For simplicity, we're also generating a CSV for Excel template
+      // In a real app, you might want to generate an actual XLSX file
+      content = 'Job Title,Description,Location,Employment Type,Experience Level,Salary Min,Salary Max,Currency,Remote,Skills\n' +
+                'Software Engineer,Full-stack developer with React and Node.js,"San Francisco, CA",Full Time,Mid-Level,80000,120000,USD,Yes,"JavaScript,React,Node.js"\n' +
+                'Marketing Manager,Digital marketing expert,"New York, NY",Full Time,Senior,70000,100000,USD,No,"SEO,Content Marketing,Social Media"\n';
+      fileName = 'job_upload_template.xlsx';
+      mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    }
+    
+    // Create a blob and download it
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Template Downloaded",
+      description: `${fileType.toUpperCase()} template has been downloaded. Fill it with your jobs data.`,
+    });
+  };
   
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -157,11 +196,11 @@ const JobBulkUpload: React.FC<JobBulkUploadProps> = ({ onClose, onSuccess }) => 
               </p>
               
               <div className="flex flex-col gap-2 md:flex-row md:gap-4">
-                <Button variant="outline" className="text-sm">
-                  Download CSV Template
+                <Button variant="outline" className="text-sm" onClick={() => downloadTemplate('csv')}>
+                  <Download className="mr-2 h-4 w-4" /> Download CSV Template
                 </Button>
-                <Button variant="outline" className="text-sm">
-                  Download Excel Template
+                <Button variant="outline" className="text-sm" onClick={() => downloadTemplate('excel')}>
+                  <Download className="mr-2 h-4 w-4" /> Download Excel Template
                 </Button>
               </div>
             </div>
