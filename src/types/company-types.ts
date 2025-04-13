@@ -14,5 +14,5 @@ export interface Company {
   location?: string;
   phone?: string;
   email?: string;
-  recruiterType?: 'internal' | 'agency'; // Added this field
+  recruiterType: 'internal' | 'agency';
 }

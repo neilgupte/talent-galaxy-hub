@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { Building, Users, Globe, MapPin, Phone, Mail, Image, Link } from 'lucide-react';
+import { Building, Users, Globe, MapPin, Phone, Mail, Image, Link, AlertCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const CompanyProfilePage = () => {
   const { authState, updateCompany } = useAuth();
@@ -20,6 +22,7 @@ const CompanyProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
+  const [error, setError] = useState<string | null>(null);
   
   // Company profile form state
   const [formData, setFormData] = useState({
@@ -32,7 +35,8 @@ const CompanyProfilePage = () => {
     founded: '',
     location: '',
     phone: '',
-    email: ''
+    email: '',
+    recruiterType: 'internal' as 'internal' | 'agency'
   });
   
   // Update form if company data changes
@@ -50,7 +54,8 @@ const CompanyProfilePage = () => {
         founded: authState.company.founded || '',
         location: authState.company.location || '',
         phone: authState.company.phone || '',
-        email: authState.company.email || ''
+        email: authState.company.email || '',
+        recruiterType: authState.company.recruiterType || 'internal'
       });
     }
     
@@ -80,13 +85,25 @@ const CompanyProfilePage = () => {
       [name]: value
     }));
   };
+
+  const handleRecruiterTypeChange = (value: 'internal' | 'agency') => {
+    setFormData(prev => ({
+      ...prev,
+      recruiterType: value
+    }));
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setError(null);
     
     try {
-      await updateCompany(formData);
+      await updateCompany({
+        ...formData,
+        id: authState.company?.id,
+        planType: authState.company?.planType || 'free'
+      });
       
       toast({
         title: "Profile updated",
@@ -94,12 +111,7 @@ const CompanyProfilePage = () => {
       });
     } catch (error) {
       console.error("Error updating company profile:", error);
-      
-      toast({
-        title: "Update failed",
-        description: "Failed to update your company profile. Please try again.",
-        variant: "destructive"
-      });
+      setError("Failed to update your company profile. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -151,26 +163,64 @@ const CompanyProfilePage = () => {
           <p className="mb-8">You don't have a company profile yet. Let's create one!</p>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="space-y-4">
+                <h3 className="font-medium">Recruiter Type</h3>
+                <RadioGroup 
+                  value={formData.recruiterType} 
+                  onValueChange={(value) => handleRecruiterTypeChange(value as 'internal' | 'agency')}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="internal" id="internal" />
+                    <Label htmlFor="internal" className="cursor-pointer">
+                      Internal Recruiter (hiring for my own company)
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="agency" id="agency" />
+                    <Label htmlFor="agency" className="cursor-pointer">
+                      External Recruitment Agency (hiring for multiple clients)
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
               <div className="space-y-2">
-                <Label htmlFor="name">Company Name*</Label>
+                <Label htmlFor="name">
+                  {formData.recruiterType === 'internal' ? 'Company Name*' : 'Agency Name*'}
+                </Label>
                 <Input 
                   id="name" 
                   name="name" 
                   value={formData.name} 
                   onChange={handleInputChange}
-                  placeholder="Enter your company name"
+                  placeholder={formData.recruiterType === 'internal' ? 
+                    "Enter your company name" : 
+                    "Enter your recruitment agency name"}
                   required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="description">Company Description*</Label>
+                <Label htmlFor="description">
+                  {formData.recruiterType === 'internal' ? 'Company Description*' : 'Agency Description*'}
+                </Label>
                 <Textarea 
                   id="description" 
                   name="description" 
                   value={formData.description} 
                   onChange={handleInputChange}
-                  placeholder="Tell us about your company"
+                  placeholder={formData.recruiterType === 'internal' ? 
+                    "Tell us about your company" : 
+                    "Tell us about your recruitment agency"}
                   required
                   rows={4}
                 />
@@ -213,6 +263,14 @@ const CompanyProfilePage = () => {
         </div>
       </div>
       
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <form onSubmit={handleSubmit}>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="w-full md:w-auto grid grid-cols-2 md:inline-flex">
@@ -234,26 +292,56 @@ const CompanyProfilePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Recruiter Type</h3>
+                  <RadioGroup 
+                    value={formData.recruiterType} 
+                    onValueChange={(value) => handleRecruiterTypeChange(value as 'internal' | 'agency')}
+                    className="space-y-2"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="internal" id="profile-internal" />
+                      <Label htmlFor="profile-internal" className="cursor-pointer">
+                        Internal Recruiter (hiring for my own company)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="agency" id="profile-agency" />
+                      <Label htmlFor="profile-agency" className="cursor-pointer">
+                        External Recruitment Agency (hiring for multiple clients)
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="name">Company Name *</Label>
+                  <Label htmlFor="name">
+                    {formData.recruiterType === 'internal' ? 'Company Name *' : 'Agency Name *'}
+                  </Label>
                   <Input
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Enter your company name"
+                    placeholder={formData.recruiterType === 'internal' ? 
+                      "Enter your company name" : 
+                      "Enter your recruitment agency name"}
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Company Description *</Label>
+                  <Label htmlFor="description">
+                    {formData.recruiterType === 'internal' ? 'Company Description *' : 'Agency Description *'}
+                  </Label>
                   <Textarea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    placeholder="Tell potential candidates about your company, culture, and values"
+                    placeholder={formData.recruiterType === 'internal' ? 
+                      "Tell potential candidates about your company, culture, and values" : 
+                      "Tell potential clients about your recruitment agency and services"}
                     rows={6}
                     required
                   />
@@ -438,6 +526,12 @@ const CompanyProfilePage = () => {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        <div className="mt-4 flex justify-end">
+          <Button type="submit" disabled={isSaving}>
+            {isSaving ? <><Spinner size="sm" className="mr-2" /> Saving...</> : 'Save All Changes'}
+          </Button>
+        </div>
       </form>
       
       <div className="mt-8 pt-4 border-t">

@@ -41,24 +41,60 @@ export const updateUserProfile = async (profile: Profile): Promise<boolean> => {
 };
 
 // Update company information
-export const updateCompanyInfo = async (company: Company): Promise<boolean> => {
+export const updateCompanyInfo = async (company: Partial<Company>): Promise<boolean> => {
   try {
+    // Get current user's ID
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) throw new Error("User not authenticated");
+    
+    // Check if company already exists
+    const { data: existingCompany, error: fetchError } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('id', company.id)
+      .single();
+    
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      // PGRST116 means no rows returned, which is fine for new companies
+      throw fetchError;
+    }
+    
     // Convert from frontend model to database model
-    const dbCompany = {
-      id: company.id,
+    const dbCompany: any = {
       name: company.name,
       industry: company.industry,
       description: company.description,
-      logo_url: company.logoUrl,
-      plan_type: company.planType
+      logo_url: company.logoUrl || company.logo,
+      website: company.website,
+      size: company.size,
+      founded: company.founded,
+      location: company.location,
+      phone: company.phone,
+      email: company.email,
+      recruiter_type: company.recruiterType,
+      plan_type: company.planType || 'free'
     };
-
-    const { error } = await supabase
-      .from('companies')
-      .update(dbCompany)
-      .eq('id', company.id);
-
-    if (error) throw error;
+    
+    let result;
+    
+    if (!existingCompany) {
+      // Insert new company
+      dbCompany.id = company.id || crypto.randomUUID();
+      dbCompany.owner_id = user.id;
+      
+      result = await supabase
+        .from('companies')
+        .insert(dbCompany);
+    } else {
+      // Update existing company
+      result = await supabase
+        .from('companies')
+        .update(dbCompany)
+        .eq('id', company.id);
+    }
+    
+    if (result.error) throw result.error;
 
     toast({
       title: "Company updated",
@@ -67,6 +103,7 @@ export const updateCompanyInfo = async (company: Company): Promise<boolean> => {
     
     return true;
   } catch (error: any) {
+    console.error("Error updating company:", error);
     toast({
       title: "Failed to update company",
       description: error.message || "An error occurred",

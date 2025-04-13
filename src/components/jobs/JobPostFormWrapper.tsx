@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useGeolocation } from '@/services/geolocation';
+import { useAuth } from '@/context/auth/useAuth';
 import JobPostForm from './JobPostForm';
 import JobBulkUpload from './JobBulkUpload';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -13,23 +14,38 @@ interface JobPostInitialValues {
   country?: string;
   city?: string;
   currency?: string;
+  companyName?: string;
+  companyDescription?: string;
 }
 
 const JobPostFormWrapper = () => {
-  const { location, loading, error } = useGeolocation();
+  const { location, loading, error: locationError } = useGeolocation();
+  const { authState } = useAuth();
   const [initialValues, setInitialValues] = useState<JobPostInitialValues>({});
   const [activeTab, setActiveTab] = useState<string>("single");
   const { toast } = useToast();
 
   useEffect(() => {
+    // Combine location data with company data for initial values
+    const newInitialValues: JobPostInitialValues = {};
+    
     if (location) {
-      setInitialValues({
-        country: location.country,
-        city: location.city || '',
-        currency: location.currency?.code || 'USD'
-      });
+      newInitialValues.country = location.country;
+      newInitialValues.city = location.city || '';
+      newInitialValues.currency = location.currency?.code || 'USD';
     }
-  }, [location]);
+    
+    // If user is authenticated and has a company
+    if (authState.isAuthenticated && authState.company) {
+      // Only pre-fill company details if they are an internal recruiter
+      if (authState.company.recruiterType === 'internal') {
+        newInitialValues.companyName = authState.company.name;
+        newInitialValues.companyDescription = authState.company.description;
+      }
+    }
+    
+    setInitialValues(newInitialValues);
+  }, [location, authState.isAuthenticated, authState.company]);
 
   const handleBulkUploadSuccess = (jobsCount: number) => {
     toast({
@@ -64,7 +80,7 @@ const JobPostFormWrapper = () => {
         </TabsList>
         
         <TabsContent value="single" className="space-y-6">
-          {error && (
+          {locationError && (
             <Alert variant="destructive" className="mb-6">
               <AlertTitle>Location Detection Failed</AlertTitle>
               <AlertDescription>
