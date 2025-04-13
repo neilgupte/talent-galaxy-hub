@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { JobEmploymentType, JobLevel, JobOnsiteType } from '@/types';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/auth/useAuth';
 
 interface JobPostFormProps {
   initialValues?: {
@@ -45,7 +44,7 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
     requirements: '',
     responsibilities: '',
     benefits: '',
-    companyName: authState.company?.name || '',
+    companyName: '',
     companyDescription: '',
     companyLogo: '',
     companyWebsite: '',
@@ -57,6 +56,20 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
     acceptsInternationalApplications: false,
     visaSponsorshipAvailable: false,
   });
+
+  useEffect(() => {
+    if (authState.company) {
+      if (authState.company.recruiterType === 'internal') {
+        setFormData(prevData => ({
+          ...prevData,
+          companyName: authState.company?.name || '',
+          companyDescription: authState.company?.description || '',
+          companyLogo: authState.company?.logoUrl || '',
+          companyWebsite: authState.company?.website || '',
+        }));
+      }
+    }
+  }, [authState.company]);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('job-details');
@@ -547,7 +560,9 @@ const JobPostForm = ({ initialValues = {} }: JobPostFormProps) => {
               <CardHeader>
                 <CardTitle>Company Information</CardTitle>
                 <CardDescription>
-                  Add details about your company to help candidates learn more
+                  {authState.company?.recruiterType === 'agency' 
+                    ? "Add details about the company you're recruiting for"
+                    : "Add details about your company to help candidates learn more"}
                 </CardDescription>
               </CardHeader>
               

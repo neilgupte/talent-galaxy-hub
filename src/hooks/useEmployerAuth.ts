@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth/useAuth';
 
-export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
+export const useEmployerAuth = (redirectTo: string = '/company/profile') => {
   const { login, register, continueWithGoogle, continueWithLinkedIn, resetPassword } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -42,21 +42,21 @@ export const useEmployerAuth = (redirectTo: string = '/dashboard/employer') => {
     }
   };
 
-  const handleRegister = async (companyName: string, name: string, email: string, password: string) => {
+  const handleRegister = async (companyName: string, name: string, email: string, password: string, recruiterType: 'internal' | 'agency' = 'internal') => {
     setError(null);
     setIsLoading(true);
     
     try {
-      console.log("useEmployerAuth: Attempting registration with company:", companyName);
-      await register(name, email, password, 'employer');
+      console.log("useEmployerAuth: Attempting registration with company:", companyName, "recruiter type:", recruiterType);
+      await register(name, email, password, 'employer', { companyName, recruiterType });
       
       toast({
         title: "Registration successful",
-        description: "Welcome to your employer portal! Setting up your account...",
+        description: "Welcome to your employer portal! Complete your company profile.",
       });
       
       console.log("useEmployerAuth: Registration successful, navigating to:", redirectTo);
-      // Directly navigate to employer dashboard after registration
+      // Directly navigate to company profile after registration
       navigate(redirectTo, { replace: true });
     } catch (err) {
       console.error("Registration error:", err);

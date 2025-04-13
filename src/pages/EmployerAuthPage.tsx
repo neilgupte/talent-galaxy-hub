@@ -12,11 +12,11 @@ const EmployerAuthPage = () => {
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  // Get redirect path from query parameters or location state
+  // Get redirect path from query parameters or location state, default to company profile
   const redirectTo = 
     location.state?.redirectTo || 
     searchParams.get('redirectTo') || 
-    '/dashboard/employer';
+    '/company/profile';
     
   // Redirect if already authenticated as employer
   useEffect(() => {
@@ -24,7 +24,7 @@ const EmployerAuthPage = () => {
       console.log("EmployerAuthPage: User authenticated, redirecting based on role:", authState.user?.role);
       
       if (authState.user?.role === 'employer') {
-        console.log("EmployerAuthPage: Redirecting to employer dashboard or custom redirect:", redirectTo);
+        console.log("EmployerAuthPage: Redirecting to company profile or custom redirect:", redirectTo);
         toast({ 
           title: "Welcome back!", 
           description: "You're now signed in to your employer account." 

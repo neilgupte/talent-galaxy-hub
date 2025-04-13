@@ -33,7 +33,7 @@ export const defaultAuthState: AuthState = {
 export type AuthContextType = {
   authState: AuthState;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role: UserRole) => Promise<void>;
+  register: (name: string, email: string, password: string, role: UserRole, additionalMetadata?: Record<string, any>) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (profile: any) => Promise<void>;
   updateCompany: (company: any) => Promise<void>;
@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (userRole === 'job_seeker') {
                 navigate('/dashboard/job-seeker', { replace: true });
               } else if (userRole === 'employer') {
-                navigate('/dashboard/employer', { replace: true });
+                navigate('/company/profile', { replace: true });
               }
             }, 500);
           }
@@ -156,10 +156,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: UserRole): Promise<void> => {
+  const register = async (name: string, email: string, password: string, role: UserRole, additionalMetadata?: Record<string, any>): Promise<void> => {
     try {
-      console.log("AuthContext: Register attempt", { email, role });
-      const { data, error } = await registerUser(name, email, password, role);
+      console.log("AuthContext: Register attempt", { email, role, additionalMetadata });
+      const { data, error } = await registerUser(name, email, password, role, additionalMetadata);
 
       if (error) throw error;
       

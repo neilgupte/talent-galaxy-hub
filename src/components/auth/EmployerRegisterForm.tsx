@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import { CardContent } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import PasswordStrengthMeter, { validatePassword } from './PasswordStrengthMeter';
 
 interface EmployerRegisterFormProps {
-  onSubmit: (companyName: string, name: string, email: string, password: string) => Promise<void>;
+  onSubmit: (companyName: string, name: string, email: string, password: string, recruiterType: 'internal' | 'agency') => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
@@ -19,6 +20,7 @@ const EmployerRegisterForm = ({ onSubmit, isLoading, error }: EmployerRegisterFo
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [recruiterType, setRecruiterType] = useState<'internal' | 'agency'>('internal');
   
   // Password validation state
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -41,8 +43,8 @@ const EmployerRegisterForm = ({ onSubmit, isLoading, error }: EmployerRegisterFo
       return;
     }
     
-    console.log("EmployerRegisterForm: Submitting form with company:", companyName);
-    await onSubmit(companyName, name, email, password);
+    console.log("EmployerRegisterForm: Submitting form with company:", companyName, "recruiter type:", recruiterType);
+    await onSubmit(companyName, name, email, password, recruiterType);
   };
 
   return (
@@ -54,12 +56,34 @@ const EmployerRegisterForm = ({ onSubmit, isLoading, error }: EmployerRegisterFo
           </div>
         )}
         
+        <div className="space-y-4">
+          <Label>Are you an internal recruiter or an external recruitment agency?</Label>
+          <RadioGroup 
+            value={recruiterType} 
+            onValueChange={(value) => setRecruiterType(value as 'internal' | 'agency')}
+            className="space-y-2"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="internal" id="internal" />
+              <Label htmlFor="internal" className="cursor-pointer">
+                Internal Recruiter (hiring for my own company)
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="agency" id="agency" />
+              <Label htmlFor="agency" className="cursor-pointer">
+                External Recruitment Agency (hiring for multiple clients)
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+        
         <div className="space-y-2">
-          <Label htmlFor="companyName">Company Name</Label>
+          <Label htmlFor="companyName">{recruiterType === 'internal' ? 'Company Name' : 'Agency Name'}</Label>
           <Input
             id="companyName"
             type="text"
-            placeholder="Acme Corporation"
+            placeholder={recruiterType === 'internal' ? "Acme Corporation" : "ABC Recruitment Agency"}
             value={companyName}
             onChange={e => setCompanyName(e.target.value)}
             required
@@ -79,11 +103,11 @@ const EmployerRegisterForm = ({ onSubmit, isLoading, error }: EmployerRegisterFo
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="registerEmail">Company Email</Label>
+          <Label htmlFor="registerEmail">Email Address</Label>
           <Input
             id="registerEmail"
             type="email"
-            placeholder="your.name@company.com"
+            placeholder={recruiterType === 'internal' ? "your.name@company.com" : "your.name@agency.com"}
             value={email}
             onChange={e => setEmail(e.target.value)}
             required

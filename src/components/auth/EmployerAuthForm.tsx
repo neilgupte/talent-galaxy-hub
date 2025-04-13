@@ -14,8 +14,8 @@ const EmployerAuthForm: React.FC = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>('login');
   
-  // Get redirect path from location state
-  const redirectTo = location.state?.redirectTo || '/dashboard/employer';
+  // Get redirect path from location state or default to company profile
+  const redirectTo = location.state?.redirectTo || '/company/profile';
   
   // Authentication hook
   const { 
