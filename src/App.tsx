@@ -20,7 +20,7 @@ import JobSeekerDashboard from './components/dashboard/JobSeekerDashboard';
 import ProfilePage from './pages/ProfilePage';
 import SavedJobsPage from './pages/SavedJobsPage';
 import AlertSettingsPage from './pages/AlertSettingsPage';
-import ApplicationsPage from './pages/NotFound'; // Temporary placeholder
+import ApplicationsPage from './pages/ApplicationsPage'; // Changed from NotFound to ApplicationsPage
 import ApplicationDetails from './pages/ApplicationDetails';
 import JobApplicationForm from './components/applications/JobApplicationForm';
 import ViewApplicationPage from './pages/ViewApplicationPage';

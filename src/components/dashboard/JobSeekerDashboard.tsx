@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation, Link } from 'react-router-dom';
 import { 
@@ -81,18 +81,6 @@ const JobSeekerDashboard = () => {
   const { user, profile } = authState;
   const [activeTab, setActiveTab] = useState('overview');
   const location = useLocation();
-  const [lastSearchTerm, setLastSearchTerm] = useState<string | null>(null);
-  
-  useEffect(() => {
-    // Get the last search term from local storage
-    const savedSearches = localStorage.getItem('recentSearches');
-    if (savedSearches) {
-      const searches = JSON.parse(savedSearches);
-      if (searches.length > 0) {
-        setLastSearchTerm(searches[0]);
-      }
-    }
-  }, []);
   
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
@@ -145,21 +133,6 @@ const JobSeekerDashboard = () => {
           {profile?.location ? profile.location : 'Complete your profile to improve your matches'}
         </p>
         
-        {lastSearchTerm && (
-          <div className="mt-1 mb-4">
-            <Button 
-              variant="outline" 
-              className="flex items-center text-sm" 
-              asChild
-            >
-              <Link to={`/jobs?q=${encodeURIComponent(lastSearchTerm)}`}>
-                <Search className="mr-1 h-4 w-4" />
-                <span>Continue searching for: <span className="font-semibold">{lastSearchTerm}</span></span>
-              </Link>
-            </Button>
-          </div>
-        )}
-        
         {!profile && (
           <Card className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950 dark:border-amber-800">
             <CardContent className="pt-6">
@@ -173,7 +146,7 @@ const JobSeekerDashboard = () => {
                   </p>
                 </div>
                 <Button asChild>
-                  <Link to="/onboarding/profile">
+                  <Link to="/profile">
                     Complete Profile
                   </Link>
                 </Button>
