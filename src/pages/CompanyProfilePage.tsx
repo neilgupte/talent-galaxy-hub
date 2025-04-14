@@ -10,14 +10,16 @@ import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
 
-// Import refactored components
-import ProfileHeader from '@/components/company/ProfileHeader';
-import BasicInfoTab from '@/components/company/BasicInfoTab';
-import DetailsTab from '@/components/company/DetailsTab';
-import BrandingTab from '@/components/company/BrandingTab';
-import ContactTab from '@/components/company/ContactTab';
-import CompanyProfilePreview from '@/components/company/CompanyProfilePreview';
-import CreateCompanyForm from '@/components/company/CreateCompanyForm';
+// Import components from the feature directory
+import {
+  ProfileHeader,
+  BasicInfoTab,
+  DetailsTab,
+  BrandingTab,
+  ContactTab,
+  CompanyProfilePreview,
+  CreateCompanyForm
+} from '@/features/company-profile';
 
 const CompanyProfilePage = () => {
   const { authState, updateCompany } = useAuth();
